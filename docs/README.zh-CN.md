@@ -18,7 +18,7 @@
 
 连接 Qwen Code、Kimi Code、CodeBuddy Code、CC Switch、Claude Code、Gemini CLI 或自己的 API 用量文件。国产模型会在同一供应商 → 模型环形图中归属到阿里云、月之暗面、智谱、MiniMax、DeepSeek；支持 Tokens／费用切换、请求明细、性能与自定义计价。[来源配置与费用口径](PROVIDER-MONITORING.md)。
 
-![Subscription Lens](images/providers.png)
+![Subscription Lens 中文多供应商总览](images/providers.zh-CN.png)
 
 *界面截图使用合成数据，不含真实账户或对话信息。*
 

@@ -18,7 +18,7 @@ A Windows desktop app for **Codex subscription users** who want to see their rem
 
 Connect Qwen Code, Kimi Code, CodeBuddy Code, CC Switch, Claude Code, Gemini CLI or your own API usage file. Domestic model families are attributed to Alibaba Cloud, Moonshot AI, Zhipu AI, MiniMax and DeepSeek through the same provider → model chart. Recorded estimates and source-reported amounts stay distinct from actual invoices. [Source setup and cost definitions](docs/PROVIDER-MONITORING.md).
 
-![Subscription Lens](docs/images/providers.png)
+![Subscription Lens provider overview in English](docs/images/providers.en-US.png)
 
 *Overview with synthetic data; no real account or conversation data is shown.*
 

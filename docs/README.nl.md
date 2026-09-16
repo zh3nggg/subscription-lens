@@ -18,7 +18,7 @@ Een Windows-desktopapp voor **Codex-abonnees** die hun resterende limieten wille
 
 Verbind Qwen Code, Kimi Code, CodeBuddy Code, CC Switch, Claude Code, Gemini CLI of je eigen API-gebruiksbestand. Chinese modelfamilies worden in hetzelfde diagram toegewezen aan Alibaba Cloud, Moonshot AI, Zhipu AI, MiniMax en DeepSeek. [Bronnen en kostendefinities](PROVIDER-MONITORING.md).
 
-![Subscription Lens](images/providers.png)
+![Subscription Lens-overzicht in het Nederlands](images/providers.nl-NL.png)
 
 *Het overzicht toont synthetische gegevens, geen echte account- of gespreksgegevens.*
 
