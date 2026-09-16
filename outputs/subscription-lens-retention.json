@@ -1,0 +1,12 @@
+{
+  "stable": {
+    "version": "1.4.1",
+    "path": "subscription-lens-1.4.1-stable",
+    "checksums": "SHA256SUMS.txt"
+  },
+  "preview": null,
+  "fallback": null,
+  "policy": "Latest verified stable and preview; previous preview as fallback until the first stable release.",
+  "updatedAt": "2026-09-16T16:03:26.448Z",
+  "note": "Stable and preview slots retained."
+}
