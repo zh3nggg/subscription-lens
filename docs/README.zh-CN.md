@@ -29,11 +29,11 @@ Codex 总览会结合近 14 天模型习惯与当前额度速度，推荐下个�
 
 **1.4.0-beta.7 预发布 · Windows x64。** 当前采集器尚未完整适配所有客户端记录格式，汇总可能偏高或偏低；费用是估算值，不是账单或保证节省的金额。安装包未做代码签名，暂不支持自动更新。
 
-[下载安装包或便携版](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.4.0-beta.7)
+[下载 1.4.0-beta.7](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.4.0-beta.7)
 
-运行新版安装包即可原位升级，沿用检测到的安装目录，无需手动卸载；设置和用量历史会保留。稳定版与测试版共用同一个应用身份。ZIP 为便携文件，不会自动覆盖已安装版本；当前不包含后台自动下载更新。
+首次安装或覆盖升级都应下载 `Subscription-Lens-1.4.0-beta.7-x64.exe`。先关闭余量，运行安装器；升级时保留原安装目录（例如 `D:\SubLens`），即可替换旧程序并保留设置和本机用量历史。ZIP 仅适合免安装的独立副本：解压到单独目录后运行 `Subscription Lens.exe`，它不会更新已安装版本。
 
-1. 从 GitHub 仓库的 Releases 页面下载安装包或便携 ZIP。运行 `Subscription-Lens-1.4.0-beta.7-x64.exe` 安装，或解压 ZIP 后运行 `Subscription Lens.exe`。
+1. 从 GitHub Releases 下载安装包；首次安装或升级均运行 `Subscription-Lens-1.4.0-beta.7-x64.exe`。
 2. 首次打开点击“开始监测”；自定义 Codex Home 可点“选择目录”。目录应包含 `sessions` 或 `archived_sessions`。
 3. 在“连接”中点击“连接账户”。应用使用本机 Codex 的官方登录；未登录时按按钮打开浏览器登录。
 4. 在“设置”中填写账期起止、套餐实付与额外额度（USD）。结束日期不含当天；可选手动日期或按续费日自动滚动。
