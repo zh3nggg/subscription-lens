@@ -7,10 +7,28 @@ const label=(s,fallback='unknown')=>typeof s==='string'&&s.trim()?s.replace(/[\x
 const count=v=>Number.isSafeInteger(v)&&v>=0?v:null;
 const cost=v=>{if(v===null||v===undefined||v==='')return null;try{const n=decimalUnits(v,15);return n<=1000000000n*10n**15n?n.toString():null;}catch{return null;}};
 const instant=v=>{const n=typeof v==='number'?(v<1e12?v*1000:v):Date.parse(v);return Number.isFinite(n)&&n>0&&n<=8640000000000000?new Date(n).toISOString():null;};
+function providerIdentity(provider,model,authoritative=false){
+ const p=String(provider||'').trim().toLowerCase(),m=String(model||'').trim().toLowerCase();
+ if(authoritative)return label(provider);
+ const modelRules=[
+  [/^(?:qwen(?:\d|[./:_-]|$)|qwq(?:\d|[./:_-]|$))/,'Alibaba Cloud'],[/^(?:kimi-code\/|kimi(?:[./:_-]|$)|moonshot(?:[./:_-]|$))/,'Moonshot AI'],
+  [/^(?:glm(?:\d|[./:_-]|$)|zhipu(?:[./:_-]|$)|zai(?:[./:_-]|$))/,'Zhipu AI'],[/^minimax(?:\d|[./:_-]|$)/,'MiniMax'],[/^deepseek(?:\d|[./:_-]|$)/,'DeepSeek'],
+  [/^(?:gpt|o[134])(?:[./:_-]|$)/,'OpenAI'],[/^claude(?:[./:_-]|$)/,'Anthropic'],[/^gemini(?:[./:_-]|$)/,'Google']
+ ];
+ for(const [pattern,name] of modelRules)if(pattern.test(m))return name;
+ const providerRules=[
+  [/(?:^|[^a-z0-9])(?:qwen|dashscope|aliyun|alibaba)(?:$|[^a-z0-9])|通义|阿里/,'Alibaba Cloud'],
+  [/(?:^|[^a-z0-9])(?:kimi|moonshot)(?:$|[^a-z0-9])|月之暗面/,'Moonshot AI'],
+  [/(?:^|[^a-z0-9])(?:zhipu|bigmodel|z\.ai|glm)(?:$|[^a-z0-9])|智谱/,'Zhipu AI'],
+  [/(?:^|[^a-z0-9])minimax(?:$|[^a-z0-9])/,'MiniMax'],[/(?:^|[^a-z0-9])deepseek(?:$|[^a-z0-9])|深度求索/,'DeepSeek']
+ ];
+ for(const [pattern,name] of providerRules)if(pattern.test(p))return name;
+ return label(provider);
+}
 function normalized(raw){
  const at=instant(raw.at),input=count(raw.input),output=count(raw.output),cached=count(raw.cached??0),write=count(raw.write??0),reasoning=count(raw.reasoning??0);
  if(!at||!raw.id||input===null||output===null||cached===null||write===null||reasoning===null||cached+write>input||reasoning>output||!Number.isSafeInteger(input+output))return null;
- return {id:hash(String(raw.id)),at,provider:label(raw.provider),model:label(raw.model),session:label(raw.session,''),project:label(raw.project,''),input,output,cached,write,reasoning,total:input+output,
+ return {id:hash(String(raw.id)),at,provider:providerIdentity(raw.provider,raw.model,raw.providerAuthoritative),model:label(raw.model),session:label(raw.session,''),project:label(raw.project,''),input,output,cached,write,reasoning,total:input+output,tokenBasis:raw.tokenBasis==='estimated'?'estimated':'measured',
   status:count(raw.status),latencyMs:count(raw.latencyMs),ttftMs:count(raw.ttftMs),amount:cost(raw.usd),basis:raw.basis==='reported'?'reported':'estimate',origin:label(raw.origin),pricingModel:label(raw.pricingModel,raw.model||'unknown')};
 }
 function ccRecord(r,provider){
@@ -24,20 +42,37 @@ function ccRecord(r,provider){
  return normalized({id:r.request_id,at:r.created_at,provider:provider||r.provider_id,model:r.model,pricingModel:r.pricing_model||r.request_model||r.model,
   input:totalInput,cached,write,output:r.output_tokens,session:r.session_id,project:r.app_type,status:r.status_code,latencyMs:r.latency_ms,ttftMs:r.first_token_ms,usd,basis:'estimate',origin:'cc-switch:'+label(r.data_source,'proxy')});
 }
-function jsonRecord(r){if(!r||r.schema!=='subscription-lens.usage.v1'||r.currency&&r.currency!=='USD')return null;return normalized({id:r.id,at:r.at,provider:r.provider,model:r.model,session:r.session,project:r.project,input:r.usage?.input,output:r.usage?.output,cached:r.usage?.cached,write:r.usage?.write,reasoning:r.usage?.reasoning,status:r.status,latencyMs:r.latencyMs,ttftMs:r.ttftMs,usd:r.cost?.usd,basis:r.cost?.basis,origin:'usage-jsonl'});}
+function jsonRecord(r){if(!r||r.schema!=='subscription-lens.usage.v1'||r.currency&&r.currency!=='USD')return null;return normalized({id:r.id,at:r.at,provider:r.provider,providerAuthoritative:true,model:r.model,session:r.session,project:r.project,input:r.usage?.input,output:r.usage?.output,cached:r.usage?.cached,write:r.usage?.write,reasoning:r.usage?.reasoning,status:r.status,latencyMs:r.latencyMs,ttftMs:r.ttftMs,usd:r.cost?.usd,basis:r.cost?.basis,origin:'usage-jsonl'});}
 function claudeRecord(r,project){
  if(r.type!=='assistant'||!r.message?.id||!r.sessionId||!r.message.usage)return null;const u=r.message.usage;
  const input=count(u.input_tokens),cached=count(u.cache_read_input_tokens??0),write=count(u.cache_creation_input_tokens??0);if(input===null||cached===null||write===null)return null;
  return normalized({id:r.sessionId+':'+r.message.id,at:r.timestamp,provider:'Anthropic',model:r.message.model,session:r.sessionId,project,input:input+cached+write,cached,write,output:u.output_tokens,origin:'claude-code'});
 }
 function geminiRecords(r,project){if(!r.sessionId||!Array.isArray(r.messages))return [];return r.messages.filter(m=>m.type==='gemini'&&m.id&&m.tokens).map(m=>{const u=m.tokens,output=count(u.output),thoughts=count(u.thoughts??0);if(output===null||thoughts===null)return null;return normalized({id:r.sessionId+':'+m.id,at:m.timestamp,provider:'Google',model:m.model,session:r.sessionId,project,input:u.input,cached:u.cached??0,output:output+thoughts,reasoning:thoughts,origin:'gemini-cli'});}).filter(Boolean);}
-async function listFiles(root,kind){const out=[];async function walk(dir,depth){if(depth>8||out.length>=25000)return;for(const item of await fsp.readdir(dir,{withFileTypes:true})){if(item.isSymbolicLink())continue;const file=path.join(dir,item.name);if(item.isDirectory())await walk(file,depth+1);else if(item.isFile()&&(kind==='gemini'?/^session-.*\.json$/.test(item.name):item.name.endsWith('.jsonl')))out.push(file);}}await walk(root,0);return out.sort();}
+function qwenRecord(r){
+ if(!r||r.schemaVersion!==1||!r.id||!r.sessionId)return null;const input=count(r.inputTokens),cached=count(r.cachedTokens),output=count(r.outputTokens),thoughts=count(r.thoughtsTokens);if([input,cached,output,thoughts].includes(null))return null;
+ return normalized({id:r.id,at:r.timestamp,provider:'Qwen Code',model:r.model,session:r.sessionId,project:r.source||'Qwen Code',input,cached,output:output+thoughts,reasoning:thoughts,latencyMs:r.apiDurationMs,origin:'qwen-code'});
+}
+function kimiRecord(r,meta={}){
+ if(!r||r.type!=='usage.record'||r.usageScope!=='turn'||!r.usage)return null;const u=r.usage,inputOther=count(u.inputOther),cached=count(u.inputCacheRead),write=count(u.inputCacheCreation),output=count(u.output);if([inputOther,cached,write,output].includes(null))return null;
+ const identity=r.id||[meta.relative||'',r.time,r.model,JSON.stringify(u)].join('|');
+ return normalized({id:identity,at:r.time,provider:'Kimi Code',model:r.model,session:meta.session,project:meta.project,input:inputOther+cached+write,cached,write,output,origin:'kimi-code'});
+}
+function codebuddyRecord(r,meta={}){
+ if(!r||!['message','function_call','assistant'].includes(r.type)||r.type==='message'&&r.role!=='assistant')return null;const raw=r.providerData?.rawUsage,u=r.message?.usage;if(!raw&&!u)return null;
+ let input,cached,write,output,reasoning;if(raw){const hit=count(raw.prompt_cache_hit_tokens??raw.prompt_tokens_details?.cached_tokens??0),created=count(raw.prompt_cache_write_tokens??0),prompt=count(raw.prompt_tokens),explicitMiss=count(raw.prompt_cache_miss_tokens),completion=count(raw.completion_tokens),thinking=count(raw.completion_thinking_tokens??0);if([hit,created,completion,thinking].includes(null))return null;const miss=explicitMiss??(prompt===null?null:prompt-hit-created);if(miss===null||miss<0)return null;input=miss+hit+created;cached=hit;write=created;output=completion;reasoning=thinking;}else{input=count(u.input_tokens);cached=count(u.cache_read_input_tokens??0);write=count(u.cache_creation_input_tokens??0);output=count(u.output_tokens);reasoning=count(u.reasoning_output_tokens??0);if([input,cached,write,output,reasoning].includes(null)||cached+write>input)return null;}
+ const model=r.providerData?.model||r.message?.model||r.model,identity=r.id||r.providerData?.messageId||[meta.relative||'',meta.offset||0,r.timestamp,model].join('|');
+ return normalized({id:identity,at:r.timestamp,provider:'CodeBuddy',model,session:r.sessionId||meta.session,project:meta.project,input,cached,write,output,reasoning,latencyMs:r.providerData?.latencyMs,origin:'codebuddy-code'});
+}
+async function listFiles(root,kind){const out=[],codebuddyProjects=path.basename(root).toLowerCase()==='projects';async function walk(dir,depth){if(depth>10||out.length>=25000)return;for(const item of await fsp.readdir(dir,{withFileTypes:true})){if(item.isSymbolicLink())continue;const file=path.join(dir,item.name);if(item.isDirectory())await walk(file,depth+1);else if(item.isFile()){
+  const rel=path.relative(root,file).replaceAll('\\','/');const match=kind==='gemini'?/^session-.*\.json$/.test(item.name):kind==='qwen'?/^token-usage-\d{4}-\d{2}\.jsonl$/.test(item.name):kind==='kimi'?item.name==='wire.jsonl'&&/(^|\/)agents\/[^/]+\/wire\.jsonl$/.test(rel):kind==='codebuddy'?item.name.endsWith('.jsonl')&&!/(^|\/)tool-results\//.test(rel)&&(codebuddyProjects||rel.startsWith('projects/')):item.name.endsWith('.jsonl');if(match)out.push(file);
+ }}}await walk(root,0);return out.sort();}
 class Monitor{
  constructor(store){this.store=store;this.running=false;this.sources=store.get('monitorSources',[]);this.states={};store.db.exec(`CREATE TABLE IF NOT EXISTS monitor_events(connection TEXT NOT NULL,id TEXT NOT NULL,at TEXT NOT NULL,provider TEXT NOT NULL,model TEXT NOT NULL,data TEXT NOT NULL,PRIMARY KEY(connection,id));CREATE INDEX IF NOT EXISTS monitor_time ON monitor_events(connection,at);CREATE TABLE IF NOT EXISTS monitor_files(connection TEXT NOT NULL,path TEXT NOT NULL,offset INTEGER NOT NULL,mtime REAL NOT NULL,size INTEGER NOT NULL,PRIMARY KEY(connection,path));`);
  this.put=store.db.prepare('INSERT INTO monitor_events VALUES(?,?,?,?,?,?) ON CONFLICT(connection,id) DO UPDATE SET at=excluded.at,provider=excluded.provider,model=excluded.model,data=excluded.data WHERE data<>excluded.data');}
  save(){this.store.set('monitorSources',this.sources);}
  setRate(provider,model,input){provider=label(provider);model=label(model);const rates={};for(const key of ['input','cached','write','output']){const v=String(input[key]??'');if(decimalUnits(v)>1000000n*1000000000n)throw Error('价格超出范围');rates[key]=v;}const all=this.store.get('monitorRates',{});all[hash(JSON.stringify([provider,model]))]={provider,model,rates,updatedAt:new Date().toISOString()};this.store.set('monitorRates',all);return true;}
- async add(kind,file){if(!['cc-switch','claude','gemini','usage-jsonl'].includes(kind))throw Error('不支持的来源');const resolved=await fsp.realpath(file),st=await fsp.stat(resolved);if(['claude','gemini'].includes(kind)?!st.isDirectory():!st.isFile())throw Error('来源类型不匹配');
+ async add(kind,file){if(!['cc-switch','claude','gemini','qwen','kimi','codebuddy','usage-jsonl'].includes(kind))throw Error('不支持的来源');const resolved=await fsp.realpath(file),st=await fsp.stat(resolved);if(['claude','gemini','qwen','kimi','codebuddy'].includes(kind)?!st.isDirectory():!st.isFile())throw Error('来源类型不匹配');
  if(this.sources.some(s=>s.path.toLowerCase()===resolved.toLowerCase()))throw Error('来源已添加');
  if(kind==='cc-switch'){const db=new DatabaseSync(resolved,{readOnly:true});try{this.columns(db);}finally{db.close();}}
  const s={id:hash(kind+'|'+resolved).slice(0,24),kind,path:resolved,enabled:true,budget:null};this.sources.push(s);this.save();await this.scan();return s;
@@ -55,7 +90,7 @@ class Monitor{
  async readLocal(s){let imported=0,invalid=0;const files=s.kind==='usage-jsonl'?[s.path]:await listFiles(s.path,s.kind);for(const file of files){const st=await fsp.stat(file),cp=this.store.db.prepare('SELECT * FROM monitor_files WHERE connection=? AND path=?').get(s.id,file);if(cp&&cp.size===st.size&&cp.mtime===st.mtimeMs)continue;const project=path.basename(path.dirname(file));
  if(s.kind==='gemini'){if(st.size>32*1024*1024){invalid++;continue;}const r=JSON.parse(await fsp.readFile(file,'utf8'));const events=geminiRecords(r,project);for(const e of events)imported+=Number(this.put.run(s.id,e.id,e.at,e.provider,e.model,JSON.stringify(e)).changes);this.checkpoint(s,file,st.size,st);continue;}
  const start=cp&&st.size>=cp.offset&&!(st.size===cp.size&&st.mtimeMs!==cp.mtime)?cp.offset:0;let offset=start,pending=Buffer.alloc(0),discard=false;const stream=fs.createReadStream(file,{start,highWaterMark:256*1024});
- for await(const chunk of stream){pending=Buffer.concat([pending,chunk]);let pos;while((pos=pending.indexOf(10))>=0){const line=pending.subarray(0,pos);pending=pending.subarray(pos+1);offset+=pos+1;if(discard){discard=false;continue;}if(line.length>8*1024*1024){invalid++;continue;}try{const r=JSON.parse(line.toString('utf8'));const e=s.kind==='claude'?claudeRecord(r,project):jsonRecord(r);if(e)imported+=Number(this.put.run(s.id,e.id,e.at,e.provider,e.model,JSON.stringify(e)).changes);else if(s.kind==='usage-jsonl')invalid++;}catch{invalid++;}}
+ for await(const chunk of stream){pending=Buffer.concat([pending,chunk]);let pos;while((pos=pending.indexOf(10))>=0){const line=pending.subarray(0,pos);pending=pending.subarray(pos+1);offset+=pos+1;if(discard){discard=false;continue;}if(line.length>8*1024*1024){invalid++;continue;}try{const r=JSON.parse(line.toString('utf8')),relative=path.relative(s.path,file).replaceAll('\\','/'),parts=relative.split('/'),agents=parts.lastIndexOf('agents'),meta={relative,offset,session:agents>0?parts[agents-1]:path.basename(file,'.jsonl'),project:agents>1?parts[agents-2]:project};const e=s.kind==='claude'?claudeRecord(r,project):s.kind==='qwen'?qwenRecord(r):s.kind==='kimi'?kimiRecord(r,meta):s.kind==='codebuddy'?codebuddyRecord(r,meta):jsonRecord(r);if(e)imported+=Number(this.put.run(s.id,e.id,e.at,e.provider,e.model,JSON.stringify(e)).changes);else if(s.kind==='usage-jsonl'||s.kind==='qwen'||s.kind==='kimi'&&r.type==='usage.record'&&r.usageScope==='turn'||s.kind==='codebuddy'&&r.providerData?.rawUsage)invalid++;}catch{invalid++;}}
  if(pending.length>8*1024*1024){offset+=pending.length;pending=Buffer.alloc(0);discard=true;invalid++;}}
  // Never commit past an unfinished record, including oversized records.
  this.checkpoint(s,file,discard?start:offset,st);
@@ -77,4 +112,4 @@ class Monitor{
  return {source:source?.id||null,sources:this.sourcesInfo(),providers,models,rates:Object.values(rates),summary:{estimatedRecords,reportedRecords,requests:filtered.length,tokens,input,cached,output,estimated:dollars(estimated.toString()),reported:dollars(reported.toString()),unpriced,knownStatus,failed,successRate:knownStatus?(knownStatus-failed)/knownStatus:null,p50:percentile(latency,.5),p95:percentile(latency,.95),ttft:percentile(ttft,.5)},groups:finish(groups),modelGroups:finish(modelGroups),days:finish(days).sort((a,b)=>a.key.localeCompare(b.key)),rows:filters.export?sorted:sorted.slice(offset,offset+limit),offset,limit,range};
  }
 }
-module.exports={Monitor,normalized,ccRecord,jsonRecord,claudeRecord,geminiRecords,cost};
+module.exports={Monitor,normalized,providerIdentity,ccRecord,jsonRecord,claudeRecord,geminiRecords,qwenRecord,kimiRecord,codebuddyRecord,cost};

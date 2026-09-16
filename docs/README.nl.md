@@ -16,7 +16,7 @@ Een Windows-desktopapp voor **Codex-abonnees** die hun resterende limieten wille
 
 ## Aanbieders volgen in 1.3
 
-Verbind CC Switch, Claude Code, Gemini CLI of je eigen API-gebruiksbestand. Klik in het ringdiagram van aanbieder naar model, wissel tussen tokens en kosten en open de verzoekdetails. Tabbladen en adaptieve paginering beperken scrollen op veelgebruikte schermen. Schattingen en door de bron gemelde bedragen zijn geen werkelijke facturen. [Bronnen en kostendefinities](PROVIDER-MONITORING.md).
+Verbind Qwen Code, Kimi Code, CodeBuddy Code, CC Switch, Claude Code, Gemini CLI of je eigen API-gebruiksbestand. Chinese modelfamilies worden in hetzelfde diagram toegewezen aan Alibaba Cloud, Moonshot AI, Zhipu AI, MiniMax en DeepSeek. [Bronnen en kostendefinities](PROVIDER-MONITORING.md).
 
 ![Subscription Lens](images/providers.png)
 
@@ -24,9 +24,9 @@ Verbind CC Switch, Claude Code, Gemini CLI of je eigen API-gebruiksbestand. Klik
 
 ## Downloaden en aan de slag
 
-**1.3.0-beta.1 Preview · Windows x64.** De collector verwerkt nog niet alle Codex-recordformaten volledig; totalen kunnen te hoog of te laag zijn. Kosten zijn schattingen, geen factuur of gegarandeerde besparing. Deze build is niet digitaal ondertekend en heeft geen automatische updates.
+**1.4.0-beta.1 Preview · Windows x64.** De collector verwerkt nog niet alle recordformaten volledig; totalen kunnen te hoog of te laag zijn. Kosten zijn schattingen, geen factuur of gegarandeerde besparing. Deze build is niet digitaal ondertekend en heeft geen automatische updates.
 
-[Download het installatiebestand of de draagbare ZIP-versie](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.3.0-beta.1)
+[Download het installatiebestand of de draagbare ZIP-versie](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.4.0-beta.1)
 
 Voer het nieuwe installatieprogramma uit om de bestaande installatie te vervangen en behoud de gevonden map. Instellingen en gebruiksgeschiedenis blijven behouden. Stabiele en testversies delen dezelfde app-identiteit. De draagbare ZIP is geen installatieprogramma; automatisch downloaden op de achtergrond is niet inbegrepen.
 
@@ -68,7 +68,7 @@ Lokale records en accounttotalen worden apart getoond en nooit bij elkaar opgete
 
 Ondersteunt Codex-abonnementen en lokale records van meerdere aanbieders op Windows. Gewone ChatGPT-gesprekken en gebruik op andere apparaten worden niet automatisch ingelezen. Volledige Codex-functionaliteit van CodexBar en codex-usage is nog niet bereikt.
 
-Versie 1.4 richt zich op veelgebruikte Chinese codingplatforms: connectors voor Qwen Code, Kimi Code CLI en CodeBuddy, plus correcte herkenning van GLM-, Qwen-, Kimi-, MiniMax- en DeepSeek-modellen via Claude Code, CC Switch of compatibele gateways. De Codex-engine blijft binnen hetzelfde dashboard in ontwikkeling. Zie de [acceptatiecriteria](DOMESTIC-COMPATIBILITY.md).
+Versie 1.4 voegt read-only connectors voor Qwen Code, Kimi Code en CodeBuddy Code toe, plus herkenning van GLM-, Qwen-, Kimi-, MiniMax- en DeepSeek-modellen via Claude Code, CC Switch of compatibele gateways. Oudere formaten en quota- of creditinterfaces blijven op de [acceptatieroadmap](DOMESTIC-COMPATIBILITY.md).
 
 [Roadmap](../ROADMAP.md#nederlands) · [Dekking](COMPATIBILITY.md) · [Releasegrenzen](RELEASE.md) · [Validatie](VALIDATION.md)
 
@@ -87,6 +87,6 @@ npm run dist
 
 Ontwikkeld met ondersteuning van **GPT-6 Astra**.
 
-[CodexBar](https://github.com/steipete/CodexBar) dient als referentie voor limieten en desktopinteractie. MIT-gelicentieerde broncode van [codex-usage](https://github.com/zJay26/codex-usage) is opgenomen voor de volgende engine-integratie; deze is nog niet actief in de desktopapp 1.3.0-beta.1.
+[CodexBar](https://github.com/steipete/CodexBar) dient als referentie voor limieten en desktopinteractie. MIT-gelicentieerde broncode van [codex-usage](https://github.com/zJay26/codex-usage) is opgenomen voor de volgende engine-integratie; deze is nog niet actief in de desktopapp 1.4.0-beta.1.
 
 MIT. Zie [licenties van derden](../THIRD-PARTY-NOTICES.md) voor bronnen en auteursrechten. Dit is een onafhankelijk project, niet verbonden aan OpenAI of onderschreven door de genoemde projecten.

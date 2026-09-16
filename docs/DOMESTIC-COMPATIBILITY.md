@@ -1,14 +1,14 @@
 # 1.4 国产编码平台兼容目标
 
-本文件定义下一版本的验收边界。名单会随官方接口变化调整；“目标”不等于当前版本已经支持。
+本文件定义 1.4 系列的验收边界。名单会随官方接口变化调整。
 
 ## 首批范围
 
 | 接入对象 | 目标方式 | 1.4 验收要求 |
 | --- | --- | --- |
-| Qwen Code | 读取本地 `usage_record.jsonl`，或接收用户明确配置的本地 OpenTelemetry 输出 | 会话、供应商、模型、Tokens、延迟与状态可核对；默认不启用包含提示词的敏感遥测字段 |
-| Kimi Code CLI | 只读解析 `KIMI_CODE_HOME` 下的本地会话／运行记录；必要时使用官方导出能力 | 识别模型、实测与估算 Tokens、压缩和分叉，不读取配置中的凭据 |
-| CodeBuddy Code | 只读解析 `~/.codebuddy` 中经验证的本地记录，或导入官方结构化输出 | 与 `/cost` 的会话结果核对，区分套餐 credit、Tokens 和 API 金额 |
+| Qwen Code | 只读解析 `usage/token-usage-YYYY-MM.jsonl` | 已接入每请求模型、Tokens、缓存、推理与 API 时长；后续补本地 OTLP 接收器 |
+| Kimi Code CLI | 只读解析 `KIMI_CODE_HOME` 下主代理与子代理的 `usage.record` | 已接入 per-turn 增量，跳过 session 累计行；后续补旧版 Kimi CLI |
+| CodeBuddy Code | 只读解析 `~/.codebuddy/projects` 中带用量的消息与工具调用 | 已接入 cache hit/miss 和包含缓存的回退口径；套餐 credit 暂不换算金额 |
 | GLM Coding Plan | 复用 Claude Code 连接器并根据可验证端点／模型标识归属到智谱 | 不把 GLM 请求显示为 Anthropic；缓存口径和重复消息处理一致 |
 | 通义／Kimi／MiniMax／DeepSeek 等兼容 API | CC Switch 或 Subscription Lens JSONL／未来本地 OTLP 接收器 | 保留实际供应商和模型；支持自定义价格及来源报告费用；不读取 API Key |
 

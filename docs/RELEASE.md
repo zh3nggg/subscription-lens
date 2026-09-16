@@ -1,10 +1,13 @@
-# Subscription Lens 1.3.0-beta.1
+# Subscription Lens 1.4.0-beta.1
 
 Windows x64 · 中文 / English / Nederlands
 
 ## 新增功能
 
-- 多供应商本地监控：CC Switch 请求数据库、Claude Code、Gemini CLI 与 API JSONL。
+- 国产编码平台只读连接器：Qwen Code 月度请求记录、Kimi Code 主／子代理 per-turn 用量、CodeBuddy Code 项目记录。
+- GLM、通义、Kimi、MiniMax、DeepSeek 的供应商归属，适用于 Claude Code、CC Switch 与兼容入口。
+- CodeBuddy 缓存命中／未命中优先解析，并修正其回退记录中输入已包含缓存的特殊口径。
+- 保留原有 CC Switch、Claude Code、Gemini CLI 与 API JSONL 连接器。
 - 供应商 → 模型环形图，可切换 Tokens／费用，点击模型进入请求明细。
 - 请求成功率、P95 延迟、首 Token 延迟、未计价筛选、自定义价格及 CSV。
 - 常用页面采用页内标签与自适应分页，避免依赖整页上下滚动；设置和主动展开的复杂内容例外。
@@ -12,11 +15,11 @@ Windows x64 · 中文 / English / Nederlands
 
 ## What's new
 
-Local provider connectors, provider-to-model ring charts, Tokens/cost switching, request and performance analysis, custom pricing and CSV export. Common screens use tabs and pagination. Run the new installer to replace the old application while retaining local settings and history; keep the detected installation directory.
+Read-only Qwen Code, Kimi Code and CodeBuddy Code connectors plus domestic provider attribution through compatible clients and gateways. The existing provider-to-model chart, performance analysis, custom pricing and CSV export remain integrated. Run the installer over the existing installation to retain local settings and history.
 
 ## Nieuw
 
-Lokale bronnen voor meerdere aanbieders, ringdiagrammen van aanbieder naar model, wisselen tussen tokens en kosten, verzoek- en prestatieanalyse, eigen prijzen en CSV. Veelgebruikte schermen gebruiken tabbladen en paginering. Het nieuwe installatieprogramma vervangt de oude app en behoudt instellingen en geschiedenis; behoud de gevonden installatiemap.
+Read-only connectors voor Qwen Code, Kimi Code en CodeBuddy Code, met herkenning van Chinese modelaanbieders via compatibele clients en gateways. Diagrammen, prestatieanalyse, eigen prijzen en CSV blijven in dezelfde interface. Het installatieprogramma vervangt de bestaande app en behoudt instellingen en geschiedenis.
 
 ## Scope
 

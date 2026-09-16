@@ -1448,6 +1448,14 @@ window.LensLocales = {
     "Projects",
     "Projecten"
   ],
+  "连接本机编码工具或用量文件。": [
+    "Connect a local coding tool or usage file.",
+    "Koppel een lokale codeertool of gebruiksbestand."
+  ],
+  "选择工具的数据目录；应用只读取明确的用量记录。": [
+    "Choose the tool's data folder; the app reads only explicit usage records.",
+    "Kies de gegevensmap van de tool; de app leest alleen expliciete gebruiksrecords."
+  ],
   "性能": [
     "Performance",
     "Prestaties"

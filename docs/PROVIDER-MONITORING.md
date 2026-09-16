@@ -1,4 +1,4 @@
-# Provider monitoring · 1.3.0 beta
+# Provider monitoring · 1.4.0 beta
 
 Use **Connections → Providers → Add source**, then open **Overview → Providers**.
 The app reads the selected local source every 15 seconds while running. No cloud account or API key is required for these connectors.
@@ -8,6 +8,9 @@ The app reads the selected local source every 15 seconds while running. No cloud
 | CC Switch | Its SQLite database, usually `~/.cc-switch/cc-switch.db` | Recorded requests, provider/model, tokens, estimated costs, HTTP status, latency and first-token latency when present. Proxy logging must already be enabled in CC Switch. |
 | Claude Code | `~/.claude/projects` | Assistant usage records; repeated message chunks update the same record. |
 | Gemini CLI | `~/.gemini/tmp` | Gemini messages in session JSON files, including cached and thinking tokens when available. |
+| Qwen Code | Its Qwen data folder, normally `~/.qwen` or `QWEN_HOME` | Per-request records from `usage/token-usage-YYYY-MM.jsonl`, including model, input/output/cache/thinking tokens and API duration. |
+| Kimi Code | `KIMI_CODE_HOME`, normally `~/.kimi-code` | Per-turn `usage.record` events from main and subagent `wire.jsonl` files. Session-level cumulative rows are skipped. |
+| CodeBuddy Code | `~/.codebuddy` or its `projects` folder | Usage-bearing assistant/tool-call rows. Cache hit/miss fields are preferred; the inclusive fallback subtracts cache reads before showing ordinary input. |
 | API usage file | A JSONL file in the schema below | Explicit usage and optional USD cost/performance data exported by your own client or gateway. |
 
 Paths are chosen explicitly through the desktop file picker. CC Switch is opened read-only. Provider configuration and credentials are not selected from its database. Local session files are parsed, but conversation bodies are not copied into the app's ledger. Project/session identifiers remain local metadata.
@@ -25,7 +28,7 @@ Paths are chosen explicitly through the desktop file picker. CC Switch is opened
 
 **Estimated** means a local pricing calculation, including CC Switch's stored calculation and its multiplier. **Source-reported** means the importing client explicitly labeled the amount as reported. It does not establish that a provider has settled or invoiced it. This beta does not query provider billing dashboards or balances.
 
-Claude/Gemini records without prices remain unpriced until you add a provider/model rule under **Prices → Providers**. Rules are exact matches and USD per million tokens. Source-provided amounts are preserved. The bundled OpenAI catalog is used only for exact OpenAI model matches with complete counters; the existing pricing snapshot limitations still apply.
+CLI records without prices remain unpriced until you add a provider/model rule under **Prices → Providers**. Rules are exact matches and USD per million tokens. Source-provided amounts are preserved. The bundled OpenAI catalog is used only for exact OpenAI model matches with complete counters; the existing pricing snapshot limitations still apply.
 
 Missing status/latency is unavailable, not a successful or zero-latency request. Success rate uses only records with a supplied status (HTTP 200–399). Latency metrics use only records that supply latency.
 
