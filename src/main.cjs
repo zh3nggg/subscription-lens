@@ -1,12 +1,14 @@
 'use strict';
 const {app,BrowserWindow,ipcMain,dialog,shell,Menu,Tray,nativeImage,nativeTheme,Notification}=require('electron');
 const path=require('node:path');const fs=require('node:fs/promises');const {pathToFileURL}=require('node:url');
+const APP_USER_MODEL_ID='net.subscriptionlens.desktop';
+app.setAppUserModelId(APP_USER_MODEL_ID);
 const {resolveLanguage,translate}=require('./i18n.js');
 const {reportData,reportHtml}=require('./core/report.cjs');
 const {Service}=require('./core/service.cjs');const {dollars}=require('./core/pricing.cjs');
 const {monitorDefaults,discoverMonitors}=require('./core/discovery.cjs');
 if(process.env.LENS_DATA_DIR)app.setPath('userData',path.resolve(process.env.LENS_DATA_DIR));
-app.setName('Subscription Lens');app.setAppUserModelId('net.subscriptionlens.desktop');
+app.setName('Subscription Lens');
 const lock=app.requestSingleInstanceLock();if(!lock){app.quit();}else{
 let win,service,tray,quitting=false,changeTimer,lastRefresh=0,compactMode=false,pinned=false,normalBounds=null;
 const t=(key,params)=>translate(key,resolveLanguage(service?.settings.language,app.getLocale()),params);
@@ -59,6 +61,7 @@ function register(){
 async function create(){
   service=new Service(app.getPath('userData'));service.on('changed',changed);service.on('alert',notifyQuota);
   win=new BrowserWindow({width:1100,height:720,minWidth:760,minHeight:560,show:false,title:t("余量"),icon,backgroundColor:'#ffffff',autoHideMenuBar:true,webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true,backgroundThrottling:!process.env.LENS_TEST_HIDDEN}});
+  if(process.platform==='win32'&&typeof win.setAppDetails==='function')win.setAppDetails({appId:APP_USER_MODEL_ID,appIconPath:icon,appIconIndex:0,relaunchDisplayName:'Subscription Lens',relaunchIcon:icon});
   Menu.setApplicationMenu(null);win.webContents.setWindowOpenHandler(()=>({action:'deny'}));win.webContents.on('will-navigate',e=>e.preventDefault());win.webContents.session.setPermissionRequestHandler((_,__,callback)=>callback(false));win.webContents.session.setPermissionCheckHandler(()=>false);
   win.on('close',e=>{if(service.settings.tray&&!quitting){e.preventDefault();win.hide();}});
   register();configureDesktop();await win.loadURL(ui);if(process.env.LENS_TEST_HIDDEN!=='1')win.show();service.start();

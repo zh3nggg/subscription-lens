@@ -1,4 +1,4 @@
-# Subscription Lens 1.4.0-beta.7
+# Subscription Lens 1.4.0-beta.8
 
 Windows x64 · 中文 / English / Nederlands
 
@@ -13,6 +13,7 @@ Windows x64 · 中文 / English / Nederlands
 - 模型建议在小窗口中作为独立标签，在高窗口中与趋势和项目并列，保持总览无整页滚动。
 - 保留供应商 → 模型环形图、多来源明细与性能、自定义计价、套餐实付对比、专注窗口和三语言支持。
 - 新安装包沿用原安装身份与目录，原位替换旧版并保留设置和用量。
+- Windows 任务栏、窗口、托盘和搜索入口统一使用 Subscription Lens 应用标识与镜片图标，避免显示为 Electron。
 
 ## What's new
 
@@ -20,11 +21,15 @@ Devices are now a first-class view. Each installation has a stable device identi
 
 Standard local installations of six supported tools are now detected and connected in one click. The Codex overview adds a confidence-labelled model-mix recommendation based on 14-day habits, API-equivalent intensity and live quota pace. It targets the next reset but remains adaptive because exact per-model subscription quota weights are not published.
 
+Windows taskbar and window metadata now use the Subscription Lens application identity and icon instead of Electron's default identity.
+
 ## Nieuw
 
 Apparaten zijn nu een eigen overzicht. Elke installatie krijgt een stabiele apparaatidentiteit; lokale Codex-geschiedenis wordt eraan gekoppeld en kan per apparaat worden gefilterd. Anonieme apparaatpakketten bevatten tijdstippen, model, tokencategorieën en API-equivalente kostensnapshots, zonder chatinhoud, projectpaden of inloggegevens. Gedeelde accountquota blijft afzonderlijk van apparaatgebruik.
 
 Zes ondersteunde tools in standaardmappen worden nu automatisch gevonden en met één klik verbonden. Het Codex-overzicht adviseert een modelmix op basis van 14 dagen gebruik, API-equivalente intensiteit en het actuele quotatempo, met een zichtbare betrouwbaarheid. Het advies richt zich op de volgende reset en blijft adaptief omdat exacte quotagewichten per model niet zijn gepubliceerd.
+
+De Windows-taakbalk en venstermetadata gebruiken nu de Subscription Lens-identiteit en het juiste pictogram in plaats van de standaardidentiteit van Electron.
 
 ## Scope
 
