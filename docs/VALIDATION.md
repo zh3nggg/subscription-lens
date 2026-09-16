@@ -1,4 +1,4 @@
-# Validation — 1.4.4
+# Validation — 1.4.5
 
 Windows x64 · Node.js 24.14.0 · Electron 44.4.0 · electron-builder 26.15.3.
 
