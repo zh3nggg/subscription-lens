@@ -11,10 +11,12 @@ overview=function(){const html=overviewBeforeDistribution();if(state.multi||(!st
 function monitorDistribution(m){
  const view=distributionState,scope=view.provider,mode=view.metric;
  const groups=scope?m.modelGroups.filter(g=>g.provider===scope):m.groups;
- const value=g=>mode==='tokens'?g.tokens:g.estimated+g.reported;
+ const costOf=g=>Number(g.estimated||0)+Number(g.reported||0),value=g=>mode==='tokens'?Number(g.tokens):costOf(g);
  const sorted=[...groups].sort((a,b)=>value(b)-value(a));
  const total=sorted.reduce((n,g)=>n+value(g),0),unpriced=groups.reduce((n,g)=>n+g.unpriced,0);
  const known=groups.reduce((n,g)=>n+g.requests-g.unpriced,0);
+ const pricedTokensOf=g=>Number(g.pricedTokens??(g.unpriced?0:g.tokens)),pricedTokens=groups.reduce((n,g)=>n+pricedTokensOf(g),0),averageCost=pricedTokens?groups.reduce((n,g)=>n+costOf(g),0)*1000000/pricedTokens:null;
+ const perMillion=g=>{const n=pricedTokensOf(g);return n?costOf(g)*1000000/n:null;};
  const color=g=>{const name=scope?g.model:g.key;let hash=0;for(const ch of name)hash=(hash*31+ch.charCodeAt(0))>>>0;return distributionColors[hash%distributionColors.length];};
  const format=n=>mode==='tokens'?fmt.format(n):money(n);
  let angle=-Math.PI/2;
@@ -32,8 +34,8 @@ function monitorDistribution(m){
  return `<section class="panel padded distribution-panel"><div class="row between"><h2>${t(scope?'模型用量':'供应商用量')}</h2><div class="segments" aria-label="${t('统计指标')}"><button data-distribution-metric="tokens" aria-pressed="${mode==='tokens'}" class="${mode==='tokens'?'active':''}">Tokens</button><button data-distribution-metric="cost" aria-pressed="${mode==='cost'}" class="${mode==='cost'?'active':''}">${t('费用')}</button></div></div>
  <div class="distribution-breadcrumb"><button class="text-button" data-distribution-back ${scope?'':'disabled'}>${t('全部供应商')}</button>${scope?`<span> / ${esc(scope)}</span>`:''}</div>
  <div class="distribution-body"><div class="distribution-visual"><svg viewBox="0 0 200 200" aria-label="${t(scope?'模型用量':'供应商用量')}">${total?segments:'<circle cx="100" cy="100" r="78" fill="var(--line)"/>'}<circle cx="100" cy="100" r="53" fill="var(--card)" pointer-events="none"/></svg><div class="distribution-center"><strong>${mode==='tokens'?compact(total):money(known?total:null)}</strong><span>${mode==='tokens'?'Tokens':t('已计价费用')}</span></div></div>
- <div class="distribution-legend">${sorted.length?sorted.map((g,i)=>`<button class="distribution-row" data-distribution-item="${i}"><span class="distribution-dot" style="background:${color(g)}"></span><span class="distribution-name">${esc(scope?g.model:g.key)}</span><span class="distribution-values"><strong>${mode==='cost'&&g.unpriced===g.requests?'—':format(value(g))}</strong><small>${total&&!(mode==='cost'&&g.unpriced===g.requests)?decimal(value(g)/total*100,1)+'%':'—'}</small></span></button>`).join(''):`<p class="caption">${t('暂无记录')}</p>`}</div></div>
- ${mode==='cost'?`<div class="caption">${t('估算与来源报告费用合计')} · ${t('未计价')} ${fmt.format(unpriced)}</div>`:''}</section>`;
+ <div class="distribution-legend">${sorted.length?sorted.map((g,i)=>`<button class="distribution-row" data-distribution-item="${i}"><span class="distribution-dot" style="background:${color(g)}"></span><span class="distribution-name">${esc(scope?g.model:g.key)}</span><span class="distribution-values"><strong>${mode==='cost'&&g.unpriced===g.requests?'—':format(value(g))}</strong><small>${total&&!(mode==='cost'&&g.unpriced===g.requests)?decimal(value(g)/total*100,1)+'%':'—'}${perMillion(g)!==null?' · '+money(perMillion(g))+'/1M':''}</small></span></button>`).join(''):`<p class="caption">${t('暂无记录')}</p>`}</div></div>
+ <div class="caption distribution-cost-summary"><span>${t('平均成本 / 1M Tokens')}：<strong>${averageCost===null?'—':money(averageCost)}</strong></span><span>${t('已计价 Tokens')} ${pricedTokens?fmt.format(pricedTokens):'—'}${mode==='cost'?` · ${t('未计价')} ${fmt.format(unpriced)}`:''}</span></div></section>`;
 }
 function distributionAction(target){
  if(target.dataset.distributionMetric){distributionState.metric=target.dataset.distributionMetric;render();}

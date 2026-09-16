@@ -1,9 +1,10 @@
-# Subscription Lens 1.4.2
+# Subscription Lens 1.4.3
 
 Windows x64 · 中文 / English / Nederlands
 
 ## 新增功能
 
+- 供应商和模型分布图新增平均每百万 Tokens 成本，按所选时间段计算；未计价 Tokens 保留展示但不纳入分母，来源报告费用与本地估算仍分开保存。
 - 新增“设备”页面：为本机生成稳定设备身份，历史 Codex 记录自动归属本机；按设备查看 Tokens、API 等价成本、会话和最后同步时间，并可直接进入该设备的用量筛选。
 - 支持设备数据包导入／导出。数据包只包含匿名会话标识、时间、模型、Token 分类和 API 等价成本快照，不包含聊天正文、项目路径或登录凭据。
 - 账户额度继续作为共享账户数据展示，不把它拆分成虚假的单设备额度。新增术语悬停解释，覆盖额度、缓存、计价、延迟、模型建议和数据范围。
@@ -19,6 +20,8 @@ Windows x64 · 中文 / English / Nederlands
 
 ## What's new
 
+Provider and model distributions now show average cost per 1M tokens for the selected period. Unpriced tokens remain visible but are excluded from the denominator; source-reported and estimated costs remain separate.
+
 Devices are now a first-class view. Each installation has a stable device identity; local Codex history is assigned to it and can be filtered by device. Anonymous device packages transfer timestamps, model, token categories and API-equivalent cost snapshots without chat content, project paths or credentials. Shared account quota remains separate from device usage.
 
 Standard local installations of six supported tools are now detected and connected in one click. The Codex overview adds a confidence-labelled model-mix recommendation based on 14-day habits, API-equivalent intensity and live quota pace. It targets the next reset but remains adaptive because exact per-model subscription quota weights are not published.
@@ -28,6 +31,8 @@ Qoder stream usage can be captured with the bundled PowerShell helper. On Window
 Windows taskbar and window metadata now use the Subscription Lens application identity and icon instead of Electron's default identity.
 
 ## Nieuw
+
+De diagrammen per aanbieder en model tonen nu de gemiddelde kosten per 1M tokens voor de geselecteerde periode. Ongeprijsde tokens blijven zichtbaar maar tellen niet mee in de noemer; gerapporteerde en geschatte kosten blijven gescheiden.
 
 Apparaten zijn nu een eigen overzicht. Elke installatie krijgt een stabiele apparaatidentiteit; lokale Codex-geschiedenis wordt eraan gekoppeld en kan per apparaat worden gefilterd. Anonieme apparaatpakketten bevatten tijdstippen, model, tokencategorieën en API-equivalente kostensnapshots, zonder chatinhoud, projectpaden of inloggegevens. Gedeelde accountquota blijft afzonderlijk van apparaatgebruik.
 

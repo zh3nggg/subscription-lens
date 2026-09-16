@@ -20,6 +20,8 @@ Een Windows-desktopapp voor **Codex-abonnees** die hun resterende limieten wille
 
 Verbind Qwen Code, Kimi Code, CodeBuddy Code, Qoder, CC Switch, Claude Code, Gemini CLI of je eigen API-gebruiksbestand. Op Windows leest Qoder Quest lokale IDE-agentlogs met contextsnapshots; deze Tokens worden duidelijk als schatting gemarkeerd. Qoder-streams kunnen ook met het ingebouwde script worden vastgelegd; Credits blijven gescheiden van API-equivalent USD en cumulatieve resultaten worden overgeslagen om dubbele kosten te voorkomen. Chinese modelfamilies worden in hetzelfde diagram toegewezen aan Alibaba Cloud, Moonshot AI, Zhipu AI, MiniMax en DeepSeek. [Bronnen en kostendefinities](PROVIDER-MONITORING.md).
 
+De diagrammen per aanbieder en model tonen ook de gemiddelde kosten per 1M tokens voor de geselecteerde periode. Alleen tokens met een prijs vormen de noemer; ongeprijsd gebruik blijft zichtbaar maar telt niet mee in het gemiddelde.
+
 Geïnstalleerde tools in standaardmappen worden automatisch gevonden en kunnen samen worden verbonden; aangepaste locaties blijven beschikbaar. Het Codex-overzicht adviseert een modelmix op basis van 14 dagen gebruik, API-equivalente intensiteit en het actuele quotatempo. Omdat OpenAI geen exacte quotagewichten per model publiceert, toont het advies de betrouwbaarheid en blijft het zichzelf kalibreren.
 
 ![Subscription Lens-overzicht in het Nederlands](images/providers.nl-NL.png)
@@ -28,11 +30,11 @@ Geïnstalleerde tools in standaardmappen worden automatisch gevonden en kunnen s
 
 ## Downloaden en aan de slag
 
-**1.4.2 Stable · Windows x64.** De collector verwerkt nog niet alle recordformaten volledig; totalen kunnen te hoog of te laag zijn. Kosten zijn schattingen, geen factuur of gegarandeerde besparing. Deze build is niet digitaal ondertekend en heeft geen automatische updates.
+**1.4.3 Stable · Windows x64.** De collector verwerkt nog niet alle recordformaten volledig; totalen kunnen te hoog of te laag zijn. Kosten zijn schattingen, geen factuur of gegarandeerde besparing. Deze build is niet digitaal ondertekend en heeft geen automatische updates.
 
-[Download 1.4.2](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.4.2)
+[Download 1.4.3](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.4.3)
 
-Gebruik `Subscription-Lens-1.4.2-x64.exe` voor een eerste installatie of upgrade. Sluit Subscription Lens, start het installatiebestand en behoud bij een upgrade de bestaande installatiemap (bijvoorbeeld `D:\SubLens`). Het vervangt de oude app met behoud van instellingen en lokaal gebruik. Kies de draagbare ZIP alleen voor een losse versie zonder installatie: pak die uit in een eigen map en start `Subscription Lens.exe`; de ZIP werkt een geïnstalleerde app niet bij.
+Gebruik `Subscription-Lens-1.4.3-x64.exe` voor een eerste installatie of upgrade. Sluit Subscription Lens, start het installatiebestand en behoud bij een upgrade de bestaande installatiemap (bijvoorbeeld `D:\SubLens`). Het vervangt de oude app met behoud van instellingen en lokaal gebruik. Kies de draagbare ZIP alleen voor een losse versie zonder installatie: pak die uit in een eigen map en start `Subscription Lens.exe`; de ZIP werkt een geïnstalleerde app niet bij.
 
 1. Kies **Monitoring starten** voor de standaardmap van Codex, of **Map kiezen** voor een eigen map met `sessions` of `archived_sessions`.
 2. Open **Verbindingen → Account verbinden** om limieten op te halen via de lokaal geïnstalleerde Codex. Gebruik **Aanmelden bij ChatGPT** als je nog niet bent aangemeld.
@@ -93,6 +95,6 @@ npm run dist
 
 Ontwikkeld met ondersteuning van **GPT-6 Astra**.
 
-[CodexBar](https://github.com/steipete/CodexBar) dient als referentie voor limieten en desktopinteractie. MIT-gelicentieerde broncode van [codex-usage](https://github.com/zJay26/codex-usage) is opgenomen voor de volgende engine-integratie; deze is nog niet actief in de desktopapp 1.4.2.
+[CodexBar](https://github.com/steipete/CodexBar) dient als referentie voor limieten en desktopinteractie. MIT-gelicentieerde broncode van [codex-usage](https://github.com/zJay26/codex-usage) is opgenomen voor de volgende engine-integratie; deze is nog niet actief in de desktopapp 1.4.3.
 
 MIT. Zie [licenties van derden](../THIRD-PARTY-NOTICES.md) voor bronnen en auteursrechten. Dit is een onafhankelijk project, niet verbonden aan OpenAI of onderschreven door de genoemde projecten.

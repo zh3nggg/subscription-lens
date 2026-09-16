@@ -20,6 +20,8 @@
 
 连接 Qwen Code、Kimi Code、CodeBuddy Code、Qoder、CC Switch、Claude Code、Gemini CLI 或自己的 API 用量文件。Windows 下 Qoder Quest 会读取本机 IDE agent 日志中的上下文快照，并明确标为 Tokens 估算；原始 Credits 与 API 等价美元分开统计。Qoder 也可通过内置脚本捕获 stream JSON，并跳过累计结果，避免重复计费。国产模型会在同一供应商 → 模型环形图中归属到阿里云、月之暗面、智谱、MiniMax、DeepSeek；支持 Tokens／费用切换、请求明细、性能与自定义计价。程序会自动发现常用目录中的已安装工具，可一次连接全部来源；特殊安装位置仍可手动选择。[来源配置与费用口径](PROVIDER-MONITORING.md)。
 
+供应商和模型饼图还会显示所选时间段的平均每百万 Tokens 成本。分母只包含已计价 Tokens；未计价用量仍会显示，但不会被纳入平均值。
+
 Codex 总览会结合近 14 天模型习惯与当前额度速度，推荐下个重置前的模型使用比例，并标注可信度。由于 OpenAI 未公布各模型对应套餐额度的精确权重，该建议使用 API 等价强度持续校准，不承诺精确耗尽额度。
 
 ![Subscription Lens 中文多供应商总览](images/providers.zh-CN.png)
@@ -28,13 +30,13 @@ Codex 总览会结合近 14 天模型习惯与当前额度速度，推荐下个�
 
 ## 下载与快速开始
 
-**1.4.2 正式版 · Windows x64。** 当前采集器尚未完整适配所有客户端记录格式，汇总可能偏高或偏低；费用是估算值，不是账单或保证节省的金额。安装包未做代码签名，暂不支持自动更新。
+**1.4.3 正式版 · Windows x64。** 当前采集器尚未完整适配所有客户端记录格式，汇总可能偏高或偏低；费用是估算值，不是账单或保证节省的金额。安装包未做代码签名，暂不支持自动更新。
 
-[下载 1.4.2](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.4.2)
+[下载 1.4.3](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.4.3)
 
-首次安装或覆盖升级都应下载 `Subscription-Lens-1.4.2-x64.exe`。先关闭余量，运行安装器；升级时保留原安装目录（例如 `D:\SubLens`），即可替换旧程序并保留设置和本机用量历史。ZIP 仅适合免安装的独立副本：解压到单独目录后运行 `Subscription Lens.exe`，它不会更新已安装版本。
+首次安装或覆盖升级都应下载 `Subscription-Lens-1.4.3-x64.exe`。先关闭余量，运行安装器；升级时保留原安装目录（例如 `D:\SubLens`），即可替换旧程序并保留设置和本机用量历史。ZIP 仅适合免安装的独立副本：解压到单独目录后运行 `Subscription Lens.exe`，它不会更新已安装版本。
 
-1. 从 GitHub Releases 下载安装包；首次安装或升级均运行 `Subscription-Lens-1.4.2-x64.exe`。
+1. 从 GitHub Releases 下载安装包；首次安装或升级均运行 `Subscription-Lens-1.4.3-x64.exe`。
 2. 首次打开点击“开始监测”；自定义 Codex Home 可点“选择目录”。目录应包含 `sessions` 或 `archived_sessions`。
 3. 在“连接”中点击“连接账户”。应用使用本机 Codex 的官方登录；未登录时按按钮打开浏览器登录。
 4. 在“设置”中填写账期起止、套餐实付与额外额度（USD）。结束日期不含当天；可选手动日期或按续费日自动滚动。
@@ -110,6 +112,6 @@ npm run dist
 
 本项目在 **GPT-6 Astra** 的协助下完成开发。
 
-[CodexBar](https://github.com/steipete/CodexBar) 为额度和桌面交互设计提供参考；项目已引入采用 MIT 许可的 [codex-usage](https://github.com/zJay26/codex-usage) 源码，用于下一步统计引擎整合，尚未在 1.4.2 桌面程序中启用。
+[CodexBar](https://github.com/steipete/CodexBar) 为额度和桌面交互设计提供参考；项目已引入采用 MIT 许可的 [codex-usage](https://github.com/zJay26/codex-usage) 源码，用于下一步统计引擎整合，尚未在 1.4.3 桌面程序中启用。
 
 本项目采用 MIT 许可，相关来源和版权见[开源说明](../THIRD-PARTY-NOTICES.md)。这是独立项目，与 OpenAI 无隶属关系，也未获得上述项目的背书。

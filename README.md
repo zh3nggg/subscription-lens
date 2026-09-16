@@ -20,6 +20,8 @@ A Windows desktop app for **Codex subscription users** who want to see their rem
 
 Connect Qwen Code, Kimi Code, CodeBuddy Code, Qoder, CC Switch, Claude Code, Gemini CLI or your own API usage file. Qoder Quest sessions are read from the local IDE agent logs on Windows; context snapshots are labeled as token estimates, while native Credits stay separate. Qoder stream capture keeps native Credits separate from API-equivalent USD and skips cumulative result events, so the same request is never charged twice. Domestic model families are attributed to Alibaba Cloud, Moonshot AI, Zhipu AI, MiniMax and DeepSeek through the same provider → model chart. Recorded estimates and source-reported amounts stay distinct from actual invoices. Installed tools in standard folders are detected automatically and can be connected together; custom locations remain available. [Source setup and cost definitions](docs/PROVIDER-MONITORING.md).
 
+The provider and model charts also show average cost per 1M tokens for the selected period. The denominator includes only priced tokens; unpriced usage remains visible and is excluded from the average.
+
 The Codex overview can recommend a model mix from the last 14 days of model usage and the current quota pace. It targets the next reset and shows its confidence. Because OpenAI does not publish an exact subscription-quota weight for each model, this is an adaptive recommendation based on API-equivalent intensity, not a guarantee.
 
 ![Subscription Lens provider overview in English](docs/images/providers.en-US.png)
@@ -28,11 +30,11 @@ The Codex overview can recommend a model mix from the last 14 days of model usag
 
 ## Download and get started
 
-**1.4.2 Stable · Windows x64.** The current collector does not yet handle all client record formats; totals may be too high or too low. Costs are estimates, not a bill or guaranteed savings. The build is unsigned and has no automatic updater.
+**1.4.3 Stable · Windows x64.** The current collector does not yet handle all client record formats; totals may be too high or too low. Costs are estimates, not a bill or guaranteed savings. The build is unsigned and has no automatic updater.
 
-[Download 1.4.2](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.4.2)
+[Download 1.4.3](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.4.3)
 
-Use `Subscription-Lens-1.4.2-x64.exe` for a first installation or an upgrade. Close Subscription Lens, run the installer, and keep the existing installation folder (for example, `D:\SubLens`) when upgrading. It replaces the old app and retains settings and local usage history. Use the portable ZIP only for a separate, no-install copy: extract it to its own folder and run `Subscription Lens.exe`; it does not update an installed copy.
+Use `Subscription-Lens-1.4.3-x64.exe` for a first installation or an upgrade. Close Subscription Lens, run the installer, and keep the existing installation folder (for example, `D:\SubLens`) when upgrading. It replaces the old app and retains settings and local usage history. Use the portable ZIP only for a separate, no-install copy: extract it to its own folder and run `Subscription Lens.exe`; it does not update an installed copy.
 
 1. Select **Start monitoring** to read the default Codex folder, or **Choose folder** for a custom folder containing `sessions` or `archived_sessions`.
 2. Open **Connections → Connect account** to query limits through your locally installed Codex. If signed out, use **Sign in to ChatGPT**.
@@ -93,6 +95,6 @@ npm run dist
 
 Developed with assistance from **GPT-6 Astra**.
 
-[CodexBar](https://github.com/steipete/CodexBar) informs the quota and desktop interaction requirements. MIT-licensed [codex-usage](https://github.com/zJay26/codex-usage) source is included for the next accounting-engine integration; it is not active in the 1.4.2 desktop app.
+[CodexBar](https://github.com/steipete/CodexBar) informs the quota and desktop interaction requirements. MIT-licensed [codex-usage](https://github.com/zJay26/codex-usage) source is included for the next accounting-engine integration; it is not active in the 1.4.3 desktop app.
 
 MIT. See [third-party notices](THIRD-PARTY-NOTICES.md) for attribution and licenses. This is an independent project, not affiliated with OpenAI or endorsed by the referenced projects.

@@ -188,6 +188,14 @@ window.LensLocales = {
     "Qoder Quest tokens use local context snapshots as an estimate; view native Credits in Qoder.",
     "Qoder Quest-tokens zijn een schatting uit lokale contextsnapshots; bekijk native Credits in Qoder."
   ],
+  "平均成本 / 1M Tokens": [
+    "Average cost / 1M Tokens",
+    "Gemiddelde kosten / 1M tokens"
+  ],
+  "已计价 Tokens": [
+    "Priced Tokens",
+    "Geprijsde tokens"
+  ],
   "开始监测": [
     "Start monitoring",
     "Monitoring starten"
