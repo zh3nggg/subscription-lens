@@ -11,5 +11,6 @@ test-results/
 *.pem
 *.key
 auth.json
+outputs/subscription-lens-*/
 *.exe
 *.zip
