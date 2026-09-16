@@ -4,7 +4,7 @@
 
 ## English
 
-### Current release: 1.4.0-beta.5 preview
+### Current release: 1.4.0-beta.6 preview
 
 Windows desktop app for Codex subscriptions, with Chinese, English and Dutch UI. Local usage analytics, account quota, billing comparison, compact view and optional notifications are available. Full Codex feature parity with CodexBar and codex-usage is **not yet complete**. See [coverage](docs/COMPATIBILITY.md).
 
@@ -23,7 +23,7 @@ Current scope includes Codex subscriptions and optional local records from Qwen 
 
 ## 简体中文
 
-### 当前版本：1.4.0-beta.5 预发布
+### 当前版本：1.4.0-beta.6 预发布
 
 面向 Codex 套餐的 Windows 桌面应用，支持中文、英语、荷兰语。已提供本地用量分析、账户额度、账期对比、专注窗口和可选提醒。**尚未完整覆盖 CodexBar 与 codex-usage 的 Codex 功能**，详见[覆盖清单](docs/COMPATIBILITY.md)。
 
@@ -42,7 +42,7 @@ Current scope includes Codex subscriptions and optional local records from Qwen 
 
 ## Nederlands
 
-### Huidige versie: 1.4.0-beta.5 preview
+### Huidige versie: 1.4.0-beta.6 preview
 
 Een Windows-desktopapp voor Codex-abonnementen, in het Chinees, Engels en Nederlands. Lokale gebruiksanalyse, accountlimieten, periodevergelijking, compacte weergave en optionele meldingen zijn beschikbaar. **Volledige Codex-functionaliteit van CodexBar en codex-usage is nog niet bereikt.** Zie het [overzicht](docs/COMPATIBILITY.md).
 

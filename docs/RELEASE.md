@@ -1,4 +1,4 @@
-# Subscription Lens 1.4.0-beta.5
+# Subscription Lens 1.4.0-beta.6
 
 Windows x64 · 中文 / English / Nederlands
 

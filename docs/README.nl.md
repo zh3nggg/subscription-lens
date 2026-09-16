@@ -27,9 +27,9 @@ Geïnstalleerde tools in standaardmappen worden automatisch gevonden en kunnen s
 
 ## Downloaden en aan de slag
 
-**1.4.0-beta.5 Preview · Windows x64.** De collector verwerkt nog niet alle recordformaten volledig; totalen kunnen te hoog of te laag zijn. Kosten zijn schattingen, geen factuur of gegarandeerde besparing. Deze build is niet digitaal ondertekend en heeft geen automatische updates.
+**1.4.0-beta.6 Preview · Windows x64.** De collector verwerkt nog niet alle recordformaten volledig; totalen kunnen te hoog of te laag zijn. Kosten zijn schattingen, geen factuur of gegarandeerde besparing. Deze build is niet digitaal ondertekend en heeft geen automatische updates.
 
-[Download het installatiebestand of de draagbare ZIP-versie](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.4.0-beta.5)
+[Download het installatiebestand of de draagbare ZIP-versie](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.4.0-beta.6)
 
 Voer het nieuwe installatieprogramma uit om de bestaande installatie te vervangen en behoud de gevonden map. Instellingen en gebruiksgeschiedenis blijven behouden. Stabiele en testversies delen dezelfde app-identiteit. De draagbare ZIP is geen installatieprogramma; automatisch downloaden op de achtergrond is niet inbegrepen.
 
@@ -92,6 +92,6 @@ npm run dist
 
 Ontwikkeld met ondersteuning van **GPT-6 Astra**.
 
-[CodexBar](https://github.com/steipete/CodexBar) dient als referentie voor limieten en desktopinteractie. MIT-gelicentieerde broncode van [codex-usage](https://github.com/zJay26/codex-usage) is opgenomen voor de volgende engine-integratie; deze is nog niet actief in de desktopapp 1.4.0-beta.5.
+[CodexBar](https://github.com/steipete/CodexBar) dient als referentie voor limieten en desktopinteractie. MIT-gelicentieerde broncode van [codex-usage](https://github.com/zJay26/codex-usage) is opgenomen voor de volgende engine-integratie; deze is nog niet actief in de desktopapp 1.4.0-beta.6.
 
 MIT. Zie [licenties van derden](../THIRD-PARTY-NOTICES.md) voor bronnen en auteursrechten. Dit is een onafhankelijk project, niet verbonden aan OpenAI of onderschreven door de genoemde projecten.
