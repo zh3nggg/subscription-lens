@@ -24,9 +24,9 @@ Verbind Qwen Code, Kimi Code, CodeBuddy Code, CC Switch, Claude Code, Gemini CLI
 
 ## Downloaden en aan de slag
 
-**1.4.0-beta.1 Preview · Windows x64.** De collector verwerkt nog niet alle recordformaten volledig; totalen kunnen te hoog of te laag zijn. Kosten zijn schattingen, geen factuur of gegarandeerde besparing. Deze build is niet digitaal ondertekend en heeft geen automatische updates.
+**1.4.0-beta.2 Preview · Windows x64.** De collector verwerkt nog niet alle recordformaten volledig; totalen kunnen te hoog of te laag zijn. Kosten zijn schattingen, geen factuur of gegarandeerde besparing. Deze build is niet digitaal ondertekend en heeft geen automatische updates.
 
-[Download het installatiebestand of de draagbare ZIP-versie](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.4.0-beta.1)
+[Download het installatiebestand of de draagbare ZIP-versie](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.4.0-beta.2)
 
 Voer het nieuwe installatieprogramma uit om de bestaande installatie te vervangen en behoud de gevonden map. Instellingen en gebruiksgeschiedenis blijven behouden. Stabiele en testversies delen dezelfde app-identiteit. De draagbare ZIP is geen installatieprogramma; automatisch downloaden op de achtergrond is niet inbegrepen.
 
@@ -34,6 +34,8 @@ Voer het nieuwe installatieprogramma uit om de bestaande installatie te vervange
 2. Open **Verbindingen → Account verbinden** om limieten op te halen via de lokaal geïnstalleerde Codex. Gebruik **Aanmelden bij ChatGPT** als je nog niet bent aangemeld.
 3. Vul onder **Instellingen** de factuurperiode, abonnementsbetaling en betaling voor extra tegoed in USD in. De einddatum telt niet mee. Kies handmatige datums of automatische maandelijkse verlenging.
 4. Kies bij **Taal** de systeeminstelling, vereenvoudigd Chinees, Engels of Nederlands en klik op **Opslaan**. De keuze wordt direct toegepast en blijft na een herstart behouden. Bij andere systeemtalen wordt Engels gebruikt.
+
+De hoofdwerkruimte is volledig bruikbaar vanaf 760×560. Codex opent met de abonnementsstatus; monitoring van meerdere aanbieders opent met de verdeling per aanbieder. Bij wisselen tussen verdeling, trends, projecten en prestaties blijven bron en periode behouden.
 
 Je hebt geen API-sleutel, Node.js, Python of Docker nodig. Voor accountgegevens moet Codex geïnstalleerd zijn. Lokaal gebruik bijhouden werkt ook zonder accountverbinding.
 
@@ -87,6 +89,6 @@ npm run dist
 
 Ontwikkeld met ondersteuning van **GPT-6 Astra**.
 
-[CodexBar](https://github.com/steipete/CodexBar) dient als referentie voor limieten en desktopinteractie. MIT-gelicentieerde broncode van [codex-usage](https://github.com/zJay26/codex-usage) is opgenomen voor de volgende engine-integratie; deze is nog niet actief in de desktopapp 1.4.0-beta.1.
+[CodexBar](https://github.com/steipete/CodexBar) dient als referentie voor limieten en desktopinteractie. MIT-gelicentieerde broncode van [codex-usage](https://github.com/zJay26/codex-usage) is opgenomen voor de volgende engine-integratie; deze is nog niet actief in de desktopapp 1.4.0-beta.2.
 
 MIT. Zie [licenties van derden](../THIRD-PARTY-NOTICES.md) voor bronnen en auteursrechten. Dit is een onafhankelijk project, niet verbonden aan OpenAI of onderschreven door de genoemde projecten.

@@ -1,5 +1,5 @@
 'use strict';
-const layoutState={tab:'distribution',pages:{},limit:5};
+const layoutState={tabs:{codex:'plan',multi:'distribution'},pages:{},limit:5};
 const filtersBeforeLayout=filters,renderBeforeLayout=render;
 filters=()=>({...filtersBeforeLayout(),limit:layoutState.limit});
 function pageItems(container,items,key,reserve=56){
@@ -13,13 +13,12 @@ function pageItems(container,items,key,reserve=56){
 function fitOverview(main){
  const distribution=main.querySelector('.distribution-panel'),two=main.querySelector('.two-col');if(!distribution)return;
  const trend=two?.querySelector(':scope > section:not(.distribution-panel)'),project=two?.querySelector('.project-card'),decision=main.querySelector('.decision-grid');
- const short=innerHeight<960;
  let performance=null;if(state.multi){const metrics=main.querySelector('.monitor-metrics');if(metrics){performance=document.createElement('section');performance.className='panel performance-panel';const grid=document.createElement('div');grid.className='metrics performance-metrics';[...metrics.children].slice(3).forEach(n=>grid.append(n));performance.append(grid);}}
- const panels=[['distribution','用量分布',distribution],['trend','用量趋势',trend],['projects','项目',project],['performance','性能',performance],...(short?[['plan','套餐与账期',decision]]:[])].filter(([, ,node])=>node);
- if(!panels.some(([key])=>key===layoutState.tab))layoutState.tab='distribution';
- const tabs=document.createElement('div');tabs.className='segments dashboard-tabs';tabs.innerHTML=panels.map(([key,label])=>`<button data-layout-tab="${key}" class="${layoutState.tab===key?'active':''}" aria-pressed="${layoutState.tab===key}">${t(label)}</button>`).join('');
+ const panels=[...(!state.multi?[['plan','套餐与账期',decision]]:[]),['distribution','用量分布',distribution],['trend','用量趋势',trend],['projects','项目',project],['performance','性能',performance]].filter(([, ,node])=>node);
+ const mode=state.multi?'multi':'codex';if(!panels.some(([key])=>key===layoutState.tabs[mode]))layoutState.tabs[mode]=panels[0][0];
+ const active=layoutState.tabs[mode];const tabs=document.createElement('div');tabs.className='segments dashboard-tabs';tabs.innerHTML=panels.map(([key,label])=>`<button data-layout-tab="${key}" class="${active===key?'active':''}" aria-pressed="${active===key}">${t(label)}</button>`).join('');
  const deck=document.createElement('div');deck.className='dashboard-deck';
- for(const[key,,node]of panels){node.hidden=key!==layoutState.tab;deck.append(node);}
+ for(const[key,,node]of panels){node.hidden=key!==active;deck.append(node);}
  if(two)two.remove();const footer=main.querySelector('.overview-footer,.monitor-footer');main.insertBefore(tabs,footer);main.insertBefore(deck,footer);
  if(project&&!project.hidden)pageItems(project.querySelector('.project-list'),[...project.querySelectorAll('.project-item')],'projects',70);
  if(!distribution.hidden)pageItems(distribution.querySelector('.distribution-legend'),[...distribution.querySelectorAll('.distribution-row')],'legend',100);
@@ -37,7 +36,7 @@ render=function(){renderBeforeLayout();if(!state.data)return;document.body.datas
  }
 };
 document.addEventListener('click',event=>{const button=event.target.closest('button');if(!button)return;const d=button.dataset;
- if(d.layoutTab){event.stopImmediatePropagation();layoutState.tab=d.layoutTab;render();}
+ if(d.layoutTab){event.stopImmediatePropagation();layoutState.tabs[state.multi?'multi':'codex']=d.layoutTab;render();}
  if(d.layoutPage){event.stopImmediatePropagation();layoutState.pages[d.layoutPage]=Math.max(0,(layoutState.pages[d.layoutPage]||0)+Number(d.delta));render();}
  if(['prev','next'].includes(d.action)){event.stopImmediatePropagation();state.offset=Math.max(0,state.offset+(d.action==='next'?layoutState.limit:-layoutState.limit));load();}
 },true);

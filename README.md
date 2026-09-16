@@ -9,7 +9,7 @@ A Windows desktop app for **Codex subscription users** who want to see their rem
 | Task | Features |
 | --- | --- |
 | Check remaining capacity | Account quota, reset countdowns and recent-pace estimates when enough observations are available. |
-| Understand your usage | Browse recorded tokens by project, model and session; drill down to individual records. |
+| Understand your usage | Compare providers in a ring chart, select one to inspect its models, then drill down to requests or Codex sessions. |
 | Compare usage with your payment | View estimated API-equivalent costs alongside your actual payment for the billing period. |
 | Keep limits within reach | Use a compact pinnable window, the system tray and optional low-quota alerts with quiet hours. |
 | Export and share | Export records to CSV or save an aggregate-only HTML report without project names or account identifiers. |
@@ -24,9 +24,9 @@ Connect Qwen Code, Kimi Code, CodeBuddy Code, CC Switch, Claude Code, Gemini CLI
 
 ## Download and get started
 
-**1.4.0-beta.1 Preview · Windows x64.** The current collector does not yet handle all client record formats; totals may be too high or too low. Costs are estimates, not a bill or guaranteed savings. The build is unsigned and has no automatic updater.
+**1.4.0-beta.2 Preview · Windows x64.** The current collector does not yet handle all client record formats; totals may be too high or too low. Costs are estimates, not a bill or guaranteed savings. The build is unsigned and has no automatic updater.
 
-[Download the installer or portable ZIP](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.4.0-beta.1)
+[Download the installer or portable ZIP](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.4.0-beta.2)
 
 Run the new installer to upgrade the existing installation in place; keep its detected folder. Settings and usage history are retained. Stable and preview installers share one application identity; the portable ZIP is not an installer. Background automatic downloading is not included.
 
@@ -34,6 +34,8 @@ Run the new installer to upgrade the existing installation in place; keep its de
 2. Open **Connections → Connect account** to query limits through your locally installed Codex. If signed out, use **Sign in to ChatGPT**.
 3. Under **Settings**, enter your billing dates, plan payment and extra credit payments in USD. The end date is exclusive. Choose manual dates or automatic monthly renewal.
 4. Choose **Language**: system default, Simplified Chinese, English or Dutch, then **Save**. The choice takes effect immediately and is preserved after restart. Other system languages default to English.
+
+The main workspace is designed for windows from 760×560 upward. Codex opens on plan status; multi-provider monitoring opens on provider distribution. Use the tabs to switch between distribution, trends, projects and performance without losing the current source or period.
 
 No API key, Node.js, Python or Docker is needed to run the app. Account queries require an installed Codex executable; local usage monitoring works without an account connection.
 
@@ -87,6 +89,6 @@ npm run dist
 
 Developed with assistance from **GPT-6 Astra**.
 
-[CodexBar](https://github.com/steipete/CodexBar) informs the quota and desktop interaction requirements. MIT-licensed [codex-usage](https://github.com/zJay26/codex-usage) source is included for the next accounting-engine integration; it is not active in the 1.4.0-beta.1 desktop app.
+[CodexBar](https://github.com/steipete/CodexBar) informs the quota and desktop interaction requirements. MIT-licensed [codex-usage](https://github.com/zJay26/codex-usage) source is included for the next accounting-engine integration; it is not active in the 1.4.0-beta.2 desktop app.
 
 MIT. See [third-party notices](THIRD-PARTY-NOTICES.md) for attribution and licenses. This is an independent project, not affiliated with OpenAI or endorsed by the referenced projects.

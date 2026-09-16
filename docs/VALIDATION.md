@@ -1,13 +1,13 @@
-# Validation — 1.4.0-beta.1
+# Validation — 1.4.0-beta.2
 
 Windows x64 · Node.js 24.14.0 · Electron 44.4.0 · electron-builder 26.15.3.
 
 ## Automated checks
 
 - 56 unit/integration checks passed locally, including Qwen Code, Kimi Code and CodeBuddy read-only imports, domestic provider attribution, cache semantics, read-only CC Switch imports and upstream corrections, duplicate/unfinished records, price rules, translations and persistent installer identity.
-- Desktop checks cover provider → model → requests, Tokens/cost switching, pagination and Chinese/English/Dutch layouts at 820×600, 1024×768 and 1320×900 content sizes.
+- Desktop checks cover provider → model → requests, Tokens/cost switching, every dashboard tab, pagination and Chinese/English/Dutch layouts at 760×560, 820×600, 1024×768 and 1320×900 content sizes.
 - Existing product, localization and simulated quota tests are part of the release checks. Actual notification delivery is intercepted; these tests do not establish Windows toast delivery under every policy.
-- Source ingestion and GUI tests use synthetic records and no production credentials. No paid model requests are made.
+- Connector and layout fixtures use synthetic records. A packaged startup smoke also verified the existing local Codex import and account connection; it copied no credentials, kept results outside the release artifacts and made no paid model requests.
 
 ## Limits
 
