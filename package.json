@@ -1,6 +1,6 @@
 {
   "name": "subscription-lens",
-  "version": "1.2.0",
+  "version": "1.3.0-beta.1",
   "description": "Local Codex subscription usage monitor",
   "main": "src/main.cjs",
   "author": "Subscription Lens contributors",
@@ -56,7 +56,9 @@
         "zh_CN",
         "nl_NL"
       ],
-      "displayLanguageSelector": true
+      "displayLanguageSelector": true,
+      "guid": "4bb92857-80a8-5988-a91d-bc1fd9808cfa",
+      "include": "assets/installer.nsh"
     },
     "artifactName": "Subscription-Lens-${version}-${arch}.${ext}"
   },

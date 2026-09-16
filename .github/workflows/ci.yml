@@ -19,6 +19,7 @@ jobs:
       - run: node scripts/smoke-i18n.cjs
       - run: node scripts/smoke-product.cjs
       - run: node scripts/smoke-quota.cjs
+      - run: node scripts/smoke-monitor.cjs
   accounting-engine:
     runs-on: windows-latest
     defaults:

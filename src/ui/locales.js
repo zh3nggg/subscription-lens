@@ -838,7 +838,7 @@ window.LensLocales = {
   ],
   "价格超出范围": [
     "Price is out of range",
-    "Tarief valt buiten het bereik"
+    "Prijs valt buiten het bereik"
   ],
   "价格目录为空": [
     "Price catalog is empty",
@@ -1199,5 +1199,257 @@ window.LensLocales = {
   "尚无可计价记录": [
     "No priced records yet",
     "Nog geen berekende records"
+  ],
+  "Codex 套餐": [
+    "Codex subscription",
+    "Codex-abonnement"
+  ],
+  "多供应商": [
+    "Providers",
+    "Aanbieders"
+  ],
+  "API 用量文件": [
+    "API usage file",
+    "API-gebruiksbestand"
+  ],
+  "统计来源": [
+    "Data source",
+    "Gegevensbron"
+  ],
+  "未添加来源": [
+    "No sources added",
+    "Geen bronnen toegevoegd"
+  ],
+  "供应商": [
+    "Provider",
+    "Aanbieder"
+  ],
+  "全部供应商": [
+    "All providers",
+    "Alle aanbieders"
+  ],
+  "管理来源": [
+    "Manage sources",
+    "Bronnen beheren"
+  ],
+  "添加使用记录": [
+    "Add usage records",
+    "Gebruiksgegevens toevoegen"
+  ],
+  "连接 CC Switch 数据库、Claude Code、Gemini CLI 或 API 用量文件。": [
+    "Connect CC Switch, Claude Code, Gemini CLI or an API usage file.",
+    "Verbind CC Switch, Claude Code, Gemini CLI of een API-gebruiksbestand."
+  ],
+  "添加监控来源": [
+    "Add source",
+    "Bron toevoegen"
+  ],
+  "读取来源失败": [
+    "Source could not be read",
+    "Bron kon niet worden gelezen"
+  ],
+  "已暂停": [
+    "Paused",
+    "Gepauzeerd"
+  ],
+  "正在读取": [
+    "Reading",
+    "Bezig met lezen"
+  ],
+  "最近同步": [
+    "Last synced",
+    "Laatst gesynchroniseerd"
+  ],
+  "未解析记录": [
+    "Unparsed records",
+    "Niet-verwerkte records"
+  ],
+  "按所选来源统计，避免重复汇总。": [
+    "Totals use the selected source only.",
+    "Totalen gebruiken alleen de geselecteerde bron."
+  ],
+  "请求数": [
+    "Requests",
+    "Verzoeken"
+  ],
+  "记录中的估算费用": [
+    "Estimated cost",
+    "Geschatte kosten"
+  ],
+  "不是实际账单": [
+    "Not an invoice",
+    "Geen factuur"
+  ],
+  "来源报告费用": [
+    "Source-reported cost",
+    "Door bron gemelde kosten"
+  ],
+  "仅统计明确标记的费用": [
+    "Explicitly reported amounts only",
+    "Alleen expliciet gemelde bedragen"
+  ],
+  "成功率": [
+    "Success rate",
+    "Succespercentage"
+  ],
+  "失败": [
+    "failed",
+    "mislukt"
+  ],
+  "有状态记录": [
+    "records with status",
+    "records met status"
+  ],
+  "延迟 P95": [
+    "Latency P95",
+    "Latentie P95"
+  ],
+  "仅含有延迟的记录": [
+    "Records with latency only",
+    "Alleen records met latentie"
+  ],
+  "每日用量": [
+    "Daily usage",
+    "Dagelijks gebruik"
+  ],
+  "首 Token 延迟 P50": [
+    "Time to first token P50",
+    "Tijd tot eerste token P50"
+  ],
+  "费用": [
+    "Cost",
+    "Kosten"
+  ],
+  "状态": [
+    "Status",
+    "Status"
+  ],
+  "延迟": [
+    "Latency",
+    "Latentie"
+  ],
+  "来源报告": [
+    "Source-reported",
+    "Door bron gemeld"
+  ],
+  "估算": [
+    "Estimated",
+    "Geschat"
+  ],
+  "搜索供应商或模型": [
+    "Search providers or models",
+    "Zoek aanbieders of modellen"
+  ],
+  "仅失败请求": [
+    "Failed requests only",
+    "Alleen mislukte verzoeken"
+  ],
+  "多供应商使用记录": [
+    "Provider usage records",
+    "Gebruiksgegevens van aanbieders"
+  ],
+  "本机只读": [
+    "Local · read-only",
+    "Lokaal · alleen-lezen"
+  ],
+  "只采集用量与性能字段，不读取密钥配置，不保存聊天正文。": [
+    "Stores usage and performance metadata. No key configuration or chat content is stored.",
+    "Slaat gebruiks- en prestatiegegevens op. Geen sleutelconfiguratie of chatinhoud."
+  ],
+  "来源类型": [
+    "Source type",
+    "Brontype"
+  ],
+  "CC Switch 选择数据库文件；Claude Code 选择 projects，Gemini CLI 选择 tmp。": [
+    "Select the CC Switch database, Claude Code projects folder or Gemini CLI tmp folder.",
+    "Selecteer de CC Switch-database, de projects-map van Claude Code of de tmp-map van Gemini CLI."
+  ],
+  "暂停采集": [
+    "Pause collection",
+    "Verzamelen pauzeren"
+  ],
+  "继续采集": [
+    "Resume collection",
+    "Verzamelen hervatten"
+  ],
+  "添加计价规则": [
+    "Add pricing rule",
+    "Prijsregel toevoegen"
+  ],
+  "自定义规则仅为未计价记录估算费用，不覆盖来源报告的金额。": [
+    "Custom rules estimate unpriced records without replacing source amounts.",
+    "Eigen regels schatten ongeprijsde records zonder bronbedragen te vervangen."
+  ],
+  "百万 Tokens": [
+    "million tokens",
+    "miljoen tokens"
+  ],
+  "首 Token 延迟": [
+    "Time to first token",
+    "Tijd tot eerste token"
+  ],
+  "计价模型": [
+    "Pricing model",
+    "Prijsmodel"
+  ],
+  "供应商用量": [
+    "Usage by provider",
+    "Gebruik per aanbieder"
+  ],
+  "统计指标": [
+    "Metric",
+    "Maatstaf"
+  ],
+  "已计价费用": [
+    "Priced cost",
+    "Berekende kosten"
+  ],
+  "估算与来源报告费用合计": [
+    "Estimated and source-reported costs combined",
+    "Geschatte en door de bron gemelde kosten samen"
+  ],
+  "不支持的来源": [
+    "Unsupported source",
+    "Niet-ondersteunde bron"
+  ],
+  "来源类型不匹配": [
+    "Source type does not match",
+    "Brontype komt niet overeen"
+  ],
+  "来源已添加": [
+    "Source already added",
+    "Bron is al toegevoegd"
+  ],
+  "来源不存在": [
+    "Source does not exist",
+    "Bron bestaat niet"
+  ],
+  "预算金额无效": [
+    "Invalid budget amount",
+    "Ongeldig budgetbedrag"
+  ],
+  "不支持的用量数据库": [
+    "Unsupported usage database",
+    "Niet-ondersteunde gebruiksdatabase"
+  ],
+  "来源暂不可用": [
+    "Source is temporarily unavailable",
+    "Bron is tijdelijk niet beschikbaar"
+  ],
+  "用量分布": [
+    "Usage distribution",
+    "Gebruiksverdeling"
+  ],
+  "套餐与账期": [
+    "Plan and billing cycle",
+    "Abonnement en factuurperiode"
+  ],
+  "项目": [
+    "Projects",
+    "Projecten"
+  ],
+  "性能": [
+    "Performance",
+    "Prestaties"
   ]
 };

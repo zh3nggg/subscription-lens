@@ -1,6 +1,7 @@
 'use strict';
 const os=require('node:os'),fs=require('node:fs'),path=require('node:path');
 const {EventEmitter}=require('node:events');
+const {Monitor}=require('./monitor.cjs');
 const {Store}=require('./store.cjs'),{Scanner}=require('./scanner.cjs'),{Account}=require('./account.cjs');
 const {price,bundled,validateCatalog}=require('./pricing.cjs');
 const {dayKey,cycleWindow,aggregate,continuousDays,quotaOutlook,alertCandidates,inQuietHours}=require('./insights.cjs');
@@ -15,7 +16,7 @@ function range(period,settings,now=new Date()){
 }
 class Service extends EventEmitter{
   constructor(dir,{home=os.homedir(),now=()=>new Date()}={}){
-    super();this.now=now;this.store=new Store(dir);this.scanner=new Scanner(this.store);this.catalog=this.store.get('catalog',bundled);
+    super();this.now=now;this.store=new Store(dir);this.scanner=new Scanner(this.store);this.monitor=new Monitor(this.store);this.catalog=this.store.get('catalog',bundled);
     const date=now(),start=dayKey(new Date(date.getFullYear(),date.getMonth(),1)),end=dayKey(new Date(date.getFullYear(),date.getMonth()+1,1));
     this.settings={roots:[],codexPath:null,accountHome:null,accountEnabled:false,cycleStart:start,cycleEnd:end,paid:null,extra:0,language:'system',theme:'system',tray:false,startup:false,cycleMode:'manual',billingDay:1,notifications:false,quietStart:22,quietEnd:8,...this.store.get('settings',{})};
     if(!this.settings.extraCycle)this.settings.extraCycle=this.settings.cycleStart;
@@ -32,7 +33,7 @@ class Service extends EventEmitter{
     this.emit('changed');
   }
   start(){this.scan();this.timer=setInterval(()=>this.scan(),15000);if(this.settings.accountEnabled)this.account.refresh(this.settings.codexPath);this.accountTimer=setInterval(()=>{if(this.settings.accountEnabled)this.account.refresh(this.settings.codexPath);},60000);}
-  async scan(){if(!this.settings.roots.length)return;await this.scanner.scan(this.settings.roots,()=>this.emit('changed'));this.emit('changed');}
+  async scan(){if(this.monitor.running||this.scanner.running)return;if(this.settings.roots.length)await this.scanner.scan(this.settings.roots,()=>this.emit('changed'));await this.monitor.scan();this.emit('changed');}
   effectiveSettings(){const c=cycleWindow(this.settings,this.now());return {...this.settings,cycleStart:c.start,cycleEnd:c.end,extra:this.settings.cycleMode==='monthly'&&this.settings.extraCycle!==c.start?0:this.settings.extra};}
   saveSettings(input){
     const next={...this.settings};
@@ -68,12 +69,12 @@ class Service extends EventEmitter{
     const offset=Math.max(0,Math.min(1000000,Math.floor(Number(filters.offset)||0))),limit=Math.max(1,Math.min(200,Math.floor(Number(filters.limit)||50)));
     const sessionRows=filters.sort==='recent'?[...a.sessions].sort((x,y)=>y.last.localeCompare(x.last)):a.sessions;
     const stats=this.store.stats(),fileStats=this.store.fileStats();
-    return {period,range:r,summary:{...a.summary,diff:period==='cycle'&&paid!==null&&events.length?a.summary.usd-paid:null,ratio:period==='cycle'&&paid>0&&events.length?a.summary.usd/paid:null},models:a.models,projects:a.projects.slice(0,50),sessions:sessionRows.slice(offset,offset+limit),sessionTotal:a.sessions.length,days:continuousDays(a.days,period==='all'?(a.days[0]?.date?new Date(a.days[0].date+'T00:00:00').toISOString():r.to):r.from,r.to),rows:(filters.sort==='cost'?[...a.rows].sort((x,y)=>(y.price.usd??-1)-(x.price.usd??-1)||y.at.localeCompare(x.at)):a.rows.reverse()).slice(offset,offset+limit),offset,limit,quota,outlooks,comparison,
+    return {monitor:this.monitor.query(filters,r,this.catalog),period,range:r,summary:{...a.summary,diff:period==='cycle'&&paid!==null&&events.length?a.summary.usd-paid:null,ratio:period==='cycle'&&paid>0&&events.length?a.summary.usd/paid:null},models:a.models,projects:a.projects.slice(0,50),sessions:sessionRows.slice(offset,offset+limit),sessionTotal:a.sessions.length,days:continuousDays(a.days,period==='all'?(a.days[0]?.date?new Date(a.days[0].date+'T00:00:00').toISOString():r.to):r.from,r.to),rows:(filters.sort==='cost'?[...a.rows].sort((x,y)=>(y.price.usd??-1)-(x.price.usd??-1)||y.at.localeCompare(x.at)):a.rows.reverse()).slice(offset,offset+limit),offset,limit,quota,outlooks,comparison,
       cycle:{...c,...ca.summary,paid,extra:settings.extra,diff:paid!==null&&ca.summary.events?ca.summary.usd-paid:null,progress:paid>0?ca.summary.usd/paid:null,remaining:paid!==null?Math.max(0,paid-ca.summary.usd):null,elapsedDays:Math.max(0,(Math.min(now,new Date(c.end+'T00:00:00'))-new Date(c.start+'T00:00:00'))/86400000),days:Math.round((Date.parse(c.end+'T12:00:00Z')-Date.parse(c.start+'T12:00:00Z'))/86400000)},
       health:{reasons:a.reasons,partial:events.filter(e=>['partial_history','ambiguous'].includes(e.quality)).length,readErrors:this.scanner.status.errors,parseErrors:fileStats.errors,priceAgeDays:Math.max(0,Math.floor((now-Date.parse(this.catalog.asOf+'T00:00:00Z'))/86400000))},
       account:this.account.status,settings,scanner:this.scanner.status,stats,fileStats,allModels:this.store.allModels(),catalog:this.catalog,detectedRoot:this.detectedRoot,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone};
   }
   exportRows(filters){let r=range(filters.period||'month',this.effectiveSettings(),this.now());if(filters.day&&validDate(filters.day)){const start=new Date(filters.day+'T00:00:00'),end=new Date(start);end.setDate(end.getDate()+1);r={from:start.toISOString(),to:new Date(Math.min(end.getTime(),this.now().getTime()+1)).toISOString()};}let rows=this.store.events(r.from,r.to);if(filters.day&&validDate(filters.day))rows=rows.filter(e=>dayKey(e.at)===filters.day);return this.select(rows,filters).map(e=>({...e,price:price(e,this.catalog)}));}
-  async close(){clearInterval(this.timer);clearInterval(this.accountTimer);this.account.stop();while(this.scanner.running)await new Promise(r=>setTimeout(r,50));this.store.close();}
+  async close(){clearInterval(this.timer);clearInterval(this.accountTimer);this.account.stop();while(this.scanner.running||this.monitor.running)await new Promise(r=>setTimeout(r,50));this.store.close();}
 }
 module.exports={Service,range,dayKey,validDate};

@@ -2,6 +2,7 @@
 const {contextBridge,ipcRenderer}=require('electron');
 const call=(name,...args)=>ipcRenderer.invoke('lens:'+name,...args);
 contextBridge.exposeInMainWorld('lens',{
+  chooseMonitor:kind=>call('chooseMonitor',kind),configureMonitor:(id,input)=>call('configureMonitor',id,input),monitorRate:(provider,model,input)=>call('monitorRate',provider,model,input),exportMonitor:filters=>call('exportMonitor',filters),
   setCompact:value=>call('setCompact',value),setPinned:value=>call('setPinned',value),removeRoot:root=>call('removeRoot',root),previewReport:f=>call('previewReport',f),exportReport:f=>call('exportReport',f),
   query:filters=>call('query',filters),saveSettings:settings=>call('saveSettings',settings),
   chooseRoot:()=>call('chooseRoot'),useDetectedRoot:()=>call('useDetectedRoot'),

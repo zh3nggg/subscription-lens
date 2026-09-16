@@ -23,3 +23,5 @@ The source under native/usage-engine is experimental and pinned to an upstream c
 ## Releases
 
 The repository's manual release workflow builds a Windows installer and ZIP, runs packaged synthetic UI checks and uploads a draft prerelease with SHA256 hashes. The maintainer reviews that draft before publishing. Windows builds are currently unsigned. Do not label incomplete functionality as supported.
+
+Run `node scripts/smoke-monitor.cjs` for provider connectors and responsive dashboards. Keep the installer GUID and appId unchanged for in-place upgrades. After verifying new artifacts, use `node scripts/retain-local-releases.cjs ROOT stable|preview VERSION FOLDER` to verify the new retention set before retiring superseded local packages.

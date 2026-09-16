@@ -14,15 +14,21 @@ A Windows desktop app for **Codex subscription users** who want to see their rem
 | Keep limits within reach | Use a compact pinnable window, the system tray and optional low-quota alerts with quiet hours. |
 | Export and share | Export records to CSV or save an aggregate-only HTML report without project names or account identifiers. |
 
-![Subscription Lens](docs/images/overview.png)
+## Provider monitoring in 1.3
+
+Connect CC Switch, Claude Code, Gemini CLI or your own API usage file. The overview shows a provider → model ring chart with Tokens/cost switching; select a model to inspect its requests. Common screens use tabs and adaptive pagination instead of long scrolling pages. Recorded estimates and source-reported amounts stay distinct from actual invoices. [Source setup and cost definitions](docs/PROVIDER-MONITORING.md).
+
+![Subscription Lens](docs/images/providers.png)
 
 *Overview with synthetic data; no real account or conversation data is shown.*
 
 ## Download and get started
 
-**1.2.0 Preview · Windows x64.** The current collector does not yet handle all Codex record formats; totals may be too high or too low. Costs are estimates, not a bill or guaranteed savings. The build is unsigned and has no automatic updater.
+**1.3.0-beta.1 Preview · Windows x64.** The current collector does not yet handle all Codex record formats; totals may be too high or too low. Costs are estimates, not a bill or guaranteed savings. The build is unsigned and has no automatic updater.
 
-[Download the installer or portable ZIP](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.2.0)
+[Download the installer or portable ZIP](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.3.0-beta.1)
+
+Run the new installer to upgrade the existing installation in place; keep its detected folder. Settings and usage history are retained. Stable and preview installers share one application identity; the portable ZIP is not an installer. Background automatic downloading is not included.
 
 1. Select **Start monitoring** to read the default Codex folder, or **Choose folder** for a custom folder containing `sessions` or `archived_sessions`.
 2. Open **Connections → Connect account** to query limits through your locally installed Codex. If signed out, use **Sign in to ChatGPT**.
@@ -60,9 +66,9 @@ Local records and account summaries are shown separately, never added together. 
 
 ## Current scope and roadmap
 
-Currently supports Codex/OpenAI on Windows. Regular ChatGPT conversations, other providers and usage on other devices are not collected automatically. Full Codex feature parity with CodexBar and codex-usage is not complete.
+Supports Codex subscriptions and selected local multi-provider records on Windows. Regular ChatGPT conversations and other-device usage are not collected automatically. Full Codex feature parity with CodexBar and codex-usage is not complete.
 
-The next update prioritizes integration of the tested codex-usage engine and safe migration, followed by task trees, agent attribution and hourly analysis. Optional Claude, Cursor, Gemini and other provider support is on the roadmap; no delivery date is committed.
+The next update prioritizes integration of the tested codex-usage engine and safe migration, followed by task trees, agent attribution and hourly analysis. Claude Code, Gemini CLI and CC Switch records are supported in this beta; direct provider billing APIs and additional connectors remain on the roadmap.
 
 [Roadmap](ROADMAP.md) · [Coverage checklist](docs/COMPATIBILITY.md) · [Release boundaries](docs/RELEASE.md) · [Validation](docs/VALIDATION.md)
 
@@ -81,6 +87,6 @@ npm run dist
 
 Developed with assistance from **GPT-6 Astra**.
 
-[CodexBar](https://github.com/steipete/CodexBar) informs the quota and desktop interaction requirements. MIT-licensed [codex-usage](https://github.com/zJay26/codex-usage) source is included for the next accounting-engine integration; it is not active in the 1.2.0 desktop app.
+[CodexBar](https://github.com/steipete/CodexBar) informs the quota and desktop interaction requirements. MIT-licensed [codex-usage](https://github.com/zJay26/codex-usage) source is included for the next accounting-engine integration; it is not active in the 1.3.0-beta.1 desktop app.
 
 MIT. See [third-party notices](THIRD-PARTY-NOTICES.md) for attribution and licenses. This is an independent project, not affiliated with OpenAI or endorsed by the referenced projects.

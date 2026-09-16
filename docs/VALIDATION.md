@@ -1,22 +1,19 @@
-# Validation — 1.2.0 preview
+# Validation — 1.3.0-beta.1
 
-Date: 2026-09-16. Platform: Windows x64. Node.js 24.14.0, Electron 44.4.0, electron-builder 26.15.3.
+Windows x64 · Node.js 24.14.0 · Electron 44.4.0 · electron-builder 26.15.3.
 
-## Completed locally
+## Automated checks
 
-- 43 automated tests passed: token pricing and subsets, legacy parsing, incremental scans, deduplication, quota snapshot isolation, stale estimates, quiet alerts, billing boundaries, filtering, report privacy and three-language catalogs.
-- Packaged product tests passed: project → session → record, data-health filtering, keyboard chart navigation, monthly billing and quiet settings, compact/pinned window, anonymous HTML export, source removal retaining history and localized overview.
-- Packaged localization tests passed: Chinese, English and Dutch pages, details, About, validation errors, narrow Dutch layout and preference persistence across restart.
-- Packaged quota integration passed: conditional forecast rendering, once-only 20% and 5% alerts, and observed reset notification. Native delivery was intercepted by the test.
-- Vendored native engine: upstream usage/store/pricing tests and synthetic adapter checks passed. This engine is **not enabled or bundled as a binary** in the desktop release.
-- Synthetic 10,000-event query benchmark: median 76.4 ms in the local test environment. This is not a cross-product benchmark or an end-to-end application performance guarantee.
-- Publication uses a reviewed source-file allowlist. No test-results, account files, databases, local caches or node_modules are included. README screenshots use synthetic data.
+- 50 unit/integration checks passed locally, including read-only CC Switch imports and upstream corrections, Claude duplicate chunks and unfinished lines, Gemini reasoning tokens, disjoint token categories, provider/model reconciliation, price rules, translations and persistent installer identity.
+- Desktop checks cover provider → model → requests, Tokens/cost switching, pagination and Chinese/English/Dutch layouts at 820×600, 1024×768 and 1320×900 content sizes.
+- Existing product, localization and simulated quota tests are part of the release checks. Actual notification delivery is intercepted; these tests do not establish Windows toast delivery under every policy.
+- Source ingestion and GUI tests use synthetic records and no production credentials. No paid model requests are made.
 
-## Limits of verification
+## Limits
 
-- The quota integration test uses simulated account data and intercepts the OS notification call. It does not verify actual toast appearance or delivery under Windows notification policies.
-- No clean-VM installer/uninstaller certification, code signing, multi-device synchronization test or live account test for every Codex version.
-- Modern independent request/compaction accounting, mixed counter scopes and fork histories are not fully handled by the active collector. The release does not claim complete or bill-grade totals.
-- GitHub Actions is configured separately; local results are not a claim that remote CI has already passed.
+- No clean-VM installer/upgrade certification or code signature. Installer identity is pinned to the 1.2.0 identity; the NSIS upgrade path retains app data. Do not mistake configuration verification for a live upgrade test.
+- No verification of official provider invoices, balances or every upstream log format. Source-reported costs are not authenticated invoice data.
+- Modern Codex request/compaction accounting and inherited forks remain incomplete in the active collector. Earlier native-engine component tests do not establish desktop integration or complete accounting.
+- GitHub Actions remains subject to account billing availability. Local results do not assert remote CI success.
 
-See RELEASE.md and COMPATIBILITY.md for current boundaries. Test scripts that use real local records are manual-only and are excluded from automated workflows.
+Release artifacts are accompanied by SHA256 checksums. No account files, usage databases, test-results, credentials, caches or development dependencies are included in the source archive. Screenshots use synthetic data.

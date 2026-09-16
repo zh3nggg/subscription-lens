@@ -9,7 +9,7 @@
 - Copied components: usage, store, model, timezone and pricing packages, including tests and fixtures. Changes and verification are recorded in [UPSTREAM.md](native/usage-engine/UPSTREAM.md).
 - Go-derived timezone material retains [GO-LICENSE](native/usage-engine/internal/timezone/GO-LICENSE).
 
-This source is included for the next accounting-engine integration. Version 1.2.0 does not execute or bundle the experimental native binary. Passing upstream tests does not establish desktop feature parity.
+This source is included for the next accounting-engine integration. Version 1.3.0-beta.1 does not execute or bundle the experimental native binary. Passing upstream tests does not establish desktop feature parity.
 
 ## CodexBar — product reference
 
@@ -20,3 +20,10 @@ This source is included for the next accounting-engine integration. Version 1.2.
 ## Desktop runtime
 
 Electron and Chromium license notices are included in the Windows binary distribution as `LICENSE.electron.txt` and `LICENSES.chromium.html`. Development dependencies and versions are recorded in package-lock.json. The application itself is licensed under MIT; upstream code retains its own notices.
+
+## CC Switch — compatibility reference
+
+- Project: https://github.com/farion1231/cc-switch
+- Reference commit: `06082e189d65e6d6dbadc35dacdac1ce6c79d89a`
+- License: MIT
+- The read-only connector implements compatibility with the public request-log schema and documented token semantics. No CC Switch source files or assets are bundled. This is not an endorsement or affiliation.

@@ -16,7 +16,7 @@ async function main(){const base=path.resolve(__dirname,'../test-results');await
     try{return original.call(this,filters);}finally{this.account.status=prior;this.settings=settings;}
    };
   });
-  await page.evaluate(()=>window.lens.query({}));await page.waitForSelector('.quota-number');await page.waitForFunction(()=>document.querySelector('.pace-line')?.textContent.includes('May run out'));
+  await page.evaluate(()=>window.lens.query({}));await page.waitForSelector('.dashboard-tabs');if(await page.locator('[data-layout-tab=plan]').count())await page.click('[data-layout-tab=plan]');await page.waitForSelector('.quota-number');await page.waitForFunction(()=>document.querySelector('.pace-line')?.textContent.includes('May run out'));
   assert.match(await page.locator('.quota-number').innerText(),/20/);assert.match(await page.locator('.pace-detail').innerText(),/30 minutes/);assert.equal(await app.evaluate(()=>global.testNotices.length),1);
   await app.evaluate(()=>global.testForceSnapshot=true);await page.evaluate(()=>window.lens.query({}));assert.equal(await app.evaluate(()=>global.testNotices.length),1);
   await page.screenshot({path:path.join(base,'product-forecast-fixture.png'),fullPage:true});

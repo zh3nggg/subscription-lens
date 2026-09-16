@@ -14,15 +14,21 @@ Een Windows-desktopapp voor **Codex-abonnees** die hun resterende limieten wille
 | Limieten tijdens het werk volgen | Een compact vastzetbaar venster, systeemvak en optionele limietmeldingen met stille uren. |
 | Exporteren en delen | Records naar CSV exporteren of een HTML-overzicht opslaan zonder projectnamen of accountidentificaties. |
 
-![Subscription Lens](images/overview.png)
+## Aanbieders volgen in 1.3
+
+Verbind CC Switch, Claude Code, Gemini CLI of je eigen API-gebruiksbestand. Klik in het ringdiagram van aanbieder naar model, wissel tussen tokens en kosten en open de verzoekdetails. Tabbladen en adaptieve paginering beperken scrollen op veelgebruikte schermen. Schattingen en door de bron gemelde bedragen zijn geen werkelijke facturen. [Bronnen en kostendefinities](PROVIDER-MONITORING.md).
+
+![Subscription Lens](images/providers.png)
 
 *Het overzicht toont synthetische gegevens, geen echte account- of gespreksgegevens.*
 
 ## Downloaden en aan de slag
 
-**1.2.0 Preview · Windows x64.** De collector verwerkt nog niet alle Codex-recordformaten volledig; totalen kunnen te hoog of te laag zijn. Kosten zijn schattingen, geen factuur of gegarandeerde besparing. Deze build is niet digitaal ondertekend en heeft geen automatische updates.
+**1.3.0-beta.1 Preview · Windows x64.** De collector verwerkt nog niet alle Codex-recordformaten volledig; totalen kunnen te hoog of te laag zijn. Kosten zijn schattingen, geen factuur of gegarandeerde besparing. Deze build is niet digitaal ondertekend en heeft geen automatische updates.
 
-[Download het installatiebestand of de draagbare ZIP-versie](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.2.0)
+[Download het installatiebestand of de draagbare ZIP-versie](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.3.0-beta.1)
+
+Voer het nieuwe installatieprogramma uit om de bestaande installatie te vervangen en behoud de gevonden map. Instellingen en gebruiksgeschiedenis blijven behouden. Stabiele en testversies delen dezelfde app-identiteit. De draagbare ZIP is geen installatieprogramma; automatisch downloaden op de achtergrond is niet inbegrepen.
 
 1. Kies **Monitoring starten** voor de standaardmap van Codex, of **Map kiezen** voor een eigen map met `sessions` of `archived_sessions`.
 2. Open **Verbindingen → Account verbinden** om limieten op te halen via de lokaal geïnstalleerde Codex. Gebruik **Aanmelden bij ChatGPT** als je nog niet bent aangemeld.
@@ -60,9 +66,9 @@ Lokale records en accounttotalen worden apart getoond en nooit bij elkaar opgete
 
 ## Huidige scope en volgende update
 
-Ondersteunt momenteel Codex/OpenAI op Windows. Gewone ChatGPT-gesprekken, andere aanbieders en gebruik op andere apparaten worden niet automatisch ingelezen. Volledige Codex-functionaliteit van CodexBar en codex-usage is nog niet bereikt.
+Ondersteunt Codex-abonnementen en lokale records van meerdere aanbieders op Windows. Gewone ChatGPT-gesprekken en gebruik op andere apparaten worden niet automatisch ingelezen. Volledige Codex-functionaliteit van CodexBar en codex-usage is nog niet bereikt.
 
-De volgende update geeft prioriteit aan de geteste codex-usage-engine en veilige migratie, gevolgd door taakbomen, agenttypen en analyse per uur. Optionele ondersteuning voor Claude, Cursor, Gemini en andere aanbieders staat op de roadmap; er is geen datum toegezegd.
+De volgende update geeft prioriteit aan de geteste codex-usage-engine en veilige migratie, gevolgd door taakbomen, agenttypen en analyse per uur. Lokale records van Claude Code, Gemini CLI en CC Switch worden ondersteund; officiële factuurinterfaces en extra clients blijven gepland zonder vaste datum.
 
 [Roadmap](../ROADMAP.md#nederlands) · [Dekking](COMPATIBILITY.md) · [Releasegrenzen](RELEASE.md) · [Validatie](VALIDATION.md)
 
@@ -81,6 +87,6 @@ npm run dist
 
 Ontwikkeld met ondersteuning van **GPT-6 Astra**.
 
-[CodexBar](https://github.com/steipete/CodexBar) dient als referentie voor limieten en desktopinteractie. MIT-gelicentieerde broncode van [codex-usage](https://github.com/zJay26/codex-usage) is opgenomen voor de volgende engine-integratie; deze is nog niet actief in de desktopapp 1.2.0.
+[CodexBar](https://github.com/steipete/CodexBar) dient als referentie voor limieten en desktopinteractie. MIT-gelicentieerde broncode van [codex-usage](https://github.com/zJay26/codex-usage) is opgenomen voor de volgende engine-integratie; deze is nog niet actief in de desktopapp 1.3.0-beta.1.
 
 MIT. Zie [licenties van derden](../THIRD-PARTY-NOTICES.md) voor bronnen en auteursrechten. Dit is een onafhankelijk project, niet verbonden aan OpenAI of onderschreven door de genoemde projecten.
