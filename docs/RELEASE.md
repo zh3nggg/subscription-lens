@@ -1,4 +1,4 @@
-# Subscription Lens 1.4.1
+# Subscription Lens 1.4.2
 
 Windows x64 · 中文 / English / Nederlands
 
@@ -10,14 +10,19 @@ Windows x64 · 中文 / English / Nederlands
 - 模型建议在小窗口中作为独立标签，在高窗口中与趋势和项目并列，保持总览无整页滚动。
 - 保留供应商 → 模型环形图、多来源明细与性能、自定义计价、套餐实付对比、专注窗口和三语言支持。
 - 新安装包沿用原安装身份与目录，原位替换旧版并保留设置和用量。
+- Qoder Quest 支持读取 Windows 本机 `%APPDATA%\Qoder\logs` 的 `agent.log` 上下文快照；每个会话只保留最新快照并标记为 Tokens 估算，原始 Credits 仍单独展示。
 
 ## What's new
 
 Standard local installations of six supported tools are now detected and connected in one click. The Codex overview adds a confidence-labelled model-mix recommendation based on 14-day habits, API-equivalent intensity and live quota pace. It targets the next reset but remains adaptive because exact per-model subscription quota weights are not published.
 
+On Windows, Qoder Quest agent logs are imported from `%APPDATA%\\Qoder\\logs` when the Qoder source is connected. Cumulative context snapshots are retained once per session and labeled as token estimates; native Credits remain separate.
+
 ## Nieuw
 
 Zes ondersteunde tools in standaardmappen worden nu automatisch gevonden en met één klik verbonden. Het Codex-overzicht adviseert een modelmix op basis van 14 dagen gebruik, API-equivalente intensiteit en het actuele quotatempo, met een zichtbare betrouwbaarheid. Het advies richt zich op de volgende reset en blijft adaptief omdat exacte quotagewichten per model niet zijn gepubliceerd.
+
+Op Windows worden Qoder Quest-agentlogs uit `%APPDATA%\\Qoder\\logs` gelezen zodra de Qoder-bron is verbonden. Cumulatieve contextsnapshots worden eenmaal per sessie bewaard en als token-schatting gemarkeerd; native Credits blijven afzonderlijk.
 
 ## Scope
 

@@ -1,4 +1,4 @@
-# Provider monitoring · 1.4.1 beta
+# Provider monitoring · 1.4.2 beta
 
 Open **Connections → Providers**. Tools installed in standard folders are detected locally; connect one or all in a click. Use **Add manually** only for custom locations, then open **Overview → Providers**.
 The app reads the selected local source every 15 seconds while running. No cloud account or API key is required for these connectors.
@@ -11,7 +11,7 @@ The app reads the selected local source every 15 seconds while running. No cloud
 | Qwen Code | Its Qwen data folder, normally `~/.qwen` or `QWEN_HOME` | Per-request records from `usage/token-usage-YYYY-MM.jsonl`, including model, input/output/cache/thinking tokens and API duration. |
 | Kimi Code | `KIMI_CODE_HOME`, normally `~/.kimi-code` | Per-turn `usage.record` events from main and subagent `wire.jsonl` files. Session-level cumulative rows are skipped. |
 | CodeBuddy Code | `~/.codebuddy` or its `projects` folder | Usage-bearing assistant/tool-call rows. Cache hit/miss fields are preferred; the inclusive fallback subtracts cache reads before showing ordinary input. |
-| Qoder | `~/.qoder` (or `QODER_CONFIG_DIR`) | Assistant usage events from Qoder stream JSON. Tokens and source-reported Credits are retained separately; cumulative `result` events are skipped to prevent double counting. |
+| Qoder | `~/.qoder` (or `QODER_CONFIG_DIR`) plus `%APPDATA%/Qoder/logs` on Windows | Assistant usage events from Qoder stream JSON. Qoder Quest IDE sessions are read from local `agent.log` context snapshots when available. Snapshot Tokens are explicitly estimates; native Credits remain separate. Cumulative `result` events are skipped to prevent double counting. |
 | API usage file | A JSONL file in the schema below | Explicit usage and optional USD cost/performance data exported by your own client or gateway. |
 
 Automatic discovery checks only the standard paths listed above and the Qwen/Kimi environment overrides. It does not read credentials or client configuration. Custom paths are chosen explicitly through the desktop file picker. CC Switch is opened read-only. Provider configuration and credentials are not selected from its database. Local session files are parsed, but conversation bodies are not copied into the app's ledger. Project/session identifiers remain local metadata.
@@ -27,13 +27,13 @@ Automatic discovery checks only the standard paths listed above and the Qwen/Kim
 
 ### Qoder capture
 
-Qoder's `/usage` screen is account-level. Subscription Lens reads only local usage events that you explicitly capture; it never reads Qoder credentials or calls the account billing endpoint. Run a task through the bundled helper to produce an append-only stream that the Qoder connector can monitor:
+Qoder's `/usage` screen is account-level. Subscription Lens reads only local usage events and IDE agent logs; it never reads Qoder credentials or calls the account billing endpoint. Quest sessions expose cumulative `usedTokens` context snapshots rather than billable input/output fields. Subscription Lens keeps the latest snapshot per session, labels it as an estimate, and never sums repeated snapshots. For CLI usage, run a task through the bundled helper to produce an append-only stream that the Qoder connector can monitor:
 
 ```powershell
 pwsh -File scripts/qoder-usage-capture.ps1 -p "your prompt"
 ```
 
-The helper writes `~/.qoder/usage/subscription-lens.jsonl`. Add the discovered **Qoder** folder under **Connections → Providers**. Qoder Credits remain in their native unit, while API-equivalent USD is shown only when a separate pricing rule is available; the two values are never summed.
+The helper writes `~/.qoder/usage/subscription-lens.jsonl`. Add the discovered **Qoder** folder under **Connections → Providers**. On Windows, the same connection also checks `%APPDATA%\Qoder\logs` for Quest agent logs. Qoder Credits remain in their native unit, while API-equivalent USD is shown only when a separate pricing rule is available; the two values are never summed.
 
 ## Cost meanings
 

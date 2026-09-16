@@ -66,6 +66,10 @@ function codebuddyRecord(r,meta={}){
 }
 function qoderRecord(r,meta={}){
  if(!r||typeof r!=='object'||r.type==='result'||r.type==='system')return null;
+ // Quest writes cumulative context snapshots to the IDE agent log rather than
+ // a per-request usage file. Keep one latest row per session so snapshots and
+ // resumed prompts do not become duplicate requests.
+ if(Number.isSafeInteger(r.usedTokens)&&r.usedTokens>=0&&r.sessionId)return normalized({id:'quest-context:'+r.sessionId,at:r._logAt||meta.lineAt,provider:'Qoder',model:'Qoder Quest',session:r.sessionId,project:'Qoder Quest',input:r.usedTokens,output:0,tokenBasis:'estimated',origin:'qoder-quest-context',basis:'estimate'});
  const envelope=r.message?.message||r.message;
  const u=envelope?.usage||r.message?.usage||r.usage||r.data?.usage;if(!u||typeof u!=='object')return null;
  const n=(...keys)=>{for(const key of keys)if(u[key]!==undefined)return u[key];return 0;};
@@ -78,11 +82,17 @@ function qoderRecord(r,meta={}){
  return normalized({id,at:r.timestamp||r.created_at||r.at,provider:'Qoder',model,session,project:r.project||meta.project,input,cached,write,output,reasoning,sourceAmount:credits,sourceUnit:'Credits',origin:'qoder-cli',basis:'reported'});
 }
 function qoderLine(line){
- try{return JSON.parse(line);}catch{}
- const start=line.indexOf('{');if(start<0)return null;try{return JSON.parse(line.slice(start));}catch{return null;}
+ const at=(line.match(/^(\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?)/)||[])[1]||null;
+ try{const r=JSON.parse(line);if(r&&at)r._logAt=at;return r;}catch{}
+ const start=line.indexOf('{');if(start<0)return null;try{const r=JSON.parse(line.slice(start));if(r&&at)r._logAt=at;return r;}catch{return null;}
+}
+function qoderRoots(root){
+ const roots=[root],roaming=process.env.APPDATA&&path.join(process.env.APPDATA,'Qoder','logs');
+ if(roaming&&path.resolve(root).toLowerCase()===path.join(require('node:os').homedir(),'.qoder').toLowerCase()&&fs.existsSync(roaming))roots.push(roaming);
+ return roots;
 }
 async function listFiles(root,kind){const out=[],codebuddyProjects=path.basename(root).toLowerCase()==='projects';async function walk(dir,depth){if(depth>10||out.length>=25000)return;for(const item of await fsp.readdir(dir,{withFileTypes:true})){if(item.isSymbolicLink())continue;const file=path.join(dir,item.name);if(item.isDirectory())await walk(file,depth+1);else if(item.isFile()){
-  const rel=path.relative(root,file).replaceAll('\\','/');const match=kind==='gemini'?/^session-.*\.json$/.test(item.name):kind==='qwen'?/^token-usage-\d{4}-\d{2}\.jsonl$/.test(item.name):kind==='kimi'?item.name==='wire.jsonl'&&/(^|\/)agents\/[^/]+\/wire\.jsonl$/.test(rel):kind==='codebuddy'?item.name.endsWith('.jsonl')&&!/(^|\/)tool-results\//.test(rel)&&(codebuddyProjects||rel.startsWith('projects/')):kind==='qoder'?/^(qodercli\.log|usage.*\.jsonl|events.*\.jsonl|subscription-lens\.jsonl)$/i.test(item.name):item.name.endsWith('.jsonl');if(match)out.push(file);
+  const rel=path.relative(root,file).replaceAll('\\','/');const match=kind==='gemini'?/^session-.*\.json$/.test(item.name):kind==='qwen'?/^token-usage-\d{4}-\d{2}\.jsonl$/.test(item.name):kind==='kimi'?item.name==='wire.jsonl'&&/(^|\/)agents\/[^/]+\/wire\.jsonl$/.test(rel):kind==='codebuddy'?item.name.endsWith('.jsonl')&&!/(^|\/)tool-results\//.test(rel)&&(codebuddyProjects||rel.startsWith('projects/')):kind==='qoder'?/^(qodercli\.log|agent\.log|quest\.log|renderer\.log|usage.*\.jsonl|events.*\.jsonl|subscription-lens\.jsonl)$/i.test(item.name):item.name.endsWith('.jsonl');if(match)out.push(file);
  }}}await walk(root,0);return out.sort();}
 class Monitor{
  constructor(store){this.store=store;this.running=false;this.sources=store.get('monitorSources',[]);this.states={};store.db.exec(`CREATE TABLE IF NOT EXISTS monitor_events(connection TEXT NOT NULL,id TEXT NOT NULL,at TEXT NOT NULL,provider TEXT NOT NULL,model TEXT NOT NULL,data TEXT NOT NULL,PRIMARY KEY(connection,id));CREATE INDEX IF NOT EXISTS monitor_time ON monitor_events(connection,at);CREATE TABLE IF NOT EXISTS monitor_files(connection TEXT NOT NULL,path TEXT NOT NULL,offset INTEGER NOT NULL,mtime REAL NOT NULL,size INTEGER NOT NULL,PRIMARY KEY(connection,path));`);
@@ -104,10 +114,10 @@ class Monitor{
  // Keyset batches keep the UI responsive. Re-read history so upstream cost corrections are reflected.
  let after='';for(;;){const rows=db.prepare(`SELECT ${selected} FROM proxy_request_logs WHERE request_id>? ORDER BY request_id LIMIT 1000`).all(after);if(!rows.length)break;this.store.db.exec('BEGIN');try{for(const row of rows){const e=ccRecord(row,names.get(row.app_type+'|'+row.provider_id));if(e)imported+=Number(this.put.run(s.id,e.id,e.at,e.provider,e.model,JSON.stringify(e)).changes);else invalid++;}this.store.db.exec('COMMIT');}catch(e){this.store.db.exec('ROLLBACK');throw e;}after=rows.at(-1).request_id;await new Promise(r=>setImmediate(r));}
  return {imported,invalid};}finally{db.close();}}
- async readLocal(s){let imported=0,invalid=0;const files=s.kind==='usage-jsonl'?[s.path]:await listFiles(s.path,s.kind);for(const file of files){const st=await fsp.stat(file),cp=this.store.db.prepare('SELECT * FROM monitor_files WHERE connection=? AND path=?').get(s.id,file);if(cp&&cp.size===st.size&&cp.mtime===st.mtimeMs)continue;const project=path.basename(path.dirname(file));
+ async readLocal(s){let imported=0,invalid=0;const roots=s.kind==='qoder'?qoderRoots(s.path):[s.path],files=s.kind==='usage-jsonl'?[s.path]:(await Promise.all(roots.map(root=>listFiles(root,s.kind)))).flat();for(const file of files){const st=await fsp.stat(file),cp=this.store.db.prepare('SELECT * FROM monitor_files WHERE connection=? AND path=?').get(s.id,file);if(cp&&cp.size===st.size&&cp.mtime===st.mtimeMs)continue;const project=path.basename(path.dirname(file));
  if(s.kind==='gemini'){if(st.size>32*1024*1024){invalid++;continue;}const r=JSON.parse(await fsp.readFile(file,'utf8'));const events=geminiRecords(r,project);for(const e of events)imported+=Number(this.put.run(s.id,e.id,e.at,e.provider,e.model,JSON.stringify(e)).changes);this.checkpoint(s,file,st.size,st);continue;}
  const start=cp&&st.size>=cp.offset&&!(st.size===cp.size&&st.mtimeMs!==cp.mtime)?cp.offset:0;let offset=start,pending=Buffer.alloc(0),discard=false;const stream=fs.createReadStream(file,{start,highWaterMark:256*1024});
- for await(const chunk of stream){pending=Buffer.concat([pending,chunk]);let pos;while((pos=pending.indexOf(10))>=0){const line=pending.subarray(0,pos);pending=pending.subarray(pos+1);offset+=pos+1;if(discard){discard=false;continue;}if(line.length>8*1024*1024){invalid++;continue;}try{const text=line.toString('utf8'),r=s.kind==='qoder'?qoderLine(text):JSON.parse(text),relative=path.relative(s.path,file).replaceAll('\\','/'),parts=relative.split('/'),agents=parts.lastIndexOf('agents'),meta={relative,offset,session:agents>0?parts[agents-1]:path.basename(file,'.jsonl'),project:agents>1?parts[agents-2]:project};const e=s.kind==='claude'?claudeRecord(r,project):s.kind==='qwen'?qwenRecord(r):s.kind==='kimi'?kimiRecord(r,meta):s.kind==='codebuddy'?codebuddyRecord(r,meta):s.kind==='qoder'?qoderRecord(r,meta):jsonRecord(r);if(e)imported+=Number(this.put.run(s.id,e.id,e.at,e.provider,e.model,JSON.stringify(e)).changes);else if(s.kind==='usage-jsonl'||s.kind==='qwen'||s.kind==='kimi'&&r.type==='usage.record'&&r.usageScope==='turn'||s.kind==='codebuddy'&&r.providerData?.rawUsage||s.kind==='qoder'&&r)invalid++;}catch{invalid++;}}
+ for await(const chunk of stream){pending=Buffer.concat([pending,chunk]);let pos;while((pos=pending.indexOf(10))>=0){const line=pending.subarray(0,pos);pending=pending.subarray(pos+1);offset+=pos+1;if(discard){discard=false;continue;}if(line.length>8*1024*1024){invalid++;continue;}try{const text=line.toString('utf8'),r=s.kind==='qoder'?qoderLine(text):JSON.parse(text),relative=path.relative(s.path,file).replaceAll('\\','/'),parts=relative.split('/'),agents=parts.lastIndexOf('agents'),meta={relative,offset,lineAt:r?._logAt||null,session:agents>0?parts[agents-1]:path.basename(file,'.jsonl'),project:agents>1?parts[agents-2]:project};const e=s.kind==='claude'?claudeRecord(r,project):s.kind==='qwen'?qwenRecord(r):s.kind==='kimi'?kimiRecord(r,meta):s.kind==='codebuddy'?codebuddyRecord(r,meta):s.kind==='qoder'?qoderRecord(r,meta):jsonRecord(r);if(e)imported+=Number(this.put.run(s.id,e.id,e.at,e.provider,e.model,JSON.stringify(e)).changes);else if(s.kind==='usage-jsonl'||s.kind==='qwen'||s.kind==='kimi'&&r.type==='usage.record'&&r.usageScope==='turn'||s.kind==='codebuddy'&&r.providerData?.rawUsage)invalid++;}catch{invalid++;}}
  if(pending.length>8*1024*1024){offset+=pending.length;pending=Buffer.alloc(0);discard=true;invalid++;}}
  // Never commit past an unfinished record, including oversized records.
  this.checkpoint(s,file,discard?start:offset,st);

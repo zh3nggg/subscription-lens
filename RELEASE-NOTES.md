@@ -1,4 +1,4 @@
-# Subscription Lens 1.4.1
+# Subscription Lens 1.4.2
 
 Windows x64 · 中文 / English / Nederlands
 
@@ -14,7 +14,7 @@ Windows x64 · 中文 / English / Nederlands
 - 保留供应商 → 模型环形图、多来源明细与性能、自定义计价、套餐实付对比、专注窗口和三语言支持。
 - 新安装包沿用原安装身份与目录，原位替换旧版并保留设置和用量。
 - Windows 任务栏、窗口、托盘和搜索入口统一使用 Subscription Lens 应用标识与镜片图标，避免显示为 Electron。
-- 新增 Qoder 只读连接器：扫描 `~/.qoder` 或 `QODER_CONFIG_DIR` 下的 stream JSON，用量与原始 Credits 分开保存；跳过累计 `result` 事件，避免重复计费。
+- 新增 Qoder 只读连接器：扫描 `~/.qoder` 或 `QODER_CONFIG_DIR` 下的 stream JSON；Windows 同时读取 `%APPDATA%\Qoder\logs` 的 Quest `agent.log`。Quest 上下文快照只保留每个会话的最新值并标记为 Tokens 估算，原始 Credits 分开保存；跳过累计 `result` 事件，避免重复计费。
 - 修复额度预测在上游时间戳滞后时持续显示“正在积累观测”的问题；同一窗口至少 15 分钟、三条观测后，即使期间没有消耗变化也会明确显示为可持续至重置，回退和重置仍会抑制预测。
 
 ## What's new
@@ -23,7 +23,7 @@ Devices are now a first-class view. Each installation has a stable device identi
 
 Standard local installations of six supported tools are now detected and connected in one click. The Codex overview adds a confidence-labelled model-mix recommendation based on 14-day habits, API-equivalent intensity and live quota pace. It targets the next reset but remains adaptive because exact per-model subscription quota weights are not published.
 
-Qoder stream usage can be captured with the bundled PowerShell helper. Native Credits remain separate from API-equivalent USD, and cumulative result events are ignored to prevent double billing. Quota forecasting now tolerates a delayed upstream observation timestamp while retaining its evidence threshold.
+Qoder stream usage can be captured with the bundled PowerShell helper. On Windows, Quest IDE agent logs are also imported automatically. Their cumulative context snapshots are kept once per session and labeled as token estimates; native Credits remain separate from API-equivalent USD, and cumulative result events are ignored to prevent double billing. Quota forecasting now tolerates a delayed upstream observation timestamp while retaining its evidence threshold.
 
 Windows taskbar and window metadata now use the Subscription Lens application identity and icon instead of Electron's default identity.
 
@@ -33,7 +33,7 @@ Apparaten zijn nu een eigen overzicht. Elke installatie krijgt een stabiele appa
 
 Zes ondersteunde tools in standaardmappen worden nu automatisch gevonden en met één klik verbonden. Het Codex-overzicht adviseert een modelmix op basis van 14 dagen gebruik, API-equivalente intensiteit en het actuele quotatempo, met een zichtbare betrouwbaarheid. Het advies richt zich op de volgende reset en blijft adaptief omdat exacte quotagewichten per model niet zijn gepubliceerd.
 
-Qoder-streamgebruik kan met het meegeleverde PowerShell-script worden vastgelegd. Credits blijven gescheiden van API-equivalente USD en cumulatieve resultaten worden overgeslagen om dubbele kosten te voorkomen. De quotavoorspelling verdraagt nu vertraagde upstream-tijdstempels en behoudt de drempel voor betrouwbare observaties.
+Qoder-streamgebruik kan met het meegeleverde PowerShell-script worden vastgelegd. Op Windows worden Quest-agentlogs ook automatisch gelezen. Hun cumulatieve contextsnapshots worden eenmaal per sessie bewaard en als token-schatting gemarkeerd; Credits blijven gescheiden van API-equivalente USD en cumulatieve resultaten worden overgeslagen om dubbele kosten te voorkomen. De quotavoorspelling verdraagt nu vertraagde upstream-tijdstempels en behoudt de drempel voor betrouwbare observaties.
 
 De Windows-taakbalk en venstermetadata gebruiken nu de Subscription Lens-identiteit en het juiste pictogram in plaats van de standaardidentiteit van Electron.
 

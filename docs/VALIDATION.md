@@ -1,10 +1,10 @@
-# Validation — 1.4.1
+# Validation — 1.4.2
 
 Windows x64 · Node.js 24.14.0 · Electron 44.4.0 · electron-builder 26.15.3.
 
 ## Automated checks
 
-- 61 unit/integration checks passed locally, including device identity, anonymous package export/import, imported-cost preservation, automatic safe discovery, model-mix calibration, provider imports, cache semantics, price rules, translations and persistent installer identity.
+- 68 unit/integration checks passed locally, including device identity, anonymous package export/import, imported-cost preservation, automatic safe discovery, model-mix calibration, provider imports, Qoder Quest agent-log snapshots, cache semantics, price rules, translations and persistent installer identity.
 - Desktop checks cover provider → model → requests, Tokens/cost switching, every dashboard tab, overview no-scroll behavior, pagination and Chinese/English/Dutch layouts at 760×560, 820×600, 1024×768 and 1320×900 content sizes.
 - Existing product, localization and simulated quota tests are part of the release checks. Actual notification delivery is intercepted; these tests do not establish Windows toast delivery under every policy.
 - Desktop smoke verifies the device page, its device filter and contextual terminology help in addition to the quota forecast flow.

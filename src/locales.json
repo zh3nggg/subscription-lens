@@ -187,6 +187,10 @@
     "Native Credits and API-equivalent cost are tracked separately.",
     "Native Credits en API-equivalente kosten worden afzonderlijk bijgehouden."
   ],
+  "Qoder Quest 使用本机上下文快照估算 Tokens；原始 Credits 仍需在 Qoder 内查看": [
+    "Qoder Quest tokens use local context snapshots as an estimate; view native Credits in Qoder.",
+    "Qoder Quest-tokens zijn een schatting uit lokale contextsnapshots; bekijk native Credits in Qoder."
+  ],
   "开始监测": [
     "Start monitoring",
     "Monitoring starten"
