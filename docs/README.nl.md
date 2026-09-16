@@ -1,5 +1,7 @@
 # Subscription Lens
 
+Ontwikkeld met ondersteuning van **GPT-6 Astra**.
+
 **1.2.0 Preview · Windows x64.** [Downloaden](https://github.com/zh3nggg/subscription-lens/releases) · [Roadmap](../ROADMAP.md) · [Licenties van derden](../THIRD-PARTY-NOTICES.md)
 
 Volledige Codex-functionaliteit van CodexBar/codex-usage is nog niet bereikt. De huidige collector verwerkt onafhankelijke verzoeken, compactie, gemengde tellerresets en overgenomen forkhistorie nog niet volledig; totalen kunnen te laag of te hoog zijn. De nieuwe engine is nog niet ingeschakeld. Zie [releasegrenzen](RELEASE.md). Andere aanbieders staan op de roadmap voor de volgende update.

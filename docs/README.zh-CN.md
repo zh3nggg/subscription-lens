@@ -1,5 +1,7 @@
 # 余量 · Subscription Lens
 
+本项目在 **GPT-6 Astra** 的协助下完成开发。
+
 **1.2.0 预发布 · Windows x64。** [下载安装包](https://github.com/zh3nggg/subscription-lens/releases) · [路线图](../ROADMAP.md) · [开源来源与许可](../THIRD-PARTY-NOTICES.md)
 
 当前尚未完整覆盖 CodexBar／codex-usage 的 Codex 功能。现有采集器尚未完整处理独立请求、压缩用量、混合计数重置和分叉继承历史，汇总可能偏低或偏高；已引入的新版统计引擎尚未启用。详见[发布边界](RELEASE.md)。其他供应商支持已列入[下一版前瞻](../ROADMAP.md#简体中文)，当前暂不包含。

@@ -1,5 +1,7 @@
 # Subscription Lens
 
+Developed with assistance from **GPT-6 Astra**.
+
 **1.2.0 Preview · Windows x64.** [Download](https://github.com/zh3nggg/subscription-lens/releases) · [Roadmap](ROADMAP.md) · [Third-party notices](THIRD-PARTY-NOTICES.md)
 
 Full CodexBar/codex-usage Codex parity is not complete. The active collector does not fully reconcile modern independent request/compaction records, mixed counter resets or inherited fork history; totals may undercount or overcount. The new vendored accounting engine is not enabled yet. See [release boundaries](docs/RELEASE.md).
