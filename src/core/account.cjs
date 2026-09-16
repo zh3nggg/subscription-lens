@@ -27,7 +27,7 @@ class Account{
     this.child.stdout.setEncoding('utf8');this.child.stdout.on('data',chunk=>{buffer+=chunk;if(buffer.length>8*1024*1024){this.stop();return;}let i;while((i=buffer.indexOf('\n'))>=0){const line=buffer.slice(0,i);buffer=buffer.slice(i+1);try{this.message(JSON.parse(line));}catch{}}});
     this.child.stderr.resume(); // Never persist upstream stderr or authentication material.
     this.child.on('error',()=>this.fail('process'));this.child.on('exit',()=>this.fail('closed'));
-    const init=await this.call('initialize',{clientInfo:{name:'subscription_lens',title:'Subscription Lens',version:'1.4.0-beta.8'},capabilities:{experimentalApi:true}});
+    const init=await this.call('initialize',{clientInfo:{name:'subscription_lens',title:'Subscription Lens',version:'1.4.0-beta.9'},capabilities:{experimentalApi:true}});
     this.status.version=typeof init?.userAgent==='string'?init.userAgent.slice(0,180):null;
     this.send({method:'initialized'});return true;
   }

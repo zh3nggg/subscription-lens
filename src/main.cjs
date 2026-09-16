@@ -2,13 +2,13 @@
 const {app,BrowserWindow,ipcMain,dialog,shell,Menu,Tray,nativeImage,nativeTheme,Notification}=require('electron');
 const path=require('node:path');const fs=require('node:fs/promises');const {pathToFileURL}=require('node:url');
 const APP_USER_MODEL_ID='net.subscriptionlens.desktop';
+app.setName('Subscription Lens');
 app.setAppUserModelId(APP_USER_MODEL_ID);
 const {resolveLanguage,translate}=require('./i18n.js');
 const {reportData,reportHtml}=require('./core/report.cjs');
 const {Service}=require('./core/service.cjs');const {dollars}=require('./core/pricing.cjs');
 const {monitorDefaults,discoverMonitors}=require('./core/discovery.cjs');
 if(process.env.LENS_DATA_DIR)app.setPath('userData',path.resolve(process.env.LENS_DATA_DIR));
-app.setName('Subscription Lens');
 const lock=app.requestSingleInstanceLock();if(!lock){app.quit();}else{
 let win,service,tray,quitting=false,changeTimer,lastRefresh=0,compactMode=false,pinned=false,normalBounds=null;
 const t=(key,params)=>translate(key,resolveLanguage(service?.settings.language,app.getLocale()),params);
