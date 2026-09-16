@@ -19,7 +19,7 @@ class Service extends EventEmitter{
   constructor(dir,{home=os.homedir(),now=()=>new Date()}={}){
     super();this.now=now;this.store=new Store(dir);this.scanner=new Scanner(this.store);this.monitor=new Monitor(this.store);this.catalog=this.store.get('catalog',bundled);
     const date=now(),start=dayKey(new Date(date.getFullYear(),date.getMonth(),1)),end=dayKey(new Date(date.getFullYear(),date.getMonth()+1,1));
-    this.settings={roots:[],codexPath:null,accountHome:null,accountEnabled:false,cycleStart:start,cycleEnd:end,paid:null,extra:0,language:'system',theme:'system',tray:false,startup:false,cycleMode:'manual',billingDay:1,notifications:false,quietStart:22,quietEnd:8,...this.store.get('settings',{})};
+    this.settings={roots:[],codexPath:null,accountHome:null,accountEnabled:false,cycleStart:start,cycleEnd:end,paid:null,extra:0,language:'system',theme:'system',fontScale:'normal',tray:false,startup:false,cycleMode:'manual',billingDay:1,notifications:false,quietStart:22,quietEnd:8,...this.store.get('settings',{})};
     if(!this.settings.extraCycle)this.settings.extraCycle=this.settings.cycleStart;
     const freshDevice=createDevice(os.hostname());this.device=normalizeDevice(this.store.get('device'),freshDevice);this.store.set('device',this.device);
     this.devices=this.store.get('devices',{});this.devices[this.device.id]={...this.device,lastSeen:new Date().toISOString()};this.store.set('devices',this.devices);
@@ -45,6 +45,7 @@ class Service extends EventEmitter{
     for(const k of ['paid','extra'])if(input[k]!==undefined){if(input[k]===null&&k==='paid')next[k]=null;else{const n=Number(input[k]);if(!Number.isFinite(n)||n<0||n>1000000)throw new Error('实付金额无效');next[k]=Math.round(n*100)/100;}}
     if(input.language!==undefined){if(!['system','zh-CN','en-US','nl-NL'].includes(input.language))throw new Error('语言无效');next.language=input.language;}
     if(input.theme!==undefined){if(!['system','light','dark'].includes(input.theme))throw new Error('主题无效');next.theme=input.theme;}
+    if(input.fontScale!==undefined){if(!['normal','large','xlarge'].includes(input.fontScale))throw new Error('文字大小无效');next.fontScale=input.fontScale;}
     if(input.cycleMode!==undefined){if(!['manual','monthly'].includes(input.cycleMode))throw new Error('账期模式无效');next.cycleMode=input.cycleMode;}
     for(const [key,min,max] of [['billingDay',1,31],['quietStart',0,23],['quietEnd',0,23]])if(input[key]!==undefined){const n=Number(input[key]);if(!Number.isInteger(n)||n<min||n>max)throw new Error('设置数值无效');next[key]=n;}
     for(const k of ['tray','startup','notifications'])if(typeof input[k]==='boolean')next[k]=input[k];

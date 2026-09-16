@@ -24,6 +24,58 @@ window.LensLocales = {
     "About",
     "Over"
   ],
+  "文字大小": [
+    "Text size",
+    "Tekstgrootte"
+  ],
+  "标准": [
+    "Standard",
+    "Standaard"
+  ],
+  "较大": [
+    "Large",
+    "Groot"
+  ],
+  "特大": [
+    "Extra large",
+    "Extra groot"
+  ],
+  "增大界面文字和可点击目标，设置立即生效。": [
+    "Increase interface text and click targets; changes apply immediately.",
+    "Vergroot tekst en klikdoelen; wijzigingen gelden direct."
+  ],
+  "日均 {metric}": [
+    "Daily average {metric}",
+    "Dagelijks gemiddelde {metric}"
+  ],
+  "仅含活跃日": [
+    "Active days only",
+    "Alleen actieve dagen"
+  ],
+  "峰值日": [
+    "Peak day",
+    "Piekdag"
+  ],
+  "活跃天数": [
+    "Active days",
+    "Actieve dagen"
+  ],
+  "共 {n} 天": [
+    "{n} days total",
+    "{n} dagen totaal"
+  ],
+  "较前 7 天": [
+    "vs previous 7 days",
+    "vs vorige 7 dagen"
+  ],
+  "最近 7 天": [
+    "Last 7 days",
+    "Afgelopen 7 dagen"
+  ],
+  "点击柱状图查看当天明细": [
+    "Select a bar to inspect that day",
+    "Selecteer een balk voor die dag"
+  ],
   "导航": [
     "Navigation",
     "Navigatie"
@@ -99,10 +151,6 @@ window.LensLocales = {
   "今天": [
     "Today",
     "Vandaag"
-  ],
-  "最近 7 天": [
-    "Last 7 days",
-    "Afgelopen 7 dagen"
   ],
   "本月": [
     "This month",
