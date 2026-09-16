@@ -1,6 +1,6 @@
 # Provider monitoring · 1.4.0 beta
 
-Use **Connections → Providers → Add source**, then open **Overview → Providers**.
+Open **Connections → Providers**. Tools installed in standard folders are detected locally; connect one or all in a click. Use **Add manually** only for custom locations, then open **Overview → Providers**.
 The app reads the selected local source every 15 seconds while running. No cloud account or API key is required for these connectors.
 
 | Source | Select | Collected information |
@@ -13,7 +13,7 @@ The app reads the selected local source every 15 seconds while running. No cloud
 | CodeBuddy Code | `~/.codebuddy` or its `projects` folder | Usage-bearing assistant/tool-call rows. Cache hit/miss fields are preferred; the inclusive fallback subtracts cache reads before showing ordinary input. |
 | API usage file | A JSONL file in the schema below | Explicit usage and optional USD cost/performance data exported by your own client or gateway. |
 
-Paths are chosen explicitly through the desktop file picker. CC Switch is opened read-only. Provider configuration and credentials are not selected from its database. Local session files are parsed, but conversation bodies are not copied into the app's ledger. Project/session identifiers remain local metadata.
+Automatic discovery checks only the standard paths listed above and the Qwen/Kimi environment overrides. It does not read credentials or client configuration. Custom paths are chosen explicitly through the desktop file picker. CC Switch is opened read-only. Provider configuration and credentials are not selected from its database. Local session files are parsed, but conversation bodies are not copied into the app's ledger. Project/session identifiers remain local metadata.
 
 ## Charts and records
 

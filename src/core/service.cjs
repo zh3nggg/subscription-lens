@@ -4,7 +4,7 @@ const {EventEmitter}=require('node:events');
 const {Monitor}=require('./monitor.cjs');
 const {Store}=require('./store.cjs'),{Scanner}=require('./scanner.cjs'),{Account}=require('./account.cjs');
 const {price,bundled,validateCatalog}=require('./pricing.cjs');
-const {dayKey,cycleWindow,aggregate,continuousDays,quotaOutlook,alertCandidates,inQuietHours}=require('./insights.cjs');
+const {dayKey,cycleWindow,aggregate,continuousDays,quotaOutlook,modelMixAdvice,alertCandidates,inQuietHours}=require('./insights.cjs');
 function validDate(s){return typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s)&&Number.isFinite(Date.parse(s+'T00:00:00'))&&dayKey(new Date(s+'T00:00:00'))===s;}
 function range(period,settings,now=new Date()){
   let start=new Date(now.getFullYear(),now.getMonth(),now.getDate()),end=new Date(now.getTime()+1);
@@ -62,6 +62,9 @@ class Service extends EventEmitter{
     const raw=this.store.events(r.from,r.to),events=this.select(raw,filters),a=aggregate(events,this.catalog);
     const quota=this.account.status.quota||this.store.get('recordQuota');const samples=this.store.quotaSamples(this.account.status.identity);
     const outlooks=(quota?.windows||[]).map(w=>quotaOutlook({...w,observedAt:w.observedAt||quota.observedAt},samples,{now:now.getTime(),live:this.settings.accountEnabled&&this.account.status.state==='connected'&&quota.source==='account'}));
+    const primaryOutlook=[...(outlooks.filter(w=>w.limit==='codex').length?outlooks.filter(w=>w.limit==='codex'):outlooks)].sort((a,b)=>b.used-a.used)[0];
+    const recentFrom=new Date(now.getTime()-14*86400000).toISOString(),recent=aggregate(this.store.events(recentFrom,new Date(now.getTime()+1).toISOString()),this.catalog);
+    const mixAdvice=modelMixAdvice(recent.models,primaryOutlook);
     const c=cycleWindow(settings,now),cycleRaw=period==='cycle'&&!filters.day?raw:this.store.events(new Date(c.start+'T00:00:00').toISOString(),new Date(Math.min(new Date(c.end+'T00:00:00').getTime(),now.getTime()+1)).toISOString());
     const ca=aggregate(cycleRaw,this.catalog),paid=settings.paid===null?null:settings.paid+settings.extra;
     const duration=new Date(r.to)-new Date(r.from);let comparison=null;
@@ -72,7 +75,7 @@ class Service extends EventEmitter{
     return {monitor:this.monitor.query(filters,r,this.catalog),period,range:r,summary:{...a.summary,diff:period==='cycle'&&paid!==null&&events.length?a.summary.usd-paid:null,ratio:period==='cycle'&&paid>0&&events.length?a.summary.usd/paid:null},models:a.models,projects:a.projects.slice(0,50),sessions:sessionRows.slice(offset,offset+limit),sessionTotal:a.sessions.length,days:continuousDays(a.days,period==='all'?(a.days[0]?.date?new Date(a.days[0].date+'T00:00:00').toISOString():r.to):r.from,r.to),rows:(filters.sort==='cost'?[...a.rows].sort((x,y)=>(y.price.usd??-1)-(x.price.usd??-1)||y.at.localeCompare(x.at)):a.rows.reverse()).slice(offset,offset+limit),offset,limit,quota,outlooks,comparison,
       cycle:{...c,...ca.summary,paid,extra:settings.extra,diff:paid!==null&&ca.summary.events?ca.summary.usd-paid:null,progress:paid>0?ca.summary.usd/paid:null,remaining:paid!==null?Math.max(0,paid-ca.summary.usd):null,elapsedDays:Math.max(0,(Math.min(now,new Date(c.end+'T00:00:00'))-new Date(c.start+'T00:00:00'))/86400000),days:Math.round((Date.parse(c.end+'T12:00:00Z')-Date.parse(c.start+'T12:00:00Z'))/86400000)},
       health:{reasons:a.reasons,partial:events.filter(e=>['partial_history','ambiguous'].includes(e.quality)).length,readErrors:this.scanner.status.errors,parseErrors:fileStats.errors,priceAgeDays:Math.max(0,Math.floor((now-Date.parse(this.catalog.asOf+'T00:00:00Z'))/86400000))},
-      account:this.account.status,settings,scanner:this.scanner.status,stats,fileStats,allModels:this.store.allModels(),catalog:this.catalog,detectedRoot:this.detectedRoot,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone};
+      mixAdvice,account:this.account.status,settings,scanner:this.scanner.status,stats,fileStats,allModels:this.store.allModels(),catalog:this.catalog,detectedRoot:this.detectedRoot,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone};
   }
   exportRows(filters){let r=range(filters.period||'month',this.effectiveSettings(),this.now());if(filters.day&&validDate(filters.day)){const start=new Date(filters.day+'T00:00:00'),end=new Date(start);end.setDate(end.getDate()+1);r={from:start.toISOString(),to:new Date(Math.min(end.getTime(),this.now().getTime()+1)).toISOString()};}let rows=this.store.events(r.from,r.to);if(filters.day&&validDate(filters.day))rows=rows.filter(e=>dayKey(e.at)===filters.day);return this.select(rows,filters).map(e=>({...e,price:price(e,this.catalog)}));}
   async close(){clearInterval(this.timer);clearInterval(this.accountTimer);this.account.stop();while(this.scanner.running||this.monitor.running)await new Promise(r=>setTimeout(r,50));this.store.close();}

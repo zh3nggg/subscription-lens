@@ -12,8 +12,8 @@
     "Tarieven"
   ],
   "连接": [
-    "Connections",
-    "Verbindingen"
+    "Connect",
+    "Verbinden"
   ],
   "设置": [
     "Settings",
@@ -1458,5 +1458,93 @@
   "性能": [
     "Performance",
     "Prestaties"
+  ],
+  "已发现的工具": [
+    "Detected tools",
+    "Gedetecteerde tools"
+  ],
+  "从常用本机目录自动发现": [
+    "Found automatically in standard local folders",
+    "Automatisch gevonden in standaard lokale mappen"
+  ],
+  "连接全部": [
+    "Connect all",
+    "Alles verbinden"
+  ],
+  "已全部连接": [
+    "All connected",
+    "Alles verbonden"
+  ],
+  "未在常用目录发现工具，可手动选择。": [
+    "No tools found in standard folders. Select a location manually.",
+    "Geen tools gevonden in standaardmappen. Kies handmatig een locatie."
+  ],
+  "手动添加": [
+    "Add manually",
+    "Handmatig toevoegen"
+  ],
+  "已连接 {n} 个来源": [
+    "Connected {n} sources",
+    "{n} bronnen verbonden"
+  ],
+  "模型组合": [
+    "Model mix",
+    "Modelmix"
+  ],
+  "正在学习你的模型习惯和额度速度": [
+    "Learning your model habits and quota pace",
+    "Je modelgewoonten en quotatempo worden geleerd"
+  ],
+  "学习中": [
+    "Learning",
+    "Bezig met leren"
+  ],
+  "至少使用两个可计价模型，并积累15分钟额度变化后生成建议。": [
+    "Use at least two priced models and collect 15 minutes of quota movement to get a recommendation.",
+    "Gebruik minstens twee geprijsde modellen en verzamel 15 minuten quotawijzigingen voor een advies."
+  ],
+  "降低高强度模型占比": [
+    "Reduce high-intensity model usage",
+    "Gebruik van intensieve modellen verlagen"
+  ],
+  "可提高高强度模型占比": [
+    "High-intensity model usage can increase",
+    "Gebruik van intensieve modellen kan omhoog"
+  ],
+  "维持当前模型组合": [
+    "Keep the current model mix",
+    "Huidige modelmix behouden"
+  ],
+  "当前速度接近目标": [
+    "Current pace is near target",
+    "Huidig tempo ligt dicht bij doel"
+  ],
+  "中等可信度": [
+    "Medium confidence",
+    "Gemiddelde betrouwbaarheid"
+  ],
+  "低可信度": [
+    "Low confidence",
+    "Lage betrouwbaarheid"
+  ],
+  "以当前额度窗口重置时间为目标": [
+    "Targets the current quota reset",
+    "Gericht op de huidige quotareset"
+  ],
+  "依据近14天模型用量、API 等价强度和近期额度速度；下个窗口会继续校准。": [
+    "Based on 14-day model usage, API-equivalent intensity, and recent quota pace; calibration continues next window.",
+    "Gebaseerd op 14 dagen modelgebruik, API-equivalente intensiteit en recent quotatempo; kalibratie gaat volgend venster door."
+  ],
+  "模型建议": [
+    "Model mix",
+    "Modelmix"
+  ],
+  "目标速度提高 {n}%": [
+    "Raise target pace by {n}%",
+    "Doeltempo {n}% verhogen"
+  ],
+  "目标速度降低 {n}%": [
+    "Lower target pace by {n}%",
+    "Doeltempo {n}% verlagen"
   ]
 }

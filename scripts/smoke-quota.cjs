@@ -6,18 +6,19 @@ async function main(){const base=path.resolve(__dirname,'../test-results');await
   await app.evaluate(({app,Notification})=>{
    // Mock the official account source and native delivery only inside this test process.
    const load=process.getBuiltinModule('module').createRequire(app.getAppPath()+'/src/main.cjs');const path=load('node:path');const {Service}=load(path.join(app.getAppPath(),'src/core/service.cjs'));const original=Service.prototype.query;
-   global.testNotices=[];global.testQuotaUsed=80;global.testQuotaReset=Math.floor(Date.now()/1000)+7200;global.testForceSnapshot=true;
+   global.testNotices=[];global.testQuotaUsed=80;global.testQuotaReset=Math.floor(Date.now()/1000)+7200;global.testForceSnapshot=true;global.testUsageSeeded=false;
    Notification.prototype.show=function(){global.testNotices.push({title:this.title,body:this.body});};
    Service.prototype.query=function(filters){const prior=this.account.status,settings={...this.settings};const now=Date.now();const win={limit:'codex',window:'primary',minutes:300,used:global.testQuotaUsed,resetsAt:global.testQuotaReset,observedAt:new Date(now).toISOString()};const quota={source:'account',observedAt:win.observedAt,windows:[win]};
     this.settings.accountEnabled=true;this.settings.notifications=true;this.settings.quietStart=0;this.settings.quietEnd=0;this.settings.language='en-US';this.settings.roots=['fixture'];
     this.account.status={state:'connected',identity:'test-account',quota,plan:'plus',usage:null};
+    if(!global.testUsageSeeded){global.testUsageSeeded=true;const at=new Date(now-60000).toISOString(),event=(id,model,input,output)=>({id,session:id,project:'fixture',model,at,input,cached:0,write:0,output,reasoning:0,total:input+output,quality:'complete',context:'standard'});this.store.commit('advice-fixture',{offset:0,size:0,mtime:0,state:{}},[event('astra','gpt-6-astra',650000,50000),event('luna','gpt-5.6-luna',280000,20000)],null);}
     for(let i=0;i<3;i++)this.store.recordQuota('test-account',{...quota,windows:[{...win,used:Math.max(0,win.used-30+i*15),observedAt:new Date(now-(2-i)*15*60000).toISOString()}]});
     if(global.testForceSnapshot){global.testForceSnapshot=false;this.accountChanged(this.account.status);}
     try{return original.call(this,filters);}finally{this.account.status=prior;this.settings=settings;}
    };
   });
   await page.evaluate(()=>window.lens.query({}));await page.waitForSelector('.dashboard-tabs');if(await page.locator('[data-layout-tab=plan]').count())await page.click('[data-layout-tab=plan]');await page.waitForSelector('.quota-number');await page.waitForFunction(()=>document.querySelector('.pace-line')?.textContent.includes('May run out'));
-  assert.match(await page.locator('.quota-number').innerText(),/20/);assert.match(await page.locator('.pace-detail').innerText(),/30 minutes/);assert.equal(await app.evaluate(()=>global.testNotices.length),1);
+  assert.match(await page.locator('.quota-number').innerText(),/20/);assert.match(await page.locator('.pace-detail').innerText(),/30 minutes/);assert.equal(await app.evaluate(()=>global.testNotices.length),1);await page.click('[data-layout-tab=advice]');await page.waitForSelector('.advice-row');assert.equal(await page.locator('.advice-row').count(),2);
   await app.evaluate(()=>global.testForceSnapshot=true);await page.evaluate(()=>window.lens.query({}));assert.equal(await app.evaluate(()=>global.testNotices.length),1);
   await page.screenshot({path:path.join(base,'product-forecast-fixture.png'),fullPage:true});
   await app.evaluate(()=>{global.testQuotaUsed=96;global.testForceSnapshot=true;});await page.evaluate(()=>window.lens.query({}));assert.equal(await app.evaluate(()=>global.testNotices.length),2);

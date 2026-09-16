@@ -14,9 +14,11 @@ Een Windows-desktopapp voor **Codex-abonnees** die hun resterende limieten wille
 | Limieten tijdens het werk volgen | Een compact vastzetbaar venster, systeemvak en optionele limietmeldingen met stille uren. |
 | Exporteren en delen | Records naar CSV exporteren of een HTML-overzicht opslaan zonder projectnamen of accountidentificaties. |
 
-## Aanbieders volgen in 1.3
+## Aanbieders volgen in 1.4
 
 Verbind Qwen Code, Kimi Code, CodeBuddy Code, CC Switch, Claude Code, Gemini CLI of je eigen API-gebruiksbestand. Chinese modelfamilies worden in hetzelfde diagram toegewezen aan Alibaba Cloud, Moonshot AI, Zhipu AI, MiniMax en DeepSeek. [Bronnen en kostendefinities](PROVIDER-MONITORING.md).
+
+Geïnstalleerde tools in standaardmappen worden automatisch gevonden en kunnen samen worden verbonden; aangepaste locaties blijven beschikbaar. Het Codex-overzicht adviseert een modelmix op basis van 14 dagen gebruik, API-equivalente intensiteit en het actuele quotatempo. Omdat OpenAI geen exacte quotagewichten per model publiceert, toont het advies de betrouwbaarheid en blijft het zichzelf kalibreren.
 
 ![Subscription Lens-overzicht in het Nederlands](images/providers.nl-NL.png)
 
@@ -24,9 +26,9 @@ Verbind Qwen Code, Kimi Code, CodeBuddy Code, CC Switch, Claude Code, Gemini CLI
 
 ## Downloaden en aan de slag
 
-**1.4.0-beta.3 Preview · Windows x64.** De collector verwerkt nog niet alle recordformaten volledig; totalen kunnen te hoog of te laag zijn. Kosten zijn schattingen, geen factuur of gegarandeerde besparing. Deze build is niet digitaal ondertekend en heeft geen automatische updates.
+**1.4.0-beta.4 Preview · Windows x64.** De collector verwerkt nog niet alle recordformaten volledig; totalen kunnen te hoog of te laag zijn. Kosten zijn schattingen, geen factuur of gegarandeerde besparing. Deze build is niet digitaal ondertekend en heeft geen automatische updates.
 
-[Download het installatiebestand of de draagbare ZIP-versie](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.4.0-beta.3)
+[Download het installatiebestand of de draagbare ZIP-versie](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.4.0-beta.4)
 
 Voer het nieuwe installatieprogramma uit om de bestaande installatie te vervangen en behoud de gevonden map. Instellingen en gebruiksgeschiedenis blijven behouden. Stabiele en testversies delen dezelfde app-identiteit. De draagbare ZIP is geen installatieprogramma; automatisch downloaden op de achtergrond is niet inbegrepen.
 
@@ -89,6 +91,6 @@ npm run dist
 
 Ontwikkeld met ondersteuning van **GPT-6 Astra**.
 
-[CodexBar](https://github.com/steipete/CodexBar) dient als referentie voor limieten en desktopinteractie. MIT-gelicentieerde broncode van [codex-usage](https://github.com/zJay26/codex-usage) is opgenomen voor de volgende engine-integratie; deze is nog niet actief in de desktopapp 1.4.0-beta.3.
+[CodexBar](https://github.com/steipete/CodexBar) dient als referentie voor limieten en desktopinteractie. MIT-gelicentieerde broncode van [codex-usage](https://github.com/zJay26/codex-usage) is opgenomen voor de volgende engine-integratie; deze is nog niet actief in de desktopapp 1.4.0-beta.4.
 
 MIT. Zie [licenties van derden](../THIRD-PARTY-NOTICES.md) voor bronnen en auteursrechten. Dit is een onafhankelijk project, niet verbonden aan OpenAI of onderschreven door de genoemde projecten.

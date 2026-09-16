@@ -40,6 +40,28 @@ function quotaOutlook(window,samples,{now=Date.now(),live=false}={}){
   const secondsToReset=(reset-now)/1000;
   return {...base,state:slowSeconds!==null&&slowSeconds<secondsToReset?'risk':fastSeconds>=secondsToReset?'on_track':'uncertain',forecast:{minutes,samples:points.length,percentPerHour:rate*60,seconds,fastSeconds,slowSeconds}};
 }
+function modelMixAdvice(models,outlook){
+  const rows=(models||[]).filter(m=>Number.isFinite(m.tokens)&&m.tokens>0).map(m=>{
+    const observed=Number.isFinite(m.usd)&&m.usd>0?m.usd/m.tokens*1e6:null;
+    const name=String(m.model||m.key||'');
+    return {model:name,tokens:m.tokens,intensity:observed,source:observed!==null?'priced':'unknown'};
+  });
+  const total=rows.reduce((n,m)=>n+m.tokens,0),forecast=outlook?.forecast,reset=outlook?.secondsToReset;
+  const base={state:'learning',basis:'api_equivalent',confidence:'low',paceChange:null,current:rows.map(m=>({model:m.model,share:m.tokens/total})),recommended:[]};
+  if(rows.length<2||!forecast||!Number.isFinite(forecast.seconds)||!Number.isFinite(reset)||reset<=0)return base;
+  const usable=rows.filter(m=>Number.isFinite(m.intensity)&&m.intensity>0);if(usable.length<2)return base;
+  const sum=usable.reduce((n,m)=>n+m.tokens,0),current=usable.map(m=>({...m,share:m.tokens/sum}));
+  const currentIntensity=current.reduce((n,m)=>n+m.share*m.intensity,0),pace=Math.max(.55,Math.min(1.6,forecast.seconds/reset));
+  const direction=pace<.95?'reduce':pace>1.05?'increase':'maintain';
+  if(direction==='maintain')return {...base,state:'ready',confidence:usable.every(m=>m.source==='priced')?'medium':'low',paceChange:0,current:current.map(({model,share})=>({model,share})),recommended:current.map(({model,share})=>({model,share}))};
+  const extreme=[...current].sort((a,b)=>direction==='reduce'?a.intensity-b.intensity:b.intensity-a.intensity)[0];
+  const target=currentIntensity*pace,denominator=extreme.intensity-currentIntensity;
+  if(Math.abs(denominator)<1e-9)return base;
+  const alpha=Math.max(0,Math.min(.6,(target-currentIntensity)/denominator));
+  if(alpha<.025)return {...base,state:'ready',confidence:'low',paceChange:Math.round((pace-1)*100),current:current.map(({model,share})=>({model,share})),recommended:current.map(({model,share})=>({model,share}))};
+  const recommended=current.map(m=>({model:m.model,share:m.share*(1-alpha)+(m.model===extreme.model?alpha:0)}));
+  return {state:'ready',basis:'api_equivalent',confidence:usable.every(m=>m.source==='priced')?'medium':'low',direction,paceChange:Math.round((pace-1)*100),targetModel:extreme.model,current:current.map(({model,share})=>({model,share})),recommended};
+}
 function alertCandidates(previous,windows,{now=Date.now(),enabled=false,quiet=false}={}){
   const state={...previous};const alerts=[];
   for(const w of windows){const at=Date.parse(w.observedAt);if(!Number.isFinite(at)||now-at>180000||at>now+30000||!w.resetsAt||w.resetsAt*1000<=now)continue;
@@ -51,4 +73,4 @@ function alertCandidates(previous,windows,{now=Date.now(),enabled=false,quiet=fa
   return {state,alerts};
 }
 function inQuietHours(start,end,now=new Date()){if(start===end)return false;const hour=now.getHours();return start<end?hour>=start&&hour<end:hour>=start||hour<end;}
-module.exports={dayKey,cycleWindow,aggregate,continuousDays,quotaOutlook,alertCandidates,inQuietHours};
+module.exports={dayKey,cycleWindow,aggregate,continuousDays,quotaOutlook,modelMixAdvice,alertCandidates,inQuietHours};

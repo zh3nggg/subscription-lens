@@ -1,35 +1,31 @@
-# Subscription Lens 1.4.0-beta.3
+# Subscription Lens 1.4.0-beta.4
 
 Windows x64 · 中文 / English / Nederlands
 
 ## 新增功能
 
-- 主窗口改为紧凑工作台：窄侧栏、低顶栏与单行操作区，把常用信息集中在 760×560 起的窗口内。
-- Codex 首屏同时显示套餐额度、账期对比和供应商／模型分布，删除套餐与分布之间的来回切换；中小窗口用标签收纳趋势和项目，大窗口自动展开更多内容。
-- 导航始终保留图标和短标签；窗口放大后也维持紧凑密度，减少无效留白和视线移动。
-- 国产编码平台只读连接器：Qwen Code 月度请求记录、Kimi Code 主／子代理 per-turn 用量、CodeBuddy Code 项目记录。
-- GLM、通义、Kimi、MiniMax、DeepSeek 的供应商归属，适用于 Claude Code、CC Switch 与兼容入口。
-- CodeBuddy 缓存命中／未命中优先解析，并修正其回退记录中输入已包含缓存的特殊口径。
-- 保留原有 CC Switch、Claude Code、Gemini CLI 与 API JSONL 连接器。
-- 供应商 → 模型环形图，可切换 Tokens／费用，点击模型进入请求明细。
-- 请求成功率、P95 延迟、首 Token 延迟、未计价筛选、自定义价格及 CSV。
-- 常用页面采用页内标签与自适应分页，避免依赖整页上下滚动；设置和主动展开的复杂内容例外。
-- 新安装包沿用原安装身份与目录，原位替换旧版并保留设置和用量；无需手动卸载。稳定版与测试版共用一个安装。
+- 自动发现 Qwen Code、Kimi Code、CodeBuddy Code、CC Switch、Claude Code 与 Gemini CLI 的常用本机目录，可一键连接单个或全部已安装工具；特殊路径继续支持手动选择。
+- Codex 总览新增模型组合建议：结合近 14 天模型使用比例、API 等价强度和当前额度预测，建议提高或降低各模型比例，使使用速度更接近窗口重置时间。
+- 建议显示学习状态和可信度。OpenAI 未提供各模型的套餐额度精确换算权重，因此建议会随额度观测继续校准，不承诺精确耗尽额度。
+- 模型建议在小窗口中作为独立标签，在高窗口中与趋势和项目并列，保持总览无整页滚动。
+- 保留供应商 → 模型环形图、多来源明细与性能、自定义计价、套餐实付对比、专注窗口和三语言支持。
+- 新安装包沿用原安装身份与目录，原位替换旧版并保留设置和用量。
 
 ## What's new
 
-A compact desktop workspace now fits the full daily workflow at 760×560. The Codex first view combines plan limits, billing comparison and provider/model distribution. Medium windows place trends and projects behind tabs; tall windows reveal them automatically. Read-only Qwen Code, Kimi Code and CodeBuddy Code connectors and domestic provider attribution remain integrated. Run the installer over the existing installation to retain local settings and history.
+Standard local installations of six supported tools are now detected and connected in one click. The Codex overview adds a confidence-labelled model-mix recommendation based on 14-day habits, API-equivalent intensity and live quota pace. It targets the next reset but remains adaptive because exact per-model subscription quota weights are not published.
 
 ## Nieuw
 
-De compacte werkruimte bevat de dagelijkse taken vanaf 760×560. De eerste Codex-weergave combineert limieten, periodevergelijking en verdeling per aanbieder/model. Middelgrote vensters plaatsen trends en projecten in tabbladen; hoge vensters tonen ze automatisch. De bestaande connectors en aanbiederherkenning blijven geïntegreerd. Het installatieprogramma vervangt de bestaande app en behoudt instellingen en geschiedenis.
+Zes ondersteunde tools in standaardmappen worden nu automatisch gevonden en met één klik verbonden. Het Codex-overzicht adviseert een modelmix op basis van 14 dagen gebruik, API-equivalente intensiteit en het actuele quotatempo, met een zichtbare betrouwbaarheid. Het advies richt zich op de volgende reset en blijft adaptief omdat exacte quotagewichten per model niet zijn gepubliceerd.
 
 ## Scope
 
-- Local sources are optional and read-only. Select one source at a time to avoid double-counting overlapping CLI/proxy records.
+- Local sources are optional and read-only. Automatic discovery checks known local paths only and never reads credentials. Select one source at a time in analytics to avoid double-counting overlapping CLI/proxy records.
+- Model-mix advice uses observed habits, API-equivalent intensity and quota pace. It is an experiment to calibrate over later windows, not an official quota conversion or guarantee.
 - CC Switch amounts are stored estimates. Source-reported amounts are not independently verified invoices. Direct billing APIs, provider balances, proxy routing and credential switching are not included.
-- The existing Codex collector still has incomplete support for modern request/compaction counters and fork histories. The vendored codex-usage engine remains experimental and inactive. This release does not claim full CodexBar, codex-usage or CC Switch parity.
-- Unsigned Windows build. In-place installer upgrades are supported by the packaging configuration; a clean-VM upgrade has not been certified. No background automatic downloading is included. Portable ZIP files must be extracted manually.
+- The existing Codex collector still has incomplete support for modern request/compaction counters and fork histories. The vendored codex-usage engine remains experimental and inactive.
+- Unsigned Windows build. In-place installer upgrades are supported by the packaging configuration; a clean-VM upgrade has not been certified. No background automatic downloading is included.
 - Keep the latest verified stable and preview locally. Until a stable release exists, the previous preview is retained as the rollback copy.
 
 See [source setup](https://github.com/zh3nggg/subscription-lens/blob/main/docs/PROVIDER-MONITORING.md), [validation](https://github.com/zh3nggg/subscription-lens/blob/main/docs/VALIDATION.md) and [third-party notices](https://github.com/zh3nggg/subscription-lens/blob/main/THIRD-PARTY-NOTICES.md).

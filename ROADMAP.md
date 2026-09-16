@@ -4,7 +4,7 @@
 
 ## English
 
-### Current release: 1.4.0-beta.3 preview
+### Current release: 1.4.0-beta.4 preview
 
 Windows desktop app for Codex subscriptions, with Chinese, English and Dutch UI. Local usage analytics, account quota, billing comparison, compact view and optional notifications are available. Full Codex feature parity with CodexBar and codex-usage is **not yet complete**. See [coverage](docs/COMPATIBILITY.md).
 
@@ -19,11 +19,11 @@ Windows desktop app for Codex subscriptions, with Chinese, English and Dutch UI.
 
 The initial acceptance set and evidence levels are tracked in [Domestic platform compatibility](docs/DOMESTIC-COMPATIBILITY.md). IDE-only products without a documented local export, log or API remain candidates rather than promised support.
 
-Current scope includes Codex subscriptions and optional local records from Qwen Code, Kimi Code, CodeBuddy Code, CC Switch, Claude Code, Gemini CLI and JSONL. Later 1.4 previews will add legacy formats, safer detection and documented quota/credit surfaces. Other providers remain a later-version direction.
+Current scope includes Codex subscriptions and optional local records from Qwen Code, Kimi Code, CodeBuddy Code, CC Switch, Claude Code, Gemini CLI and JSONL. Later 1.4 previews will add legacy formats and documented quota/credit surfaces. Other providers remain a later-version direction.
 
 ## 简体中文
 
-### 当前版本：1.4.0-beta.3 预发布
+### 当前版本：1.4.0-beta.4 预发布
 
 面向 Codex 套餐的 Windows 桌面应用，支持中文、英语、荷兰语。已提供本地用量分析、账户额度、账期对比、专注窗口和可选提醒。**尚未完整覆盖 CodexBar 与 codex-usage 的 Codex 功能**，详见[覆盖清单](docs/COMPATIBILITY.md)。
 
@@ -38,11 +38,11 @@ Current scope includes Codex subscriptions and optional local records from Qwen 
 
 首批验收范围和证据级别见[国产平台兼容目标](docs/DOMESTIC-COMPATIBILITY.md)。仅有封闭 IDE、没有公开本地导出／日志／接口的平台先列为候选，不提前承诺支持。
 
-当前已包含 Codex 套餐，以及可选的 Qwen Code、Kimi Code、CodeBuddy Code、CC Switch、Claude Code、Gemini CLI 和 JSONL 本地记录接入。后续 1.4 预览版继续补旧格式、安全发现和有官方依据的额度／积分接口；其它供应商留作再下一版本方向。
+当前已包含 Codex 套餐，以及可选的 Qwen Code、Kimi Code、CodeBuddy Code、CC Switch、Claude Code、Gemini CLI 和 JSONL 本地记录接入。后续 1.4 预览版继续补旧格式和有官方依据的额度／积分接口；其它供应商留作再下一版本方向。
 
 ## Nederlands
 
-### Huidige versie: 1.4.0-beta.3 preview
+### Huidige versie: 1.4.0-beta.4 preview
 
 Een Windows-desktopapp voor Codex-abonnementen, in het Chinees, Engels en Nederlands. Lokale gebruiksanalyse, accountlimieten, periodevergelijking, compacte weergave en optionele meldingen zijn beschikbaar. **Volledige Codex-functionaliteit van CodexBar en codex-usage is nog niet bereikt.** Zie het [overzicht](docs/COMPATIBILITY.md).
 
@@ -57,4 +57,4 @@ Een Windows-desktopapp voor Codex-abonnementen, in het Chinees, Engels en Nederl
 
 De eerste acceptatieset en bewijsniveaus staan in [compatibiliteit met Chinese platforms](docs/DOMESTIC-COMPATIBILITY.md). Gesloten IDE-producten zonder gedocumenteerde export, log of API blijven kandidaat.
 
-De huidige scope omvat Codex-abonnementen en lokale records van Qwen Code, Kimi Code, CodeBuddy Code, CC Switch, Claude Code, Gemini CLI en JSONL. Latere 1.4-previews voegen oudere formaten, veilige detectie en gedocumenteerde quota- of creditbronnen toe; andere aanbieders volgen in een latere versie.
+De huidige scope omvat Codex-abonnementen en lokale records van Qwen Code, Kimi Code, CodeBuddy Code, CC Switch, Claude Code, Gemini CLI en JSONL. Latere 1.4-previews voegen oudere formaten en gedocumenteerde quota- of creditbronnen toe; andere aanbieders volgen in een latere versie.

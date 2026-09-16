@@ -66,7 +66,7 @@ body:not(.compact-mode) .dashboard-deck .decision-grid{margin:0;gap:10px;grid-te
 .overview-primary .billing-card .section-gap{margin-top:7px}
 .overview-primary .distribution-body{min-height:164px!important}
 .overview-primary .distribution-visual{width:145px!important;flex-basis:145px!important}
-.overview-expanded .two-col{margin-bottom:10px;gap:10px}
+.overview-expanded .two-col{margin-bottom:10px;gap:10px;grid-template-columns:minmax(0,1.35fr) minmax(0,.8fr) minmax(0,.9fr)}
 .overview-expanded .two-col .panel{min-width:0}
 .overview-expanded .two-col .chart{height:145px}
 .overview-expanded .two-col .chart-area{padding-top:8px;padding-bottom:2px}
@@ -138,3 +138,5 @@ body:not(.compact-mode) .notice{margin-bottom:7px;padding:7px 10px}
  .overview-primary .distribution-body{min-height:132px!important}
  .overview-primary .distribution-visual{width:112px!important;flex-basis:112px!important}
 }
+
+.overview-expanded .model-advice-card .panel-head{padding-top:11px}.overview-expanded .model-advice-card{overflow:hidden}

@@ -1,9 +1,10 @@
 'use strict';
 const {app,BrowserWindow,ipcMain,dialog,shell,Menu,Tray,nativeImage,nativeTheme,Notification}=require('electron');
-const path=require('node:path'),os=require('node:os');const fs=require('node:fs/promises');const {pathToFileURL}=require('node:url');
+const path=require('node:path');const fs=require('node:fs/promises');const {pathToFileURL}=require('node:url');
 const {resolveLanguage,translate}=require('./i18n.js');
 const {reportData,reportHtml}=require('./core/report.cjs');
 const {Service}=require('./core/service.cjs');const {dollars}=require('./core/pricing.cjs');
+const {monitorDefaults,discoverMonitors}=require('./core/discovery.cjs');
 if(process.env.LENS_DATA_DIR)app.setPath('userData',path.resolve(process.env.LENS_DATA_DIR));
 app.setName('Subscription Lens');app.setAppUserModelId('net.subscriptionlens.desktop');
 const lock=app.requestSingleInstanceLock();if(!lock){app.quit();}else{
@@ -21,13 +22,15 @@ function notifyQuota(alerts){if(!Notification.isSupported())return;try{const bod
 
 function handler(name,fn){ipcMain.handle('lens:'+name,async(event,...args)=>{if(!win||event.sender!==win.webContents||event.senderFrame!==win.webContents.mainFrame||event.senderFrame.url!==ui)throw new Error('无效窗口');try{return {ok:true,value:await fn(...args)};}catch(e){return {ok:false,error:typeof e.message==='string'?t(e.message).slice(0,200):t("操作失败")};}});}
 function csvCell(value){let s=String(value??'');if(/^[=+@\-\t\r]/.test(s))s="'"+s;return '"'+s.replaceAll('"','""')+'"';}
-function monitorDefault(kind){const home=os.homedir(),paths={qwen:process.env.QWEN_HOME||path.join(home,'.qwen'),kimi:process.env.KIMI_CODE_HOME||path.join(home,'.kimi-code'),codebuddy:path.join(home,'.codebuddy'),claude:path.join(home,'.claude','projects'),gemini:path.join(home,'.gemini','tmp'),'cc-switch':path.join(home,'.cc-switch','cc-switch.db')};return paths[kind];}
+function monitorDefault(kind){return monitorDefaults().find(candidate=>candidate.kind===kind)?.path;}
+function detectedMonitors(){return discoverMonitors({connected:service.monitor.sources});}
 function register(){
   handler('chooseMonitor',async kind=>{if(!['cc-switch','claude','gemini','qwen','kimi','codebuddy','usage-jsonl'].includes(kind))throw Error('不支持的来源');const folder=['claude','gemini','qwen','kimi','codebuddy'].includes(kind),candidate=monitorDefault(kind);let defaultPath;try{if(candidate){await fs.access(candidate);defaultPath=candidate;}}catch{/* Start in the system default folder when the client has no data yet. */}const result=await dialog.showOpenDialog(win,{title:t('添加监控来源'),properties:[folder?'openDirectory':'openFile'],...(defaultPath?{defaultPath}:{}),...(folder?{}:{filters:[{name:kind==='cc-switch'?'SQLite':'JSONL',extensions:kind==='cc-switch'?['db','sqlite','sqlite3']:['jsonl']}]})});if(result.canceled)return null;const added=await service.monitor.add(kind,result.filePaths[0]);changed();return added;});
   handler('configureMonitor',(id,input)=>{const result=service.monitor.configure(id,input||{});changed();return result;});
+  handler('addDetectedMonitors',async kind=>{const candidates=detectedMonitors().filter(item=>!item.connected&&(!kind||item.kind===kind));const added=[],failed=[];for(const candidate of candidates)try{added.push(await service.monitor.add(candidate.kind,candidate.path));}catch(error){failed.push({kind:candidate.kind,error:error.message});}changed();if(!added.length&&failed.length)throw Error(failed[0].error);return {added:added.length,failed:failed.length};});
   handler('monitorRate',(provider,model,input)=>{const result=service.monitor.setRate(provider,model,input||{});changed();return result;});
   handler('exportMonitor',async filters=>{const selected=service.query(filters||{});const data=service.monitor.query({...filters,export:true},selected.range,service.catalog);const result=await dialog.showSaveDialog(win,{title:t('导出用量'),defaultPath:'provider-usage.csv',filters:[{name:'CSV',extensions:['csv']}]});if(result.canceled)return null;const rows=[['time_utc','provider','model','input_including_cache','cached','cache_write','output_including_reasoning','reasoning','total_tokens','cost_usd','cost_basis','status','latency_ms','ttft_ms'],...data.rows.map(e=>[e.at,e.provider,e.model,e.input,e.cached,e.write,e.output,e.reasoning,e.total,e.usd??'',e.amount===null?'unpriced':e.basis,e.status,e.latencyMs,e.ttftMs])];await fs.writeFile(result.filePath,'\uFEFF'+rows.map(row=>row.map(csvCell).join(',')).join('\r\n'));return data.rows.length;});
-  handler('query',f=>({...service.query(f||{}),desktop:{compact:compactMode,pinned,version:app.getVersion(),notificationsAvailable:Notification.isSupported()}}));
+  handler('query',f=>({...service.query(f||{}),desktop:{compact:compactMode,pinned,version:app.getVersion(),notificationsAvailable:Notification.isSupported(),detectedMonitors:detectedMonitors()}}));
   handler('setCompact',value=>{setCompact(value===true);return true;});
   handler('setPinned',value=>{pinned=value===true;win.setAlwaysOnTop(pinned);changed();return pinned;});
   handler('removeRoot',root=>service.removeRoot(root));
