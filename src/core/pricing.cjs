@@ -8,6 +8,7 @@ function decimalUnits(value,scale=9){
 function price(event,catalog=bundled){
   const rate=catalog.models[event.model];
   const unknown=reason=>({amount:null,reason,parts:null,version:catalog.version});
+  if(Object.prototype.hasOwnProperty.call(event,'importedCost'))return event.importedCost===null?unknown('model'):{amount:event.importedCost,parts:null,reason:null,version:'device-ledger',context:'imported'};
   if(!rate)return unknown('model');
   if(event.quality==='ambiguous')return unknown('counter');
   if(KEYS.some(k=>event[k]===null||!Number.isSafeInteger(event[k])||event[k]<0))return unknown('tokens');

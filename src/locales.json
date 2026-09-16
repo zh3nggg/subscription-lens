@@ -1546,5 +1546,136 @@
   "目标速度降低 {n}%": [
     "Lower target pace by {n}%",
     "Doeltempo {n}% verlagen"
-  ]
+  ],
+  "API 等价强度": [
+    "API-equivalent intensity",
+    "API-equivalente intensiteit"
+  ],
+  "依据近14天模型用量、": [
+    "Based on 14-day model usage, ",
+    "Gebaseerd op 14 dagen modelgebruik, "
+  ],
+  "和近期额度速度；下个窗口会继续校准。": [
+    " and recent quota pace; calibration continues next window.",
+    " en recent quotatempo; kalibratie gaat volgend venster door."
+  ],
+  "模型处理的文本单位，包括输入和输出；缓存分类只计算一次。": [
+    "Units of text processed by a model, including input and output. Cache categories are counted once.",
+    "Teksteenheden die een model verwerkt, inclusief invoer en uitvoer. Cachecategorieën worden één keer geteld."
+  ],
+  "按保存的 API 价格快照换算当前收集用量所得的金额，并非套餐账单或保证节省的费用。": [
+    "What the collected usage would cost at the saved API price snapshot. It is not your subscription bill or guaranteed savings.",
+    "Wat het verzamelde gebruik volgens de opgeslagen API-prijzen zou kosten. Dit is geen abonnementsfactuur of gegarandeerde besparing."
+  ],
+  "从先前提示缓存中重复使用的输入 Tokens；它们仍属于输入，不会重复计入总量。": [
+    "Input tokens reused from a previous prompt cache. They remain part of input and are not added twice.",
+    "Invoertokens die uit een eerdere promptcache worden hergebruikt. Ze blijven onderdeel van de invoer en worden niet dubbel geteld."
+  ],
+  "供应商写入可重复使用的提示缓存的输入 Tokens。": [
+    "Input tokens written to a reusable prompt cache by the provider.",
+    "Invoertokens die door de aanbieder naar een herbruikbare promptcache worden geschreven."
+  ],
+  "输入 Tokens 中从缓存读取的比例；比例较高通常会降低 API 等价成本。": [
+    "The share of input tokens served from cache. A higher share can reduce API-equivalent cost.",
+    "Het aandeel invoertokens dat uit de cache komt. Een hoger aandeel kan de API-equivalente kosten verlagen."
+  ],
+  "已收集 Tokens 中匹配完整价格规则的比例，不代表账户全部活动都已被收集。": [
+    "The share of collected tokens that match a complete price rule. It does not measure whether all account activity was collected.",
+    "Het aandeel verzamelde tokens met een volledige prijsregel. Dit zegt niet of alle accountactiviteit is verzameld."
+  ],
+  "模型或 Token 分类没有完整价格规则的记录；其 Tokens 仍计入用量。": [
+    "A record whose model or token categories do not have a complete price rule. Its tokens remain included.",
+    "Een record zonder volledige prijsregel voor het model of de tokencategorieën. De tokens blijven wel meetellen."
+  ],
+  "单次请求超过此规模后，模型会采用长上下文价格档位。": [
+    "The request size above which a model uses its long-context price tier.",
+    "De aanvraaggrootte waarboven een model het tarief voor lange context gebruikt."
+  ],
+  "Codex 返回的 ChatGPT/Codex 账户级容量，由不同客户端共享，并非单台设备的 Token 总量。": [
+    "Account-level ChatGPT/Codex capacity returned by Codex. It is shared across clients and is not a per-device token total.",
+    "Capaciteit op ChatGPT/Codex-accountniveau die Codex teruggeeft. Deze wordt gedeeld door clients en is geen tokentotaal per apparaat."
+  ],
+  "根据本机使用习惯、API 等价强度和账户额度速度，为近期模型建议的使用比例。": [
+    "A suggested share for recently used models, based on local habits, API-equivalent intensity and account quota pace.",
+    "Een voorgestelde verdeling voor recent gebruikte modellen, gebaseerd op lokale gewoonten, API-equivalente intensiteit en het tempo van het accountquotum."
+  ],
+  "表示可用价格和额度历史对建议的支持程度，并非结果保证。": [
+    "Shows how much usable pricing and quota history supports the recommendation. It is not a guarantee.",
+    "Geeft aan hoeveel bruikbare prijs- en quotageschiedenis het advies ondersteunt. Het is geen garantie."
+  ],
+  "根据 Token 数量和价格规则在本地计算的金额，并非供应商报告。": [
+    "A locally calculated amount from token counts and a price rule. It is not reported by the provider.",
+    "Een lokaal berekend bedrag op basis van tokens en een prijsregel. Het is niet door de aanbieder gerapporteerd."
+  ],
+  "导入来源记录中自带的金额；Subscription Lens 不将其验证为账单。": [
+    "An amount included in the imported source record. Subscription Lens does not verify it as an invoice.",
+    "Een bedrag uit het geïmporteerde bronrecord. Subscription Lens verifieert dit niet als factuur."
+  ],
+  "成功请求数除以包含状态码的记录数；没有状态的记录不参与计算。": [
+    "Successful requests divided by records that include a status code. Records without status are excluded.",
+    "Geslaagde aanvragen gedeeld door records met een statuscode. Records zonder status tellen niet mee."
+  ],
+  "95% 的已测请求在此时间内完成；没有延迟数据的记录不参与计算。": [
+    "Ninety-five percent of measured requests completed within this time. Records without latency are excluded.",
+    "Vijfennegentig procent van de gemeten aanvragen werd binnen deze tijd voltooid. Records zonder vertraging tellen niet mee."
+  ],
+  "所选本地来源的估算金额和来源报告金额，统一以 USD 显示，并非账户账单。": [
+    "Estimated and source-reported USD amounts for the selected local source. It is not an account invoice.",
+    "Geschatte en door de bron gemelde USD-bedragen voor de gekozen lokale bron. Dit is geen accountfactuur."
+  ],
+  "来源提供的请求耗时；缺失值不会按零计算。": [
+    "Elapsed request time when the source provides it. Missing values are not treated as zero.",
+    "Verstreken aanvraagtijd wanneer de bron die levert. Ontbrekende waarden worden niet als nul behandeld."
+  ],
+  "收到第一个输出 Token 所需时间的中位数，仅统计提供该指标的记录。": [
+    "The median time until the first output token. Only records that provide this measurement are included.",
+    "De mediane tijd tot het eerste uitvoertoken. Alleen records met deze meting tellen mee."
+  ],
+  "Codex 返回的账户级活动汇总；当前协议不按设备拆分。": [
+    "An account-level activity summary returned by Codex. The current protocol does not split it by device.",
+    "Een activiteitsoverzicht op accountniveau dat Codex teruggeeft. Het huidige protocol splitst dit niet per apparaat."
+  ],
+  "从这台电脑上已配置的 Codex 目录读取的会话，不会自动包含其他设备。": [
+    "Sessions read from Codex folders configured on this computer. Other devices are not included automatically.",
+    "Sessies uit Codex-mappen die op deze computer zijn ingesteld. Andere apparaten worden niet automatisch meegenomen."
+  ],
+  "登录账户返回的聚合活动信息，明细程度低于本机会话记录。": [
+    "Aggregate activity returned for the signed-in account. It has less detail than local session records.",
+    "Geaggregeerde activiteit voor het aangemelde account. Deze bevat minder detail dan lokale sessierecords."
+  ],
+  "除非单独导入数据，否则无法获取其他电脑或云端任务的详细记录。": [
+    "Detailed records from other computers or cloud tasks are unavailable unless their data is imported separately.",
+    "Gedetailleerde records van andere computers of cloudtaken zijn niet beschikbaar tenzij hun gegevens apart worden geïmporteerd."
+  ],
+  "本账期实际支付的套餐金额，由用户以 USD 手动填写。": [
+    "The amount you actually paid for the subscription during this billing period, entered manually in USD.",
+    "Het bedrag dat je in deze factuurperiode werkelijk voor het abonnement betaalde, handmatig ingevoerd in USD."
+  ],
+  "本账期额外支付或购买的额度，由用户以 USD 手动填写。": [
+    "Additional payment or purchased credits for the current billing period, entered manually in USD.",
+    "Extra betaling of gekochte credits voor de huidige factuurperiode, handmatig ingevoerd in USD."
+  ],
+  "API 等价成本除以套餐实付金额；它用于比较，并非现金节省。": [
+    "API-equivalent cost divided by the subscription payment. It is a comparison, not cash savings.",
+    "API-equivalente kosten gedeeld door de abonnementsbetaling. Dit is een vergelijking, geen contante besparing."
+  ],
+  "各模型每 Token 对应的已观测 API 等价成本，仅用作相对信号，并非官方套餐额度权重。": [
+    "Observed API-equivalent cost per token for each model. It is used only as a relative signal and is not an official subscription quota weight.",
+    "De waargenomen API-equivalente kosten per token voor elk model. Dit is alleen een relatief signaal en geen officieel quotagewicht."
+  ],
+  "设备": ["Devices", "Apparaten"],
+  "导出设备数据": ["Export device data", "Apparaatgegevens exporteren"],
+  "导入设备数据": ["Import device data", "Apparaatgegevens importeren"],
+  "账户额度由所有客户端共享；设备页只统计已采集或已导入的本机 Codex 记录。": ["Account quota is shared by every client. Devices only counts collected or imported local Codex records.", "Accountquota wordt door alle clients gedeeld. Apparaten telt alleen verzamelde of geïmporteerde lokale Codex-records."],
+  "设备名称": ["Device name", "Apparaatnaam"],
+  "重命名": ["Rename", "Naam wijzigen"],
+  "重命名设备": ["Rename device", "Apparaat hernoemen"],
+  "本机": ["This device", "Dit apparaat"],
+  "最后同步": ["Last sync", "Laatst gesynchroniseerd"],
+  "筛选设备": ["Filter device", "Apparaat filteren"],
+  "全部设备": ["All devices", "Alle apparaten"],
+  "数据包仅包含匿名会话标识、时间、模型和 Token 分类；不包含聊天正文、项目路径或登录凭据。": ["The package contains only anonymous session IDs, time, model and token categories; it excludes chat content, project paths and sign-in credentials.", "Het pakket bevat alleen anonieme sessie-ID's, tijd, model en tokencategorieën; chatinhoud, projectpaden en inloggegevens zijn uitgesloten."],
+  "已导入 {n} 条记录": ["Imported {n} records", "{n} records geïmporteerd"],
+  "查看用量": ["View usage", "Gebruik bekijken"],
+  "{n} 台已导入设备": ["{n} imported devices", "{n} geïmporteerde apparaten"]
 }

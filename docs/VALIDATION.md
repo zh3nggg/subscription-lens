@@ -1,12 +1,13 @@
-# Validation — 1.4.0-beta.4
+# Validation — 1.4.0-beta.5
 
 Windows x64 · Node.js 24.14.0 · Electron 44.4.0 · electron-builder 26.15.3.
 
 ## Automated checks
 
-- 60 unit/integration checks passed locally, including automatic safe discovery, model-mix calibration, Qwen Code, Kimi Code and CodeBuddy read-only imports, domestic provider attribution, cache semantics, read-only CC Switch imports and upstream corrections, duplicate/unfinished records, price rules, translations and persistent installer identity.
+- 61 unit/integration checks passed locally, including device identity, anonymous package export/import, imported-cost preservation, automatic safe discovery, model-mix calibration, provider imports, cache semantics, price rules, translations and persistent installer identity.
 - Desktop checks cover provider → model → requests, Tokens/cost switching, every dashboard tab, overview no-scroll behavior, pagination and Chinese/English/Dutch layouts at 760×560, 820×600, 1024×768 and 1320×900 content sizes.
 - Existing product, localization and simulated quota tests are part of the release checks. Actual notification delivery is intercepted; these tests do not establish Windows toast delivery under every policy.
+- Desktop smoke verifies the device page, its device filter and contextual terminology help in addition to the quota forecast flow.
 - Connector and layout fixtures use synthetic records. A packaged startup smoke also verified the existing local Codex import and account connection; it copied no credentials, kept results outside the release artifacts and made no paid model requests.
 
 ## Limits

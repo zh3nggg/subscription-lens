@@ -1,9 +1,12 @@
-# Subscription Lens 1.4.0-beta.4
+# Subscription Lens 1.4.0-beta.5
 
 Windows x64 · 中文 / English / Nederlands
 
 ## 新增功能
 
+- 新增“设备”页面：为本机生成稳定设备身份，历史 Codex 记录自动归属本机；按设备查看 Tokens、API 等价成本、会话和最后同步时间，并可直接进入该设备的用量筛选。
+- 支持设备数据包导入／导出。数据包只包含匿名会话标识、时间、模型、Token 分类和 API 等价成本快照，不包含聊天正文、项目路径或登录凭据。
+- 账户额度继续作为共享账户数据展示，不把它拆分成虚假的单设备额度。新增术语悬停解释，覆盖额度、缓存、计价、延迟、模型建议和数据范围。
 - 自动发现 Qwen Code、Kimi Code、CodeBuddy Code、CC Switch、Claude Code 与 Gemini CLI 的常用本机目录，可一键连接单个或全部已安装工具；特殊路径继续支持手动选择。
 - Codex 总览新增模型组合建议：结合近 14 天模型使用比例、API 等价强度和当前额度预测，建议提高或降低各模型比例，使使用速度更接近窗口重置时间。
 - 建议显示学习状态和可信度。OpenAI 未提供各模型的套餐额度精确换算权重，因此建议会随额度观测继续校准，不承诺精确耗尽额度。
@@ -13,9 +16,13 @@ Windows x64 · 中文 / English / Nederlands
 
 ## What's new
 
+Devices are now a first-class view. Each installation has a stable device identity; local Codex history is assigned to it and can be filtered by device. Anonymous device packages transfer timestamps, model, token categories and API-equivalent cost snapshots without chat content, project paths or credentials. Shared account quota remains separate from device usage.
+
 Standard local installations of six supported tools are now detected and connected in one click. The Codex overview adds a confidence-labelled model-mix recommendation based on 14-day habits, API-equivalent intensity and live quota pace. It targets the next reset but remains adaptive because exact per-model subscription quota weights are not published.
 
 ## Nieuw
+
+Apparaten zijn nu een eigen overzicht. Elke installatie krijgt een stabiele apparaatidentiteit; lokale Codex-geschiedenis wordt eraan gekoppeld en kan per apparaat worden gefilterd. Anonieme apparaatpakketten bevatten tijdstippen, model, tokencategorieën en API-equivalente kostensnapshots, zonder chatinhoud, projectpaden of inloggegevens. Gedeelde accountquota blijft afzonderlijk van apparaatgebruik.
 
 Zes ondersteunde tools in standaardmappen worden nu automatisch gevonden en met één klik verbonden. Het Codex-overzicht adviseert een modelmix op basis van 14 dagen gebruik, API-equivalente intensiteit en het actuele quotatempo, met een zichtbare betrouwbaarheid. Het advies richt zich op de volgende reset en blijft adaptief omdat exacte quotagewichten per model niet zijn gepubliceerd.
 

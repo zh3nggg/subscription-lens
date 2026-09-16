@@ -9,7 +9,7 @@
 - Copied components: usage, store, model, timezone and pricing packages, including tests and fixtures. Changes and verification are recorded in [UPSTREAM.md](native/usage-engine/UPSTREAM.md).
 - Go-derived timezone material retains [GO-LICENSE](native/usage-engine/internal/timezone/GO-LICENSE).
 
-This source is included for the next accounting-engine integration. Version 1.4.0-beta.4 does not execute or bundle the experimental native binary. Passing upstream tests does not establish desktop feature parity.
+This source is included for the next accounting-engine integration. Version 1.4.0-beta.5 does not execute or bundle the experimental native binary. Passing upstream tests does not establish desktop feature parity.
 
 ## CodexBar — product reference
 
