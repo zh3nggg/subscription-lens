@@ -1,16 +1,28 @@
 # 余量 · Subscription Lens
 
-本项目在 **GPT-6 Astra** 的协助下完成开发。
-
-**1.2.0 预发布 · Windows x64。** [下载安装包](https://github.com/zh3nggg/subscription-lens/releases) · [路线图](../ROADMAP.md) · [开源来源与许可](../THIRD-PARTY-NOTICES.md)
-
-当前尚未完整覆盖 CodexBar／codex-usage 的 Codex 功能。现有采集器尚未完整处理独立请求、压缩用量、混合计数重置和分叉继承历史，汇总可能偏低或偏高；已引入的新版统计引擎尚未启用。详见[发布边界](RELEASE.md)。其他供应商支持已列入[下一版前瞻](../ROADMAP.md#简体中文)，当前暂不包含。
+面向 **Codex 套餐用户**的 Windows 桌面应用：查看还剩多少额度、哪些项目消耗了 Tokens，以及已记录用量按 API 价格估算后，与套餐实付相差多少。无需 API Key。
 
 [English](../README.md) · [简体中文](README.zh-CN.md) · [Nederlands](README.nl.md)
 
-Windows 桌面应用。统计本机 Codex 套餐用量，查询套餐额度，换算 API 等价成本。
+## 主要功能
 
-## 安装与使用
+| 使用需求 | 对应功能 |
+| --- | --- |
+| 了解还能用多久 | 查看账户额度、重置倒计时；观测充足时提供基于近期使用速度的估算。 |
+| 弄清 Tokens 用在哪里 | 按项目、模型和会话查看已记录用量，逐层进入具体记录。 |
+| 比较用量价值与套餐实付 | 将 API 等价成本与当期实际付款并列展示，支持自动月度账期。 |
+| 工作时随手看额度 | 使用可置顶专注窗口、托盘和可选额度提醒，支持免打扰时段。 |
+| 导出明细或分享汇总 | 导出 CSV，或生成不含项目名和账户标识的 HTML 汇总报告。 |
+
+![Subscription Lens](images/overview.png)
+
+*界面截图使用合成数据，不含真实账户或对话信息。*
+
+## 下载与快速开始
+
+**1.2.0 预发布 · Windows x64。** 当前采集器尚未完整适配所有 Codex 记录格式，汇总可能偏高或偏低；费用是估算值，不是账单或保证节省的金额。安装包未做代码签名，暂不支持自动更新。
+
+[下载安装包或便携版](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.2.0)
 
 1. 从 GitHub 仓库的 Releases 页面下载安装包或便携 ZIP。运行 `Subscription-Lens-1.2.0-x64.exe` 安装，或解压 ZIP 后运行 `Subscription Lens.exe`。
 2. 首次打开点击“开始监测”；自定义 Codex Home 可点“选择目录”。目录应包含 `sessions` 或 `archived_sessions`。
@@ -21,7 +33,8 @@ Windows 桌面应用。统计本机 Codex 套餐用量，查询套餐额度，�
 
 不需要 API Key、Node、Python 或 Docker。查询账户额度需要本机安装 Codex；找不到程序时可选择 `codex.exe`。仅查看本地 Token 明细不依赖账户查询。
 
-## 日常使用
+<details>
+<summary>使用细节与快捷键</summary>
 
 - **工作前看额度。** 首页优先显示账户余量与距重置时间。预测至少需要同一账户、同一窗口、同一重置周期的 3 次观测、15 分钟及可测量变化；最多参考最近两小时。超过三分钟的旧数据、重置或计数回退不会沿用旧预测。预测假设近期速度持续，不是保证；不会用本机 Tokens 猜套餐额度。
 - **工作中用专注窗口。** Ctrl+Shift+M 切换小窗口，可选置顶；Esc 返回。启用托盘后单击托盘图标打开小窗口。
@@ -32,6 +45,8 @@ Windows 桌面应用。统计本机 Codex 套餐用量，查询套餐额度，�
 - **分享匿名摘要。** 预览后保存独立 HTML 文件，仅含汇总、计价覆盖率和日期，不含账户、项目名、路径或会话标识；不会自动上传。
 
 额度观测只在本机保存，最多三天、25,000条。新功能未增加运行依赖、云服务或模型调用。
+
+</details>
 
 ## 数据与费用口径
 
@@ -60,9 +75,17 @@ Windows 桌面应用。统计本机 Codex 套餐用量，查询套餐额度，�
 - **Token 已记录但未计价**：查看明细原因，必要时导入价格目录。不要用相似模型的价格代替未知模型。
 - **价格变更**：从官方价格页核对，并通过“价格 → 导出/导入”维护目录。
 
-## 源码构建
+## 当前范围与下一版计划
 
-Windows x64，Node.js 24。依赖版本已固定在 package-lock.json。
+当前面向 Windows 上的 Codex/OpenAI 使用场景，暂不自动采集普通 ChatGPT 聊天、其他供应商或其他设备的用量。尚未完整覆盖 CodexBar 与 codex-usage 的 Codex 功能。
+
+下一版优先接入已通过组件测试的 codex-usage 统计引擎并完成安全迁移，随后完善任务树、代理归属和小时分析。Claude、Cursor、Gemini 等其他供应商已列入更新前瞻，当前不包含，交付日期未定。
+
+[路线图](../ROADMAP.md#简体中文) · [功能覆盖清单](COMPATIBILITY.md) · [发布边界](RELEASE.md) · [验证报告](VALIDATION.md)
+
+## 源码构建与参与贡献
+
+使用 Windows x64 和 Node.js 24，依赖版本固定在 package-lock.json。界面测试、翻译维护及实验性统计引擎说明见[贡献指南](../CONTRIBUTING.md)。真实账户测试仅供手动运行。
 
 ```powershell
 npm ci
@@ -71,20 +94,10 @@ npm start
 npm run dist
 ```
 
-`npm run dist` 生成 NSIS 安装包和便携 ZIP。构建工具缓存建议设置到项目内 `.cache`（环境变量 `ELECTRON_CACHE`、`ELECTRON_BUILDER_CACHE`）。
+## 开发与致谢
 
-`node scripts/smoke.cjs` 进行隐藏桌面测试；此测试会使用测试者本机 Codex 记录和官方账户查询，测试账本保存在 `test-results`，不会随发行包打包。
+本项目在 **GPT-6 Astra** 的协助下完成开发。
 
-测试安装版时设置 `LENS_TEST_EXE` 为该版本的可执行文件。测试输出不得作为朋友的初始数据打包。
+[CodexBar](https://github.com/steipete/CodexBar) 为额度和桌面交互设计提供参考；项目已引入采用 MIT 许可的 [codex-usage](https://github.com/zJay26/codex-usage) 源码，用于下一步统计引擎整合，尚未在 1.2.0 桌面程序中启用。
 
-## 版本与许可
-
-1.2.0 · Windows x64 · MIT。此构建未做 Windows 发布者代码签名，没有自动更新服务。
-
-独立工具，与 OpenAI 无隶属关系。官方参考：
-
-- https://learn.chatgpt.com/docs/app-server
-- https://developers.openai.com/api/docs/pricing
-- https://developers.openai.com/api/docs/models/gpt-6-astra
-
-运行时许可见随包提供的 Electron / Chromium 许可文件。
+本项目采用 MIT 许可，相关来源和版权见[开源说明](../THIRD-PARTY-NOTICES.md)。这是独立项目，与 OpenAI 无隶属关系，也未获得上述项目的背书。

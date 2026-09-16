@@ -1,18 +1,28 @@
 # Subscription Lens
 
-Ontwikkeld met ondersteuning van **GPT-6 Astra**.
-
-**1.2.0 Preview · Windows x64.** [Downloaden](https://github.com/zh3nggg/subscription-lens/releases) · [Roadmap](../ROADMAP.md) · [Licenties van derden](../THIRD-PARTY-NOTICES.md)
-
-Volledige Codex-functionaliteit van CodexBar/codex-usage is nog niet bereikt. De huidige collector verwerkt onafhankelijke verzoeken, compactie, gemengde tellerresets en overgenomen forkhistorie nog niet volledig; totalen kunnen te laag of te hoog zijn. De nieuwe engine is nog niet ingeschakeld. Zie [releasegrenzen](RELEASE.md). Andere aanbieders staan op de roadmap voor de volgende update.
+Een Windows-desktopapp voor **Codex-abonnees** die hun resterende limieten willen bekijken, willen zien welke projecten tokens gebruiken en het vastgelegde gebruik tegen API-tarieven willen vergelijken met hun abonnementsbetaling. Geen API-sleutel nodig.
 
 [English](../README.md) · [简体中文](README.zh-CN.md) · [Nederlands](README.nl.md)
 
-Een lokale Windows-app voor het bijhouden van je Codex-abonnementsgebruik. Bekijk vastgelegde tokens, abonnementslimieten, equivalente API-kosten en een vergelijking met je abonnementsbetaling.
+## Wat kun je ermee?
 
-## Installeren
+| Behoefte | Functies |
+| --- | --- |
+| Resterende capaciteit bekijken | Accountlimieten, aftellen tot herstel en temposchattingen zodra voldoende metingen beschikbaar zijn. |
+| Tokengebruik begrijpen | Gebruik per project, model en sessie bekijken en doorklikken naar afzonderlijke records. |
+| Gebruik met je betaling vergelijken | Geschatte equivalente API-kosten naast je werkelijke betaling per factuurperiode bekijken. |
+| Limieten tijdens het werk volgen | Een compact vastzetbaar venster, systeemvak en optionele limietmeldingen met stille uren. |
+| Exporteren en delen | Records naar CSV exporteren of een HTML-overzicht opslaan zonder projectnamen of accountidentificaties. |
 
-Download het Windows x64-installatiebestand of het ZIP-bestand via **Releases** in deze repository. Voer het installatiebestand uit of pak het ZIP-bestand uit en open `Subscription Lens.exe`.
+![Subscription Lens](images/overview.png)
+
+*Het overzicht toont synthetische gegevens, geen echte account- of gespreksgegevens.*
+
+## Downloaden en aan de slag
+
+**1.2.0 Preview · Windows x64.** De collector verwerkt nog niet alle Codex-recordformaten volledig; totalen kunnen te hoog of te laag zijn. Kosten zijn schattingen, geen factuur of gegarandeerde besparing. Deze build is niet digitaal ondertekend en heeft geen automatische updates.
+
+[Download het installatiebestand of de draagbare ZIP-versie](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.2.0)
 
 1. Kies **Monitoring starten** voor de standaardmap van Codex, of **Map kiezen** voor een eigen map met `sessions` of `archived_sessions`.
 2. Open **Verbindingen → Account verbinden** om limieten op te halen via de lokaal geïnstalleerde Codex. Gebruik **Aanmelden bij ChatGPT** als je nog niet bent aangemeld.
@@ -21,16 +31,8 @@ Download het Windows x64-installatiebestand of het ZIP-bestand via **Releases** 
 
 Je hebt geen API-sleutel, Node.js, Python of Docker nodig. Voor accountgegevens moet Codex geïnstalleerd zijn. Lokaal gebruik bijhouden werkt ook zonder accountverbinding.
 
-## Functies
-
-- Nieuwe lokale gebruiksgegevens elke 15 seconden inlezen, opslaan in SQLite en dubbele records voorkomen.
-- Officiële Codex-accountgegevens: limieten elke 60 seconden wanneer verbonden; het totale tokengebruik ongeveer elke 10 minuten.
-- Equivalente API-kosten voor invoer, cachelezingen, cacheschrijfacties en uitvoer. Redeneertokens die al in de uitvoer zijn opgenomen, tellen niet dubbel mee.
-- Zoeken, filteren op model, CSV-export, tarieven importeren/exporteren en kosten vergelijken.
-- Licht/donker thema, optioneel actief blijven in het systeemvak en starten met Windows.
-- Chinese, Engelse en Nederlandse interface, dialoogtitels en systeemvakmenu's; lokale getal- en datumnotatie.
-
-## Dagelijks gebruik
+<details>
+<summary>Gebruiksdetails en sneltoetsen</summary>
 
 - **Vooraf capaciteit bekijken.** Het overzicht toont resterende limieten en de tijd tot herstel. Een temposchatting vereist minstens drie metingen, 15 minuten en een meetbare verandering binnen hetzelfde account, venster en herstelmoment. Maximaal twee uur wordt gebruikt. Gegevens ouder dan drie minuten, resets en tellercorrecties onderdrukken onbetrouwbare schattingen. Een schatting gaat uit van gelijkblijvend gebruik en is geen garantie. Lokale tokens worden nooit naar abonnementslimieten omgerekend.
 - **Tijdens het werk compact blijven.** Ctrl+Shift+M opent het compacte venster, dat je optioneel kunt vastzetten. Escape herstelt het overzicht. Een klik op het systeemvakpictogram opent het compacte venster als systeemvakmodus actief is.
@@ -41,6 +43,8 @@ Je hebt geen API-sleutel, Node.js, Python of Docker nodig. Voor accountgegevens 
 - **Zonder projectgegevens delen.** Bekijk een voorbeeld en exporteer een zelfstandig HTML-overzicht met totalen, tariefdekking en datumbereik. Geen account, projectnamen, paden of sessie-ID’s; er wordt niets automatisch geüpload.
 
 Limietmetingen blijven maximaal drie dagen lokaal bewaard, met een grens van 25.000 records. Geen nieuwe runtime-afhankelijkheden, clouddienst of modelaanroepen.
+
+</details>
 
 ## Gegevens en schattingen
 
@@ -54,9 +58,17 @@ Equivalente API-kosten zijn een schatting, geen factuur of gegarandeerde bespari
 
 Lokale records en accounttotalen worden apart getoond en nooit bij elkaar opgeteld. Gewone ChatGPT-gesprekken worden niet ondersteund. Andere apparaten en details van cloudtaken worden niet automatisch ingelezen. Historische lokale records worden niet automatisch aan het verbonden account toegewezen; selecteer op gedeelde computers alleen je eigen mappen.
 
-## Zelf bouwen
+## Huidige scope en volgende update
 
-Windows x64, Node.js 24:
+Ondersteunt momenteel Codex/OpenAI op Windows. Gewone ChatGPT-gesprekken, andere aanbieders en gebruik op andere apparaten worden niet automatisch ingelezen. Volledige Codex-functionaliteit van CodexBar en codex-usage is nog niet bereikt.
+
+De volgende update geeft prioriteit aan de geteste codex-usage-engine en veilige migratie, gevolgd door taakbomen, agenttypen en analyse per uur. Optionele ondersteuning voor Claude, Cursor, Gemini en andere aanbieders staat op de roadmap; er is geen datum toegezegd.
+
+[Roadmap](../ROADMAP.md#nederlands) · [Dekking](COMPATIBILITY.md) · [Releasegrenzen](RELEASE.md) · [Validatie](VALIDATION.md)
+
+## Zelf bouwen en bijdragen
+
+Gebruik Windows x64 en Node.js 24. Afhankelijkheden zijn vastgelegd in package-lock.json. Zie [CONTRIBUTING.md](../CONTRIBUTING.md) voor synthetische interfacetests, vertalingen en de experimentele engine. De test met een echt account is uitsluitend voor handmatig gebruik.
 
 ```powershell
 npm ci
@@ -65,14 +77,10 @@ npm start
 npm run dist
 ```
 
-Versies staan vast in `package-lock.json`. De build maakt een NSIS-installatiebestand en een ZIP-bestand. Stel desgewenst `ELECTRON_CACHE` en `ELECTRON_BUILDER_CACHE` in op mappen binnen het project.
+## Ontwikkeling en dankwoord
 
-`node scripts/smoke-i18n.cjs` test de talen in een geïsoleerde desktopomgeving zonder je account te gebruiken. `node scripts/smoke.cjs` gebruikt je echte lokale Codex-records en account. Resultaten staan in `test-results`; verspreid die map niet. Met `LENS_TEST_EXE` kun je een verpakte app testen.
+Ontwikkeld met ondersteuning van **GPT-6 Astra**.
 
-Vertalingen staan in `src/locales.json`: Chinese brontekst, gevolgd door de Engelse en Nederlandse vertaling. De browsercatalogus wordt vóór starten, testen en bouwen automatisch gegenereerd. Projectnamen en paden blijven ongewijzigd. CSV-kolomnamen blijven Engelse identificaties voor compatibiliteit.
+[CodexBar](https://github.com/steipete/CodexBar) dient als referentie voor limieten en desktopinteractie. MIT-gelicentieerde broncode van [codex-usage](https://github.com/zJay26/codex-usage) is opgenomen voor de volgende engine-integratie; deze is nog niet actief in de desktopapp 1.2.0.
 
-## Versie en licentie
-
-Versie 1.2.0 · Windows x64 · MIT. Deze build is niet digitaal ondertekend en heeft geen automatische updates. De accountkoppeling is afhankelijk van de geïnstalleerde Codex-versie. Onafhankelijke tool, niet verbonden aan OpenAI.
-
-Officiële bronnen: [Codex App Server](https://learn.chatgpt.com/docs/app-server), [API-tarieven](https://developers.openai.com/api/docs/pricing). De licentieteksten voor Electron en Chromium zijn bij de app inbegrepen.
+MIT. Zie [licenties van derden](../THIRD-PARTY-NOTICES.md) voor bronnen en auteursrechten. Dit is een onafhankelijk project, niet verbonden aan OpenAI of onderschreven door de genoemde projecten.
