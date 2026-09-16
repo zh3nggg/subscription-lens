@@ -18,7 +18,7 @@
 
 ## 1.4 多供应商监控
 
-连接 Qwen Code、Kimi Code、CodeBuddy Code、CC Switch、Claude Code、Gemini CLI 或自己的 API 用量文件。国产模型会在同一供应商 → 模型环形图中归属到阿里云、月之暗面、智谱、MiniMax、DeepSeek；支持 Tokens／费用切换、请求明细、性能与自定义计价。程序会自动发现常用目录中的已安装工具，可一次连接全部来源；特殊安装位置仍可手动选择。[来源配置与费用口径](PROVIDER-MONITORING.md)。
+连接 Qwen Code、Kimi Code、CodeBuddy Code、Qoder、CC Switch、Claude Code、Gemini CLI 或自己的 API 用量文件。Qoder 可通过内置脚本捕获 stream JSON，原始 Credits 与 API 等价美元分开统计，并跳过累计结果，避免重复计费。国产模型会在同一供应商 → 模型环形图中归属到阿里云、月之暗面、智谱、MiniMax、DeepSeek；支持 Tokens／费用切换、请求明细、性能与自定义计价。程序会自动发现常用目录中的已安装工具，可一次连接全部来源；特殊安装位置仍可手动选择。[来源配置与费用口径](PROVIDER-MONITORING.md)。
 
 Codex 总览会结合近 14 天模型习惯与当前额度速度，推荐下个重置前的模型使用比例，并标注可信度。由于 OpenAI 未公布各模型对应套餐额度的精确权重，该建议使用 API 等价强度持续校准，不承诺精确耗尽额度。
 

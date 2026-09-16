@@ -127,6 +127,14 @@
     "Select your local Codex folder to start.",
     "Selecteer je lokale Codex-map om te beginnen."
   ],
+  "首次连接会回读已有历史记录": [
+    "Existing local history is imported on first connection.",
+    "Bestaande lokale geschiedenis wordt bij de eerste verbinding ingelezen."
+  ],
+  "原始 Credits 与 API 等价成本分开统计": [
+    "Native Credits and API-equivalent cost are tracked separately.",
+    "Native Credits en API-equivalente kosten worden afzonderlijk bijgehouden."
+  ],
   "开始监测": [
     "Start monitoring",
     "Monitoring starten"
@@ -1498,6 +1506,18 @@
   "学习中": [
     "Learning",
     "Bezig met leren"
+  ],
+  "基于本地历史用量": [
+    "Based on local usage history",
+    "Gebaseerd op lokale gebruiksgeschiedenis"
+  ],
+  "等待实时额度速度": [
+    "Waiting for live quota pace",
+    "Wachten op live quotatempo"
+  ],
+  "建议基于已有本地历史；连接并观测额度后会校准。": [
+    "This baseline uses existing local history; connect and observe quota pace to calibrate it.",
+    "Deze basis gebruikt bestaande lokale geschiedenis; verbind en observeer het quotatempo voor kalibratie."
   ],
   "至少使用两个可计价模型，并积累15分钟额度变化后生成建议。": [
     "Use at least two priced models and collect 15 minutes of quota movement to get a recommendation.",

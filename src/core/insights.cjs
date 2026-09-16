@@ -28,16 +28,21 @@ function quotaOutlook(window,samples,{now=Date.now(),live=false}={}){
   if(!Number.isFinite(at)||now-at>180000||at>now+30000||!live)return {...base,state:'stale'};
   if(!Number.isFinite(reset)||reset<=now)return {...base,state:'expired'};
   if(remaining<=0)return {...base,state:'exhausted'};
-  let points=samples.filter(s=>s.limit===window.limit&&s.window===window.window&&s.reset===window.resetsAt&&s.at<=at&&s.at>=at-7200000).sort((a,b)=>a.at-b.at);
+  // Rate-limit notifications can carry an observation timestamp that is a few
+  // seconds behind the local sample write. Keep the two-hour window anchored
+  // to the newest known time while still isolating reset/window identities.
+  const latestAt=Math.max(at,now), upperAt=now-at>30000?latestAt+30000:at;
+  let points=samples.filter(s=>s.limit===window.limit&&s.window===window.window&&s.reset===window.resetsAt&&s.at<=upperAt&&s.at>=latestAt-7200000).sort((a,b)=>a.at-b.at);
   // A decrease is a correction/reset: discard the earlier slope.
   for(let i=points.length-1;i>0;i--)if(points[i].used<points[i-1].used){points=points.slice(i);break;}
   if(points.length<3)return {...base,state:'learning'};
   const first=points[0],last=points.at(-1),minutes=(last.at-first.at)/60000,delta=last.used-first.used;
-  if(minutes<15||delta<2)return {...base,state:'learning'};
+  if(minutes<15||delta<0)return {...base,state:'learning'};
+  const secondsToReset=(reset-now)/1000;
+  if(delta===0)return {...base,state:'on_track',forecast:{minutes,samples:points.length,percentPerHour:0,seconds:secondsToReset,fastSeconds:secondsToReset,slowSeconds:secondsToReset}};
   const rate=delta/minutes;const seconds=remaining/rate*60;
   const fastSeconds=Math.max(0,remaining-1)/((delta+1)/minutes)*60;
   const slowSeconds=delta>1?(remaining+1)/((delta-1)/minutes)*60:null;
-  const secondsToReset=(reset-now)/1000;
   return {...base,state:slowSeconds!==null&&slowSeconds<secondsToReset?'risk':fastSeconds>=secondsToReset?'on_track':'uncertain',forecast:{minutes,samples:points.length,percentPerHour:rate*60,seconds,fastSeconds,slowSeconds}};
 }
 function modelMixAdvice(models,outlook){
@@ -48,9 +53,14 @@ function modelMixAdvice(models,outlook){
   });
   const total=rows.reduce((n,m)=>n+m.tokens,0),forecast=outlook?.forecast,reset=outlook?.secondsToReset;
   const base={state:'learning',basis:'api_equivalent',confidence:'low',paceChange:null,current:rows.map(m=>({model:m.model,share:m.tokens/total})),recommended:[]};
-  if(rows.length<2||!forecast||!Number.isFinite(forecast.seconds)||!Number.isFinite(reset)||reset<=0)return base;
+  if(rows.length<2)return base;
   const usable=rows.filter(m=>Number.isFinite(m.intensity)&&m.intensity>0);if(usable.length<2)return base;
   const sum=usable.reduce((n,m)=>n+m.tokens,0),current=usable.map(m=>({...m,share:m.tokens/sum}));
+  // Local history can still provide a useful baseline while the account
+  // quota observer is warming up. Mark it low-confidence and keep the
+  // observed mix unchanged until a live pace is available.
+  if(!outlook)return base;
+  if(!forecast||!Number.isFinite(forecast.seconds)||!Number.isFinite(reset)||reset<=0)return {state:'ready',basis:'local_history',confidence:'low',paceChange:null,current:current.map(({model,share})=>({model,share})),recommended:current.map(({model,share})=>({model,share})),direction:'maintain'};
   const currentIntensity=current.reduce((n,m)=>n+m.share*m.intensity,0),pace=Math.max(.55,Math.min(1.6,forecast.seconds/reset));
   const direction=pace<.95?'reduce':pace>1.05?'increase':'maintain';
   if(direction==='maintain')return {...base,state:'ready',confidence:usable.every(m=>m.source==='priced')?'medium':'low',paceChange:0,current:current.map(({model,share})=>({model,share})),recommended:current.map(({model,share})=>({model,share}))};

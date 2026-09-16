@@ -18,7 +18,7 @@ Een Windows-desktopapp voor **Codex-abonnees** die hun resterende limieten wille
 
 ## Aanbieders volgen in 1.4
 
-Verbind Qwen Code, Kimi Code, CodeBuddy Code, CC Switch, Claude Code, Gemini CLI of je eigen API-gebruiksbestand. Chinese modelfamilies worden in hetzelfde diagram toegewezen aan Alibaba Cloud, Moonshot AI, Zhipu AI, MiniMax en DeepSeek. [Bronnen en kostendefinities](PROVIDER-MONITORING.md).
+Verbind Qwen Code, Kimi Code, CodeBuddy Code, Qoder, CC Switch, Claude Code, Gemini CLI of je eigen API-gebruiksbestand. Qoder-streams kunnen met het ingebouwde script worden vastgelegd; Credits blijven gescheiden van API-equivalent USD en cumulatieve resultaten worden overgeslagen om dubbele kosten te voorkomen. Chinese modelfamilies worden in hetzelfde diagram toegewezen aan Alibaba Cloud, Moonshot AI, Zhipu AI, MiniMax en DeepSeek. [Bronnen en kostendefinities](PROVIDER-MONITORING.md).
 
 Geïnstalleerde tools in standaardmappen worden automatisch gevonden en kunnen samen worden verbonden; aangepaste locaties blijven beschikbaar. Het Codex-overzicht adviseert een modelmix op basis van 14 dagen gebruik, API-equivalente intensiteit en het actuele quotatempo. Omdat OpenAI geen exacte quotagewichten per model publiceert, toont het advies de betrouwbaarheid en blijft het zichzelf kalibreren.
 

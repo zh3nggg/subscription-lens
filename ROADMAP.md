@@ -20,7 +20,7 @@ Windows desktop app for Codex subscriptions, with Chinese, English and Dutch UI.
 
 The initial acceptance set and evidence levels are tracked in [Domestic platform compatibility](docs/DOMESTIC-COMPATIBILITY.md). IDE-only products without a documented local export, log or API remain candidates rather than promised support.
 
-Current scope includes Codex subscriptions and optional local records from Qwen Code, Kimi Code, CodeBuddy Code, CC Switch, Claude Code, Gemini CLI and JSONL. The 1.5 track adds evidence-gated domestic agent compatibility; unsupported IDE-only formats remain candidates.
+Current scope includes Codex subscriptions and optional local records from Qwen Code, Kimi Code, CodeBuddy Code, Qoder, CC Switch, Claude Code, Gemini CLI and JSONL. Qoder Credits are retained in their native unit and never added to API-equivalent USD. The 1.5 track extends evidence-gated domestic agent compatibility; unsupported IDE-only formats remain candidates.
 
 ## 简体中文
 
@@ -40,7 +40,7 @@ Current scope includes Codex subscriptions and optional local records from Qwen 
 
 首批验收范围和证据级别见[国产平台兼容目标](docs/DOMESTIC-COMPATIBILITY.md)。仅有封闭 IDE、没有公开本地导出／日志／接口的平台先列为候选，不提前承诺支持。
 
-当前已包含 Codex 套餐，以及可选的 Qwen Code、Kimi Code、CodeBuddy Code、CC Switch、Claude Code、Gemini CLI 和 JSONL 本地记录接入。1.5 版本按证据等级扩展国产 Agent；没有稳定格式的 IDE 暂不标记为已支持。
+当前已包含 Codex 套餐，以及可选的 Qwen Code、Kimi Code、CodeBuddy Code、Qoder、CC Switch、Claude Code、Gemini CLI 和 JSONL 本地记录接入。Qoder Credits 保留原单位，不与 API 等价美元相加。1.5 版本按证据等级扩展国产 Agent；没有稳定格式的 IDE 暂不标记为已支持。
 
 ## Nederlands
 
@@ -60,4 +60,4 @@ Een Windows-desktopapp voor Codex-abonnementen, in het Chinees, Engels en Nederl
 
 De eerste acceptatieset en bewijsniveaus staan in [compatibiliteit met Chinese platforms](docs/DOMESTIC-COMPATIBILITY.md). Gesloten IDE-producten zonder gedocumenteerde export, log of API blijven kandidaat.
 
-De huidige scope omvat Codex-abonnementen en lokale records van Qwen Code, Kimi Code, CodeBuddy Code, CC Switch, Claude Code, Gemini CLI en JSONL. Versie 1.5 breidt dit uit volgens bewijsniveau; IDE-formaten zonder stabiele bron blijven kandidaat.
+De huidige scope omvat Codex-abonnementen en lokale records van Qwen Code, Kimi Code, CodeBuddy Code, Qoder, CC Switch, Claude Code, Gemini CLI en JSONL. Qoder Credits blijven in de oorspronkelijke eenheid en worden niet opgeteld bij API-equivalente USD. Versie 1.5 breidt dit uit volgens bewijsniveau; IDE-formaten zonder stabiele bron blijven kandidaat.

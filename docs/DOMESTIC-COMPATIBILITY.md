@@ -17,7 +17,7 @@
 | 平台 | 当前可行路径 | 支持边界 |
 | --- | --- | --- |
 | CodeBuddy Code | 现有 `.codebuddy/projects` 只读连接器 | 已支持；继续覆盖新记录格式与重复事件更新。 |
-| Qoder | 官方 CLI `/usage`、Qoder Agent SDK 或用户导出的 usage JSON | 账户额度和 Credits 需要用户授权；未获得授权时不读取凭据，只接入显式导出。 |
+| Qoder | 官方 CLI stream JSON（通过内置捕获脚本）或用户导出的 usage JSON | 已接入本地 Assistant usage；跳过累计 `result`，保留 Credits 原单位。账户额度仍需用户在 Qoder 内查看，不读取凭据。 |
 | TRAE | 用户导出的 JSONL、兼容网关或未来官方本地遥测 | IDE 本地目录尚无稳定公开用量格式，暂不宣称自动读取。 |
 | Cursor | 用户导出的用量数据、兼容网关或未来官方接口 | 仅凭 IDE 缓存无法可靠还原请求与 Tokens，暂不自动扫描。 |
 | DeepSeek | CC Switch、兼容网关或 Subscription Lens JSONL | 已支持供应商／模型归属；直接账户余额与账单接口另需官方授权。 |

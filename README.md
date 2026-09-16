@@ -18,7 +18,7 @@ A Windows desktop app for **Codex subscription users** who want to see their rem
 
 ## Provider monitoring in 1.4
 
-Connect Qwen Code, Kimi Code, CodeBuddy Code, CC Switch, Claude Code, Gemini CLI or your own API usage file. Domestic model families are attributed to Alibaba Cloud, Moonshot AI, Zhipu AI, MiniMax and DeepSeek through the same provider → model chart. Recorded estimates and source-reported amounts stay distinct from actual invoices. Installed tools in standard folders are detected automatically and can be connected together; custom locations remain available. [Source setup and cost definitions](docs/PROVIDER-MONITORING.md).
+Connect Qwen Code, Kimi Code, CodeBuddy Code, Qoder, CC Switch, Claude Code, Gemini CLI or your own API usage file. Qoder stream capture keeps native Credits separate from API-equivalent USD and skips cumulative result events, so the same request is never charged twice. Domestic model families are attributed to Alibaba Cloud, Moonshot AI, Zhipu AI, MiniMax and DeepSeek through the same provider → model chart. Recorded estimates and source-reported amounts stay distinct from actual invoices. Installed tools in standard folders are detected automatically and can be connected together; custom locations remain available. [Source setup and cost definitions](docs/PROVIDER-MONITORING.md).
 
 The Codex overview can recommend a model mix from the last 14 days of model usage and the current quota pace. It targets the next reset and shows its confidence. Because OpenAI does not publish an exact subscription-quota weight for each model, this is an adaptive recommendation based on API-equivalent intensity, not a guarantee.
 
@@ -46,7 +46,7 @@ No API key, Node.js, Python or Docker is needed to run the app. Account queries 
 <details>
 <summary>Usage details and shortcuts</summary>
 
-- **Know when to slow down.** The overview prioritizes account capacity and reset time. Recent-pace estimates require at least three observations, 15 minutes and a measurable change in the same account/window/reset. They use up to two hours of observations, never local token-to-quota guesses. Stale data (over three minutes), resets and counter corrections suppress unreliable estimates. Forecasts assume your recent pace continues; they are not guarantees.
+- **Know when to slow down.** The overview prioritizes account capacity and reset time. Recent-pace estimates require at least three observations across 15 minutes in the same account/window/reset. A positive change estimates the current burn rate; a stable window is shown as no observed consumption. They use up to two hours of observations, never local token-to-quota guesses. Stale data (over three minutes), resets and counter corrections suppress unreliable estimates. Forecasts assume your recent pace continues; they are not guarantees.
 - **Stay in your work.** Open Compact view with Ctrl+Shift+M; optionally pin it above other windows. Escape restores the dashboard. A tray click opens this view when tray mode is enabled.
 - **Get quiet alerts.** Opt into alerts at 20% and 5% remaining and observed quota recovery. Alerts are deduplicated per window and account. Quiet hours default to 22:00–08:00 local time. The app must remain running; Windows notification settings can suppress delivery.
 - **Find expensive work.** Select a project or chart date, sort sessions by cost or recency, then inspect the exact records. Ctrl+K opens search. Session totals count each record once; subagent rows show their own usage, not an inclusive parent total.
