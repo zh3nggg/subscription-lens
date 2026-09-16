@@ -1,0 +1,33 @@
+name: Tests
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  desktop:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: node scripts/smoke-i18n.cjs
+      - run: node scripts/smoke-product.cjs
+      - run: node scripts/smoke-quota.cjs
+  accounting-engine:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: native/usage-engine
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: native/usage-engine/go.mod
+          cache-dependency-path: native/usage-engine/go.sum
+      - run: go test ./...

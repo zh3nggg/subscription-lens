@@ -1,0 +1,37 @@
+name: Build draft release
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run dist
+      - name: Test packaged application
+        shell: pwsh
+        run: |
+          $env:LENS_TEST_EXE = Join-Path $PWD 'dist/win-unpacked/Subscription Lens.exe'
+          node scripts/smoke-i18n.cjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node scripts/smoke-product.cjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node scripts/smoke-quota.cjs
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Checksums and draft
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = (Get-Content package.json | ConvertFrom-Json).version
+          $assets = @("dist/Subscription-Lens-$version-x64.exe", "dist/Subscription-Lens-$version-x64.zip")
+          $lines = foreach ($file in $assets) { "{0}  {1}" -f (Get-FileHash -LiteralPath $file -Algorithm SHA256).Hash.ToLower(), (Split-Path $file -Leaf) }
+          $lines | Set-Content dist/SHA256SUMS.txt -Encoding utf8
+          gh release create "v$version" @assets dist/SHA256SUMS.txt --draft --prerelease --target '${{ github.sha }}' --title "Subscription Lens $version (Preview)" --notes-file docs/RELEASE.md

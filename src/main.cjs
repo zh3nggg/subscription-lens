@@ -1,0 +1,58 @@
+'use strict';
+const {app,BrowserWindow,ipcMain,dialog,shell,Menu,Tray,nativeImage,nativeTheme,Notification}=require('electron');
+const path=require('node:path');const fs=require('node:fs/promises');const {pathToFileURL}=require('node:url');
+const {resolveLanguage,translate}=require('./i18n.js');
+const {reportData,reportHtml}=require('./core/report.cjs');
+const {Service}=require('./core/service.cjs');const {dollars}=require('./core/pricing.cjs');
+if(process.env.LENS_DATA_DIR)app.setPath('userData',path.resolve(process.env.LENS_DATA_DIR));
+app.setName('Subscription Lens');app.setAppUserModelId('net.subscriptionlens.desktop');
+const lock=app.requestSingleInstanceLock();if(!lock){app.quit();}else{
+let win,service,tray,quitting=false,changeTimer,lastRefresh=0,compactMode=false,pinned=false,normalBounds=null;
+const t=(key,params)=>translate(key,resolveLanguage(service?.settings.language,app.getLocale()),params);
+const ui=pathToFileURL(path.join(__dirname,'ui','index.html')).href;
+const icon=path.join(__dirname,'../assets/icon.png');
+function changed(){clearTimeout(changeTimer);changeTimer=setTimeout(()=>{if(win&&!win.isDestroyed())win.webContents.send('lens:changed');updateTray();},250);}
+function show(){if(win){if(win.isMinimized())win.restore();win.show();win.focus();}}
+function configureDesktop(){nativeTheme.themeSource=service.settings.theme;if(win)win.setBackgroundColor(nativeTheme.shouldUseDarkColors?'#212121':'#ffffff');if(tray){tray.destroy();tray=null;}if(service.settings.tray&&!tray){tray=new Tray(nativeImage.createFromPath(icon));tray.setToolTip(t("余量"));tray.setContextMenu(Menu.buildFromTemplate([{label:t("打开余量"),click:show},{label:t("刷新用量"),click:()=>service.scan()},{type:'separator'},{label:t("退出"),click:()=>app.quit()}]));tray.on('double-click',show);tray.on('click',()=>{setCompact(true);show();});}if(!service.settings.tray&&tray){tray.destroy();tray=null;}}
+
+function setCompact(value){if(!win||compactMode===value)return;if(value){normalBounds=win.getBounds();win.setMinimumSize(360,400);win.setSize(420,560);}else{win.setMinimumSize(820,600);if(normalBounds)win.setBounds(normalBounds);if(pinned){pinned=false;win.setAlwaysOnTop(false);}}compactMode=value;changed();}
+function updateTray(){if(!tray||!service)return;const account=service.account.status;const fresh=account.state==='connected'&&account.quota&&Date.now()-Date.parse(account.quota.observedAt)<180000;const windows=fresh?account.quota.windows.filter(w=>w.resetsAt*1000>Date.now()):[];const primary=(windows.filter(w=>w.limit==='codex').length?windows.filter(w=>w.limit==='codex'):windows).sort((a,b)=>b.used-a.used)[0];const status=primary?Math.max(0,100-primary.used).toFixed(0)+t('% 剩余'):t('未连接');tray.setToolTip('Subscription Lens · '+status);tray.setContextMenu(Menu.buildFromTemplate([{label:status,enabled:false},{label:t('打开余量'),click:()=>{setCompact(false);show();}},{label:t('专注窗口'),click:()=>{setCompact(true);show();}},{label:t('刷新用量'),click:()=>{service.scan();if(service.settings.accountEnabled)service.account.refresh(service.settings.codexPath);}},{type:'separator'},{label:t('退出'),click:()=>app.quit()}]));}
+function notifyQuota(alerts){if(!Notification.isSupported())return;try{const body=alerts.map(a=>(a.window.label||a.window.limit)+' · '+(a.type==='reset'?t('额度已恢复'):Math.max(0,100-a.window.used).toFixed(0)+t('% 剩余'))).join('\n');const notice=new Notification({title:t('套餐额度'),body,silent:true,icon});notice.on('click',()=>{setCompact(true);show();});notice.show();}catch{/* Notification failures must not break account refresh. */}}
+
+function handler(name,fn){ipcMain.handle('lens:'+name,async(event,...args)=>{if(!win||event.sender!==win.webContents||event.senderFrame!==win.webContents.mainFrame||event.senderFrame.url!==ui)throw new Error('无效窗口');try{return {ok:true,value:await fn(...args)};}catch(e){return {ok:false,error:typeof e.message==='string'?t(e.message).slice(0,200):t("操作失败")};}});}
+function csvCell(value){let s=String(value??'');if(/^[=+@\-\t\r]/.test(s))s="'"+s;return '"'+s.replaceAll('"','""')+'"';}
+function register(){
+  handler('query',f=>({...service.query(f||{}),desktop:{compact:compactMode,pinned,notificationsAvailable:Notification.isSupported()}}));
+  handler('setCompact',value=>{setCompact(value===true);return true;});
+  handler('setPinned',value=>{pinned=value===true;win.setAlwaysOnTop(pinned);changed();return pinned;});
+  handler('removeRoot',root=>service.removeRoot(root));
+  handler('previewReport',f=>reportData(service.query(f||{}),f||{}));
+  handler('exportReport',async f=>{const data=reportData(service.query(f||{}),f||{});const result=await dialog.showSaveDialog(win,{title:t('导出摘要'),defaultPath:'subscription-lens-summary.html',filters:[{name:'HTML',extensions:['html']}]});if(result.canceled)return null;await fs.writeFile(result.filePath,reportHtml(data,resolveLanguage(service.settings.language,app.getLocale())));return true;});
+  handler('saveSettings',s=>{const before=service.settings.startup;const result=service.saveSettings(s||{});configureDesktop();if(app.isPackaged&&before!==result.startup)app.setLoginItemSettings({openAtLogin:result.startup,path:app.getPath('exe')});return result;});
+  handler('chooseRoot',async()=>{const r=await dialog.showOpenDialog(win,{title:t("选择 Codex 目录"),defaultPath:service.detectedRoot,properties:['openDirectory']});if(r.canceled)return null;return service.addRoot(r.filePaths[0]);});
+  handler('useDetectedRoot',()=>service.addRoot(service.detectedRoot));
+  handler('chooseCodex',async()=>{const r=await dialog.showOpenDialog(win,{title:t("选择 codex.exe"),filters:[{name:'Codex',extensions:['exe']}],properties:['openFile']});if(r.canceled)return null;const exe=r.filePaths[0];if(path.basename(exe).toLowerCase()!=='codex.exe')throw new Error('请选择 codex.exe');service.setCodexPath(exe);return exe;});
+  handler('connect',()=>service.enableAccount());
+  handler('login',async()=>{service.settings.accountEnabled=true;service.store.set('settings',service.settings);const url=await service.account.login(service.settings.codexPath);const u=new URL(url);if(u.protocol!=='https:'||!['auth.openai.com','chatgpt.com','auth0.openai.com'].includes(u.hostname))throw new Error('登录地址未通过校验');await shell.openExternal(url);return true;});
+  handler('cancelLogin',()=>service.account.cancelLogin());handler('disconnect',()=>service.disableAccount());
+  handler('refresh',async()=>{if(Date.now()-lastRefresh<15000)throw new Error('请稍后刷新');lastRefresh=Date.now();await service.scan();if(service.settings.accountEnabled)await service.account.refresh(service.settings.codexPath);return true;});
+  handler('rescan',async()=>{if(service.scanner.running)throw new Error('正在读取，请稍后重试');service.store.clearCheckpoints();await service.scan();return true;});
+  handler('exportCsv',async filters=>{const r=await dialog.showSaveDialog(win,{title:t("导出用量"),defaultPath:'codex-usage.csv',filters:[{name:'CSV',extensions:['csv']}]});if(r.canceled)return null;const rows=service.exportRows(filters||{});const data=[['time_utc','model','input','cached_input','cache_write_input','output','reasoning_in_output','tokens','api_equivalent_usd','pricing_status','price_version'],...rows.map(e=>[e.at,e.model,e.input,e.cached,e.write,e.output,e.reasoning,e.total,e.price.amount===null?'':dollars(e.price.amount).toFixed(9),e.price.reason||'priced',e.price.version])].map(row=>row.map(csvCell).join(',')).join('\r\n');await fs.writeFile(r.filePath,'\uFEFF'+data,'utf8');return rows.length;});
+  handler('exportPrices',async()=>{const r=await dialog.showSaveDialog(win,{title:t("导出价格目录"),defaultPath:'prices.json',filters:[{name:'JSON',extensions:['json']}]});if(r.canceled)return null;await fs.writeFile(r.filePath,JSON.stringify(service.catalog,null,2));return true;});
+  handler('importPrices',async()=>{const r=await dialog.showOpenDialog(win,{title:t("导入价格目录"),filters:[{name:'JSON',extensions:['json']}],properties:['openFile']});if(r.canceled)return null;const s=await fs.stat(r.filePaths[0]);if(s.size>1024*1024)throw new Error('价格文件过大');service.catalogImport(JSON.parse(await fs.readFile(r.filePaths[0],'utf8')));return true;});
+  handler('resetPrices',()=>{service.catalogReset();return true;});
+  handler('openHelp',()=>shell.openExternal('https://learn.chatgpt.com/docs/cli'));
+  handler('openPricing',()=>shell.openExternal('https://developers.openai.com/api/docs/pricing'));
+  handler('diagnostics',async()=>{const r=await dialog.showSaveDialog(win,{title:t("导出诊断"),defaultPath:'subscription-lens-diagnostics.json',filters:[{name:'JSON',extensions:['json']}]});if(r.canceled)return null;const summary={version:app.getVersion(),platform:process.platform,arch:process.arch,scanner:service.scanner.status,counts:service.store.stats(),fileCounts:service.store.fileStats(),accountState:service.account.status.state,accountError:service.account.status.lastError,priceVersion:service.catalog.version};await fs.writeFile(r.filePath,JSON.stringify(summary,null,2));return true;});
+}
+async function create(){
+  service=new Service(app.getPath('userData'));service.on('changed',changed);service.on('alert',notifyQuota);
+  win=new BrowserWindow({width:1320,height:900,minWidth:820,minHeight:600,show:false,title:t("余量"),icon,backgroundColor:'#ffffff',autoHideMenuBar:true,webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true}});
+  Menu.setApplicationMenu(null);win.webContents.setWindowOpenHandler(()=>({action:'deny'}));win.webContents.on('will-navigate',e=>e.preventDefault());win.webContents.session.setPermissionRequestHandler((_,__,callback)=>callback(false));win.webContents.session.setPermissionCheckHandler(()=>false);
+  win.on('close',e=>{if(service.settings.tray&&!quitting){e.preventDefault();win.hide();}});
+  register();configureDesktop();await win.loadURL(ui);if(process.env.LENS_TEST_HIDDEN!=='1')win.show();service.start();
+}
+app.on('second-instance',show);app.whenReady().then(create).catch(()=>{dialog.showErrorBox(t("无法启动"),t("应用数据无法打开。请检查数据目录权限。"));app.exit(1);});
+app.on('window-all-closed',()=>{if(!service?.settings.tray)app.quit();});
+app.on('before-quit',e=>{if(!quitting&&service){e.preventDefault();quitting=true;clearTimeout(changeTimer);service.close().finally(()=>app.quit());}});
+}

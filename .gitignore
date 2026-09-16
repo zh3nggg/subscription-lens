@@ -1,0 +1,15 @@
+node_modules/
+dist/
+.cache/
+test-results/
+*.sqlite*
+*.log
+
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+auth.json
+*.exe
+*.zip

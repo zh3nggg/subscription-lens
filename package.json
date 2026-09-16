@@ -1,0 +1,71 @@
+{
+  "name": "subscription-lens",
+  "version": "1.2.0",
+  "description": "Local Codex subscription usage monitor",
+  "main": "src/main.cjs",
+  "author": "Subscription Lens contributors",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test test/*.test.cjs",
+    "dist": "electron-builder --win nsis zip --x64",
+    "prestart": "node scripts/build-locales.cjs",
+    "pretest": "node scripts/build-locales.cjs",
+    "predist": "node scripts/build-locales.cjs"
+  },
+  "devDependencies": {
+    "electron": "44.4.0",
+    "electron-builder": "26.15.3",
+    "playwright": "1.62.1"
+  },
+  "build": {
+    "appId": "net.subscriptionlens.desktop",
+    "productName": "Subscription Lens",
+    "asar": true,
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "package.json",
+      "LICENSE",
+      "README.md",
+      "docs/**/*",
+      "ROADMAP.md",
+      "THIRD-PARTY-NOTICES.md"
+    ],
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
+    },
+    "win": {
+      "icon": "assets/icon.ico",
+      "target": [
+        "nsis",
+        "zip"
+      ],
+      "signExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "deleteAppDataOnUninstall": false,
+      "installerLanguages": [
+        "en_US",
+        "zh_CN",
+        "nl_NL"
+      ],
+      "displayLanguageSelector": true
+    },
+    "artifactName": "Subscription-Lens-${version}-${arch}.${ext}"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zh3nggg/subscription-lens.git"
+  },
+  "homepage": "https://github.com/zh3nggg/subscription-lens",
+  "bugs": {
+    "url": "https://github.com/zh3nggg/subscription-lens/issues"
+  }
+}

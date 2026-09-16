@@ -1,0 +1,5 @@
+'use strict';
+const path=require('node:path');
+const {Service}=require('../src/core/service.cjs');
+async function main(){const dir=path.resolve(__dirname,'../test-results/live');const home=process.env.LENS_CHECK_HOME;if(!home)throw new Error('LENS_CHECK_HOME is required');const s=new Service(dir,{home});try{await s.addRoot(path.join(home,'.codex'));const q=s.query({period:'all'});console.log(JSON.stringify({records:q.stats.records,sessions:q.stats.sessions,files:q.fileStats.files,tokens:q.summary.tokens,models:q.models.map(m=>({model:m.model,tokens:m.tokens,events:m.events,unpriced:m.unpriced})),unpriced:q.summary.unpriced,scanErrors:q.scanner.errors,parseErrors:q.fileStats.errors,quotaSource:q.quota?.source},null,2));if(process.argv.includes('--account')){const a=await s.enableAccount();console.log(JSON.stringify({accountState:a.state,plan:a.plan,error:a.lastError,quotaWindows:a.quota?.windows.length,usageAvailable:!!a.usage},null,2));}}finally{await s.close();}}
+main().catch(e=>{console.error(e.code||e.message);process.exitCode=1;});
