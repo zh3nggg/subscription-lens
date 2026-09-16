@@ -1,4 +1,4 @@
-# 1.4 国产编码平台兼容目标
+# 1.5 国产 Agent 兼容目标
 
 本文件定义 1.4 系列的验收边界。名单会随官方接口变化调整。
 
@@ -12,7 +12,17 @@
 | GLM Coding Plan | 复用 Claude Code 连接器并根据可验证端点／模型标识归属到智谱 | 不把 GLM 请求显示为 Anthropic；缓存口径和重复消息处理一致 |
 | 通义／Kimi／MiniMax／DeepSeek 等兼容 API | CC Switch 或 Subscription Lens JSONL／未来本地 OTLP 接收器 | 保留实际供应商和模型；支持自定义价格及来源报告费用；不读取 API Key |
 
-灵码、TRAE、Qoder 等 IDE 或插件列为候选。只有在存在官方本地导出、稳定日志、CLI 结构化输出或经用户授权的用量接口后，才进入已承诺范围。
+## 1.5 候选与证据分级
+
+| 平台 | 当前可行路径 | 支持边界 |
+| --- | --- | --- |
+| CodeBuddy Code | 现有 `.codebuddy/projects` 只读连接器 | 已支持；继续覆盖新记录格式与重复事件更新。 |
+| Qoder | 官方 CLI `/usage`、Qoder Agent SDK 或用户导出的 usage JSON | 账户额度和 Credits 需要用户授权；未获得授权时不读取凭据，只接入显式导出。 |
+| TRAE | 用户导出的 JSONL、兼容网关或未来官方本地遥测 | IDE 本地目录尚无稳定公开用量格式，暂不宣称自动读取。 |
+| Cursor | 用户导出的用量数据、兼容网关或未来官方接口 | 仅凭 IDE 缓存无法可靠还原请求与 Tokens，暂不自动扫描。 |
+| DeepSeek | CC Switch、兼容网关或 Subscription Lens JSONL | 已支持供应商／模型归属；直接账户余额与账单接口另需官方授权。 |
+
+灵码等 IDE 或插件继续列为候选。只有在存在官方本地导出、稳定日志、CLI 结构化输出或经用户授权的用量接口后，才进入已承诺范围。
 
 ## 统一用户体验
 
@@ -25,7 +35,7 @@
 3. **本地估算**：依据用户选择的价格规则计算。
 4. **未知**：缺少可靠字段时保持未知，不显示为零。
 
-套餐额度、API 余额和本地 Tokens 不得混加。credit 只有在官方定义换算规则时才转换为金额。代理与客户端记录可能描述同一次请求，默认按单一来源统计；跨来源合并需要稳定请求标识和去重测试。
+套餐额度、API 余额和本地 Tokens 不得混加。Credits 只有在官方定义换算规则时才转换为金额。代理与客户端记录可能描述同一次请求，默认按单一来源统计；跨来源合并需要稳定请求标识和去重测试。仪表盘不会把不同来源自动相加，用户切换来源后才查看对应账本。
 
 ## 隐私与安全
 
@@ -49,8 +59,8 @@
 
 ## English summary
 
-Version 1.4 targets read-only Qwen Code, Kimi Code CLI and CodeBuddy Code connectors plus correct attribution for domestic models used through Claude Code, CC Switch and OpenAI/Anthropic-compatible gateways. Support requires documented data, privacy-safe fixtures and verified token semantics. Closed IDEs without a stable export remain candidates. Subscription quota, credits, reported API cost and local estimates stay separate.
+Version 1.5 targets evidence-gated read-only connectors for TRAE, CodeBuddy Code and Qoder, plus explicit import paths for Cursor and DeepSeek. Support requires documented data, privacy-safe fixtures, verified token semantics and deduplication. Closed IDEs without a stable export remain candidates. Subscription quota, credits, reported API cost and local estimates stay separate.
 
 ## Nederlandse samenvatting
 
-Versie 1.4 richt zich op read-only connectors voor Qwen Code, Kimi Code CLI en CodeBuddy Code, plus correcte herkenning van Chinese modellen via Claude Code, CC Switch en OpenAI/Anthropic-compatibele gateways. Ondersteuning vereist gedocumenteerde gegevens, privacyveilige fixtures en geteste tokenregels. Gesloten IDE's zonder stabiele export blijven kandidaten. Abonnementslimieten, credits, bronkosten en lokale schattingen blijven gescheiden.
+Versie 1.5 richt zich op connectors met verifieerbare gegevens voor TRAE, CodeBuddy Code en Qoder, plus expliciete importpaden voor Cursor en DeepSeek. Ondersteuning vereist gedocumenteerde gegevens, privacyveilige fixtures, geteste tokenregels en deduplicatie. Gesloten IDE's zonder stabiele export blijven kandidaat. Abonnementslimieten, credits, bronkosten en lokale schattingen blijven gescheiden.
