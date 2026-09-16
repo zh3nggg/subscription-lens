@@ -1,6 +1,6 @@
 # Subscription Lens
 
-A Windows desktop app for **Codex subscription users** who want to see their remaining quota, understand which projects use their tokens, and compare recorded usage at API rates with their subscription payment. No API key is required.
+A Windows desktop app for **Codex subscription users** who want to see their remaining quota, understand which projects use their tokens, and choose a model mix that carries their quota to the next reset. It also compares recorded usage at API rates with the subscription payment. No API key is required.
 
 [English](README.md) · [简体中文](docs/README.zh-CN.md) · [Nederlands](docs/README.nl.md)
 
@@ -10,6 +10,7 @@ A Windows desktop app for **Codex subscription users** who want to see their rem
 | --- | --- |
 | Check remaining capacity | Account quota, reset countdowns and recent-pace estimates when enough observations are available. |
 | Understand your usage | Compare providers in a ring chart, select one to inspect its models, then drill down to requests or Codex sessions. |
+| Plan your model mix | Turn the current quota pace and 14-day model habits into a recommended mix for the next reset, with confidence and suggested changes per model. |
 | Compare usage with your payment | View estimated API-equivalent costs alongside your actual payment for the billing period. |
 | Keep limits within reach | Use a compact pinnable window, the system tray and optional low-quota alerts with quiet hours. |
 | Compare devices privately | Assign local Codex records to a stable device, filter by device, and transfer anonymous device packages without chat content or paths. |

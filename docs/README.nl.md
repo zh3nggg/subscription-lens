@@ -1,6 +1,6 @@
 # Subscription Lens
 
-Een Windows-desktopapp voor **Codex-abonnees** die hun resterende limieten willen bekijken, willen zien welke projecten tokens gebruiken en het vastgelegde gebruik tegen API-tarieven willen vergelijken met hun abonnementsbetaling. Geen API-sleutel nodig.
+Een Windows-desktopapp voor **Codex-abonnees** die hun resterende limieten willen bekijken, willen zien welke projecten tokens gebruiken en een modelmix willen kiezen die de limiet tot de volgende reset laat meegaan. De app vergelijkt ook vastgelegd gebruik tegen API-tarieven met de abonnementsbetaling. Geen API-sleutel nodig.
 
 [English](../README.md) · [简体中文](README.zh-CN.md) · [Nederlands](README.nl.md)
 
@@ -10,6 +10,7 @@ Een Windows-desktopapp voor **Codex-abonnees** die hun resterende limieten wille
 | --- | --- |
 | Resterende capaciteit bekijken | Accountlimieten, aftellen tot herstel en temposchattingen zodra voldoende metingen beschikbaar zijn. |
 | Tokengebruik begrijpen | Gebruik per project, model en sessie bekijken en doorklikken naar afzonderlijke records. |
+| Je modelmix plannen | Maak van het actuele quotatempo en 14 dagen modelgewoonten een aanbevolen mix voor de volgende reset, met betrouwbaarheid en bijsturing per model. |
 | Gebruik met je betaling vergelijken | Geschatte equivalente API-kosten naast je werkelijke betaling per factuurperiode bekijken. |
 | Limieten tijdens het werk volgen | Een compact vastzetbaar venster, systeemvak en optionele limietmeldingen met stille uren. |
 | Apparaten privé vergelijken | Koppel lokale Codex-records aan een stabiel apparaat, filter per apparaat en wissel anonieme pakketten uit zonder chatinhoud of paden. |
