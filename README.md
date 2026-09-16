@@ -27,9 +27,9 @@ The Codex overview can recommend a model mix from the last 14 days of model usag
 
 ## Download and get started
 
-**1.4.0-beta.6 Preview · Windows x64.** The current collector does not yet handle all client record formats; totals may be too high or too low. Costs are estimates, not a bill or guaranteed savings. The build is unsigned and has no automatic updater.
+**1.4.0-beta.7 Preview · Windows x64.** The current collector does not yet handle all client record formats; totals may be too high or too low. Costs are estimates, not a bill or guaranteed savings. The build is unsigned and has no automatic updater.
 
-[Download the installer or portable ZIP](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.4.0-beta.6)
+[Download the installer or portable ZIP](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.4.0-beta.7)
 
 Run the new installer to upgrade the existing installation in place; keep its detected folder. Settings and usage history are retained. Stable and preview installers share one application identity; the portable ZIP is not an installer. Background automatic downloading is not included.
 
@@ -92,6 +92,6 @@ npm run dist
 
 Developed with assistance from **GPT-6 Astra**.
 
-[CodexBar](https://github.com/steipete/CodexBar) informs the quota and desktop interaction requirements. MIT-licensed [codex-usage](https://github.com/zJay26/codex-usage) source is included for the next accounting-engine integration; it is not active in the 1.4.0-beta.6 desktop app.
+[CodexBar](https://github.com/steipete/CodexBar) informs the quota and desktop interaction requirements. MIT-licensed [codex-usage](https://github.com/zJay26/codex-usage) source is included for the next accounting-engine integration; it is not active in the 1.4.0-beta.7 desktop app.
 
 MIT. See [third-party notices](THIRD-PARTY-NOTICES.md) for attribution and licenses. This is an independent project, not affiliated with OpenAI or endorsed by the referenced projects.
