@@ -45,6 +45,7 @@ function quotaOutlook(window,samples,{now=Date.now(),live=false}={}){
   const slowSeconds=delta>1?(remaining+1)/((delta-1)/minutes)*60:null;
   return {...base,state:slowSeconds!==null&&slowSeconds<secondsToReset?'risk':fastSeconds>=secondsToReset?'on_track':'uncertain',forecast:{minutes,samples:points.length,percentPerHour:rate*60,seconds,fastSeconds,slowSeconds}};
 }
+function quotaAdvice(outlook){const reset=Number(outlook?.secondsToReset),forecast=outlook?.forecast;if(!forecast||!Number.isFinite(reset)||reset<=0)return null;const early=Number.isFinite(forecast.fastSeconds)&&forecast.fastSeconds<reset;const underuse=Number.isFinite(forecast.seconds)&&forecast.seconds>reset*1.25;return early?'early':underuse?'underuse':null;}
 function modelMixAdvice(models,outlook){
   const rows=(models||[]).filter(m=>Number.isFinite(m.tokens)&&m.tokens>0).map(m=>{
     const observed=Number.isFinite(m.usd)&&m.usd>0?m.usd/m.tokens*1e6:null;
@@ -83,4 +84,4 @@ function alertCandidates(previous,windows,{now=Date.now(),enabled=false,quiet=fa
   return {state,alerts};
 }
 function inQuietHours(start,end,now=new Date()){if(start===end)return false;const hour=now.getHours();return start<end?hour>=start&&hour<end:hour>=start||hour<end;}
-module.exports={dayKey,cycleWindow,aggregate,continuousDays,quotaOutlook,modelMixAdvice,alertCandidates,inQuietHours};
+module.exports={dayKey,cycleWindow,aggregate,continuousDays,quotaOutlook,quotaAdvice,modelMixAdvice,alertCandidates,inQuietHours};

@@ -1803,5 +1803,9 @@ window.LensLocales = {
   "{n} 台已导入设备": [
     "{n} imported devices",
     "{n} geïmporteerde apparaten"
+  ],
+  "查看模型建议": [
+    "View model recommendations",
+    "Modeladvies bekijken"
   ]
 };

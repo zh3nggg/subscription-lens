@@ -1761,5 +1761,6 @@
   "数据包仅包含匿名会话标识、时间、模型和 Token 分类；不包含聊天正文、项目路径或登录凭据。": ["The package contains only anonymous session IDs, time, model and token categories; it excludes chat content, project paths and sign-in credentials.", "Het pakket bevat alleen anonieme sessie-ID's, tijd, model en tokencategorieën; chatinhoud, projectpaden en inloggegevens zijn uitgesloten."],
   "已导入 {n} 条记录": ["Imported {n} records", "{n} records geïmporteerd"],
   "查看用量": ["View usage", "Gebruik bekijken"],
-  "{n} 台已导入设备": ["{n} imported devices", "{n} geïmporteerde apparaten"]
+  "{n} 台已导入设备": ["{n} imported devices", "{n} geïmporteerde apparaten"],
+  "查看模型建议": ["View model recommendations", "Modeladvies bekijken"]
 }

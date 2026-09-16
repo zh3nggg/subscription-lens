@@ -4,7 +4,7 @@ const {EventEmitter}=require('node:events');
 const {Monitor}=require('./monitor.cjs');
 const {Store}=require('./store.cjs'),{Scanner}=require('./scanner.cjs'),{Account}=require('./account.cjs');
 const {price,bundled,validateCatalog}=require('./pricing.cjs');
-const {dayKey,cycleWindow,aggregate,continuousDays,quotaOutlook,modelMixAdvice,alertCandidates,inQuietHours}=require('./insights.cjs');
+const {dayKey,cycleWindow,aggregate,continuousDays,quotaOutlook,quotaAdvice,modelMixAdvice,alertCandidates,inQuietHours}=require('./insights.cjs');
 const {createDevice,normalizeDevice,safeLabel,packet,importPacket}=require('./devices.cjs');
 function validDate(s){return typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s)&&Number.isFinite(Date.parse(s+'T00:00:00'))&&dayKey(new Date(s+'T00:00:00'))===s;}
 function range(period,settings,now=new Date()){
@@ -68,7 +68,7 @@ class Service extends EventEmitter{
     this.devices[this.device.id]={...this.devices[this.device.id],lastSeen:new Date().toISOString()};this.store.set('devices',this.devices);
     const deviceRows=Object.values(this.devices).map(device=>{const deviceEvents=raw.filter(event=>event.device===device.id),summary=aggregate(deviceEvents,this.catalog).summary;return {...device,local:device.id===this.device.id,summary,lastSeen:deviceEvents.reduce((last,event)=>last>event.at?last:event.at,device.lastSeen||null)};}).filter(device=>device.local||device.summary.events>0).sort((a,b)=>b.summary.tokens-a.summary.tokens||a.label.localeCompare(b.label));
     const quota=this.account.status.quota||this.store.get('recordQuota');const samples=this.store.quotaSamples(this.account.status.identity);
-    const outlooks=(quota?.windows||[]).map(w=>quotaOutlook({...w,observedAt:w.observedAt||quota.observedAt},samples,{now:now.getTime(),live:this.settings.accountEnabled&&this.account.status.state==='connected'&&quota.source==='account'}));
+    const outlooks=(quota?.windows||[]).map(w=>{const outlook=quotaOutlook({...w,observedAt:w.observedAt||quota.observedAt},samples,{now:now.getTime(),live:this.settings.accountEnabled&&this.account.status.state==='connected'&&quota.source==='account'});return {...outlook,advice:quotaAdvice(outlook)};});
     const primaryOutlook=[...(outlooks.filter(w=>w.limit==='codex').length?outlooks.filter(w=>w.limit==='codex'):outlooks)].sort((a,b)=>b.used-a.used)[0];
     const recentFrom=new Date(now.getTime()-14*86400000).toISOString(),recent=aggregate(this.select(this.store.events(recentFrom,new Date(now.getTime()+1).toISOString(),this.device.id),filters),this.catalog);
     const mixAdvice=modelMixAdvice(recent.models,primaryOutlook);
