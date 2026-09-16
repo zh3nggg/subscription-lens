@@ -1,11 +1,11 @@
-# Subscription Lens 1.4.0-beta.2
+# Subscription Lens 1.4.0-beta.3
 
 Windows x64 · 中文 / English / Nederlands
 
 ## 新增功能
 
 - 主窗口改为紧凑工作台：窄侧栏、低顶栏与单行操作区，把常用信息集中在 760×560 起的窗口内。
-- Codex 默认先显示套餐与账期；多供应商默认先显示用量分布。额度、分布、趋势、项目与性能共享同一内容区域，切换时不改变筛选条件。
+- Codex 首屏同时显示套餐额度、账期对比和供应商／模型分布，删除套餐与分布之间的来回切换；中小窗口用标签收纳趋势和项目，大窗口自动展开更多内容。
 - 导航始终保留图标和短标签；窗口放大后也维持紧凑密度，减少无效留白和视线移动。
 - 国产编码平台只读连接器：Qwen Code 月度请求记录、Kimi Code 主／子代理 per-turn 用量、CodeBuddy Code 项目记录。
 - GLM、通义、Kimi、MiniMax、DeepSeek 的供应商归属，适用于 Claude Code、CC Switch 与兼容入口。
@@ -18,11 +18,11 @@ Windows x64 · 中文 / English / Nederlands
 
 ## What's new
 
-A compact desktop workspace now fits the full daily workflow at 760×560. Codex opens on plan status, while multi-provider monitoring opens on provider distribution; quota, distribution, trends, projects and performance share one tabbed workspace. Read-only Qwen Code, Kimi Code and CodeBuddy Code connectors and domestic provider attribution remain integrated. Run the installer over the existing installation to retain local settings and history.
+A compact desktop workspace now fits the full daily workflow at 760×560. The Codex first view combines plan limits, billing comparison and provider/model distribution. Medium windows place trends and projects behind tabs; tall windows reveal them automatically. Read-only Qwen Code, Kimi Code and CodeBuddy Code connectors and domestic provider attribution remain integrated. Run the installer over the existing installation to retain local settings and history.
 
 ## Nieuw
 
-De compacte werkruimte bevat de dagelijkse taken vanaf 760×560. Codex opent met de abonnementsstatus; monitoring van meerdere aanbieders opent met de verdeling per aanbieder. Limieten, verdeling, trends, projecten en prestaties delen één gebied met tabbladen. De bestaande connectors en aanbiederherkenning blijven geïntegreerd. Het installatieprogramma vervangt de bestaande app en behoudt instellingen en geschiedenis.
+De compacte werkruimte bevat de dagelijkse taken vanaf 760×560. De eerste Codex-weergave combineert limieten, periodevergelijking en verdeling per aanbieder/model. Middelgrote vensters plaatsen trends en projecten in tabbladen; hoge vensters tonen ze automatisch. De bestaande connectors en aanbiederherkenning blijven geïntegreerd. Het installatieprogramma vervangt de bestaande app en behoudt instellingen en geschiedenis.
 
 ## Scope
 

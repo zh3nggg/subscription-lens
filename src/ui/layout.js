@@ -1,5 +1,5 @@
 'use strict';
-const layoutState={tabs:{codex:'plan',multi:'distribution'},pages:{},limit:5};
+const layoutState={tabs:{codex:'summary',multi:'distribution'},pages:{},limit:5};
 const filtersBeforeLayout=filters,renderBeforeLayout=render;
 filters=()=>({...filtersBeforeLayout(),limit:layoutState.limit});
 function pageItems(container,items,key,reserve=56){
@@ -12,9 +12,12 @@ function pageItems(container,items,key,reserve=56){
 }
 function fitOverview(main){
  const distribution=main.querySelector('.distribution-panel'),two=main.querySelector('.two-col');if(!distribution)return;
- const trend=two?.querySelector(':scope > section:not(.distribution-panel)'),project=two?.querySelector('.project-card'),decision=main.querySelector('.decision-grid');
+ const trend=two?.querySelector(':scope > section:not(.distribution-panel)'),project=two?.querySelector('.project-card'),decision=main.querySelector('.decision-grid'),metrics=main.querySelector(':scope > .metrics');
+ let summary=null;if(!state.multi&&decision){summary=document.createElement('div');summary.className='overview-primary';summary.append(decision,distribution);if(metrics)main.insertBefore(metrics,two||main.firstChild);main.insertBefore(summary,two||main.querySelector('.overview-footer'));}
+ const expanded=innerHeight>=820&&innerWidth>=980;main.classList.toggle('overview-expanded',expanded);
+ if(expanded){return;}
  let performance=null;if(state.multi){const metrics=main.querySelector('.monitor-metrics');if(metrics){performance=document.createElement('section');performance.className='panel performance-panel';const grid=document.createElement('div');grid.className='metrics performance-metrics';[...metrics.children].slice(3).forEach(n=>grid.append(n));performance.append(grid);}}
- const panels=[...(!state.multi?[['plan','套餐与账期',decision]]:[]),['distribution','用量分布',distribution],['trend','用量趋势',trend],['projects','项目',project],['performance','性能',performance]].filter(([, ,node])=>node);
+ const panels=[...(!state.multi?[['summary','总览',summary]]:[['distribution','用量分布',distribution]]),['trend','用量趋势',trend],['projects','项目',project],['performance','性能',performance]].filter(([, ,node])=>node);
  const mode=state.multi?'multi':'codex';if(!panels.some(([key])=>key===layoutState.tabs[mode]))layoutState.tabs[mode]=panels[0][0];
  const active=layoutState.tabs[mode];const tabs=document.createElement('div');tabs.className='segments dashboard-tabs';tabs.innerHTML=panels.map(([key,label])=>`<button data-layout-tab="${key}" class="${active===key?'active':''}" aria-pressed="${active===key}">${t(label)}</button>`).join('');
  const deck=document.createElement('div');deck.className='dashboard-deck';

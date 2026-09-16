@@ -57,6 +57,22 @@ body:not(.compact-mode) .dashboard-tabs{margin-bottom:7px;padding:2px;max-width:
 body:not(.compact-mode) .dashboard-tabs button{padding:4px 9px}
 body:not(.compact-mode) .dashboard-deck{margin-bottom:7px}
 body:not(.compact-mode) .dashboard-deck .decision-grid{margin:0;gap:10px;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)}
+.overview-primary{display:grid;grid-template-columns:minmax(0,.9fr) minmax(0,1.35fr);gap:10px;margin-bottom:10px;align-items:stretch}
+.overview-primary .decision-grid{display:grid;grid-template-columns:1fr!important;gap:10px!important;margin:0!important;min-width:0}
+.overview-primary .quota-card,.overview-primary .billing-card,.overview-primary .distribution-panel{min-width:0}
+.overview-primary .quota-footer{display:none}
+.overview-primary .quota-card .empty{min-height:0;padding:14px 12px;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+.overview-primary .quota-card .empty p{width:100%;margin:0 0 2px;line-height:1.35}
+.overview-primary .billing-card .section-gap{margin-top:7px}
+.overview-primary .distribution-body{min-height:164px!important}
+.overview-primary .distribution-visual{width:145px!important;flex-basis:145px!important}
+.overview-expanded .two-col{margin-bottom:10px;gap:10px}
+.overview-expanded .two-col .panel{min-width:0}
+.overview-expanded .two-col .chart{height:145px}
+.overview-expanded .two-col .chart-area{padding-top:8px;padding-bottom:2px}
+.overview-expanded .two-col .panel-head{padding-top:11px}
+.overview-expanded .project-list{padding-top:6px;padding-bottom:8px}
+.overview-expanded .project-item{padding-top:6px;padding-bottom:7px}
 body:not(.compact-mode) .quota-card .panel-head{padding:10px 14px 0;align-items:center;flex-wrap:nowrap}
 body:not(.compact-mode) .quota-card select{max-width:64%;padding-top:5px;padding-bottom:5px}
 body:not(.compact-mode) .quota-main{padding:7px 14px 5px}
@@ -103,6 +119,7 @@ body:not(.compact-mode) .notice{margin-bottom:7px;padding:7px 10px}
  body:not(.compact-mode) .page-actions .button{padding-left:7px;padding-right:7px}
  body:not(.compact-mode) .monitor-metrics{grid-template-columns:repeat(3,minmax(0,1fr))!important}
  body:not(.compact-mode) .dashboard-deck .decision-grid{grid-template-columns:minmax(0,1fr) minmax(0,.9fr)}
+ .overview-primary{grid-template-columns:minmax(0,.9fr) minmax(0,1.1fr)}
 }
 @media(max-height:620px){
  body:not(.compact-mode) header{height:42px}
@@ -116,4 +133,8 @@ body:not(.compact-mode) .notice{margin-bottom:7px;padding:7px 10px}
  body:not(.compact-mode) .dashboard-deck .distribution-visual{width:105px;flex-basis:105px}
  body:not(.compact-mode) .quota-footer{display:none}
  body:not(.compact-mode) .pace-detail{font-size:9px}
+ .overview-primary{gap:7px;margin-bottom:5px}
+ .overview-primary .decision-grid{gap:7px!important}
+ .overview-primary .distribution-body{min-height:132px!important}
+ .overview-primary .distribution-visual{width:112px!important;flex-basis:112px!important}
 }

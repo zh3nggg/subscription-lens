@@ -24,20 +24,20 @@
 
 ## 下载与快速开始
 
-**1.4.0-beta.2 预发布 · Windows x64。** 当前采集器尚未完整适配所有客户端记录格式，汇总可能偏高或偏低；费用是估算值，不是账单或保证节省的金额。安装包未做代码签名，暂不支持自动更新。
+**1.4.0-beta.3 预发布 · Windows x64。** 当前采集器尚未完整适配所有客户端记录格式，汇总可能偏高或偏低；费用是估算值，不是账单或保证节省的金额。安装包未做代码签名，暂不支持自动更新。
 
-[下载安装包或便携版](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.4.0-beta.2)
+[下载安装包或便携版](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.4.0-beta.3)
 
 运行新版安装包即可原位升级，沿用检测到的安装目录，无需手动卸载；设置和用量历史会保留。稳定版与测试版共用同一个应用身份。ZIP 为便携文件，不会自动覆盖已安装版本；当前不包含后台自动下载更新。
 
-1. 从 GitHub 仓库的 Releases 页面下载安装包或便携 ZIP。运行 `Subscription-Lens-1.4.0-beta.2-x64.exe` 安装，或解压 ZIP 后运行 `Subscription Lens.exe`。
+1. 从 GitHub 仓库的 Releases 页面下载安装包或便携 ZIP。运行 `Subscription-Lens-1.4.0-beta.3-x64.exe` 安装，或解压 ZIP 后运行 `Subscription Lens.exe`。
 2. 首次打开点击“开始监测”；自定义 Codex Home 可点“选择目录”。目录应包含 `sessions` 或 `archived_sessions`。
 3. 在“连接”中点击“连接账户”。应用使用本机 Codex 的官方登录；未登录时按按钮打开浏览器登录。
 4. 在“设置”中填写账期起止、套餐实付与额外额度（USD）。结束日期不含当天；可选手动日期或按续费日自动滚动。
 5. 托盘运行、开机启动、深浅主题均在“设置”中配置。
 6. 在“设置 → 语言”选择简体中文、English 或 Nederlands，点击“保存”立即应用。默认跟随系统，其他系统语言使用英语；重启后保留选择。
 
-主工作台从 760×560 窗口起即可完整使用。Codex 模式默认显示套餐状态，多供应商模式默认显示供应商分布；切换分布、趋势、项目与性能标签时会保留当前来源和时间范围。
+主工作台从 760×560 窗口起即可完整使用。Codex 首屏同时显示套餐状态、账期对比和供应商／模型分布；中等窗口用标签收纳趋势和项目，高窗口会自动展开更多内容，并保留当前来源和时间范围。
 
 不需要 API Key、Node、Python 或 Docker。查询账户额度需要本机安装 Codex；找不到程序时可选择 `codex.exe`。仅查看本地 Token 明细不依赖账户查询。
 
@@ -106,6 +106,6 @@ npm run dist
 
 本项目在 **GPT-6 Astra** 的协助下完成开发。
 
-[CodexBar](https://github.com/steipete/CodexBar) 为额度和桌面交互设计提供参考；项目已引入采用 MIT 许可的 [codex-usage](https://github.com/zJay26/codex-usage) 源码，用于下一步统计引擎整合，尚未在 1.4.0-beta.2 桌面程序中启用。
+[CodexBar](https://github.com/steipete/CodexBar) 为额度和桌面交互设计提供参考；项目已引入采用 MIT 许可的 [codex-usage](https://github.com/zJay26/codex-usage) 源码，用于下一步统计引擎整合，尚未在 1.4.0-beta.3 桌面程序中启用。
 
 本项目采用 MIT 许可，相关来源和版权见[开源说明](../THIRD-PARTY-NOTICES.md)。这是独立项目，与 OpenAI 无隶属关系，也未获得上述项目的背书。
