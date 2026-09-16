@@ -137,6 +137,18 @@ body:not(.compact-mode) .notice{margin-bottom:7px;padding:7px 10px}
  .overview-primary .decision-grid{gap:7px!important}
  .overview-primary .distribution-body{min-height:132px!important}
  .overview-primary .distribution-visual{width:112px!important;flex-basis:112px!important}
+
+ /* Keep the overview trend readable without introducing a first-screen scrollbar
+    on compact laptop windows. The full four-stat layout remains unchanged at
+    normal heights; this only tightens spacing when vertical space is scarce. */
+ body:not(.compact-mode) .dashboard-deck .trend-stats{grid-template-columns:repeat(4,minmax(0,1fr));margin:7px 14px 0}
+ body:not(.compact-mode) .dashboard-deck .trend-stats>div{padding:6px 8px}
+ body:not(.compact-mode) .dashboard-deck .trend-stats span,
+ body:not(.compact-mode) .dashboard-deck .trend-stats small{font-size:8px}
+ body:not(.compact-mode) .dashboard-deck .trend-stats strong{font-size:14px;margin:2px 0 1px}
+ body:not(.compact-mode) .dashboard-deck .trend-card .chart{height:94px}
+ body:not(.compact-mode) .dashboard-deck .trend-card .chart-area{padding:3px 12px 0}
+ body:not(.compact-mode) .dashboard-deck .trend-footer{padding:0 14px 6px;font-size:9px}
 }
 
 .overview-expanded .model-advice-card .panel-head{padding-top:11px}.overview-expanded .model-advice-card{overflow:hidden}
