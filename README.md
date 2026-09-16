@@ -68,7 +68,7 @@ Local records and account summaries are shown separately, never added together. 
 
 Supports Codex subscriptions and selected local multi-provider records on Windows. Regular ChatGPT conversations and other-device usage are not collected automatically. Full Codex feature parity with CodexBar and codex-usage is not complete.
 
-The next update prioritizes integration of the tested codex-usage engine and safe migration, followed by task trees, agent attribution and hourly analysis. Claude Code, Gemini CLI and CC Switch records are supported in this beta; direct provider billing APIs and additional connectors remain on the roadmap.
+Version 1.4 targets mainstream domestic coding platforms: first-class Qwen Code, Kimi Code CLI and CodeBuddy connectors, plus correct GLM, Qwen, Kimi, MiniMax and DeepSeek attribution when used through Claude Code, CC Switch or compatible gateways. The Codex accounting migration continues in the same dashboard. See the [acceptance scope](docs/DOMESTIC-COMPATIBILITY.md).
 
 [Roadmap](ROADMAP.md) · [Coverage checklist](docs/COMPATIBILITY.md) · [Release boundaries](docs/RELEASE.md) · [Validation](docs/VALIDATION.md)
 

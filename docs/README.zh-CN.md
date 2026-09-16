@@ -85,7 +85,7 @@
 
 当前支持 Windows 上的 Codex 套餐与多供应商本地记录；普通 ChatGPT 聊天和其他设备用量不自动采集。尚未完整覆盖 CodexBar 与 codex-usage 的 Codex 功能。
 
-下一版优先接入已通过组件测试的 codex-usage 统计引擎并完成安全迁移，随后完善任务树、代理归属和小时分析。已支持 Claude Code、Gemini CLI、CC Switch 本地记录；后续计划扩展官方账单接口和更多客户端，交付日期未定。
+1.4 的目标是兼容国产主流类 Codex 平台：首批加入 Qwen Code、Kimi Code CLI、CodeBuddy 连接器，并正确识别经 Claude Code、CC Switch 或兼容网关使用的 GLM、通义、Kimi、MiniMax、DeepSeek。Codex 统计引擎迁移继续在同一面板推进，详见[验收范围](DOMESTIC-COMPATIBILITY.md)。
 
 [路线图](../ROADMAP.md#简体中文) · [功能覆盖清单](COMPATIBILITY.md) · [发布边界](RELEASE.md) · [验证报告](VALIDATION.md)
 

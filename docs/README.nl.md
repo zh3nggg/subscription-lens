@@ -68,7 +68,7 @@ Lokale records en accounttotalen worden apart getoond en nooit bij elkaar opgete
 
 Ondersteunt Codex-abonnementen en lokale records van meerdere aanbieders op Windows. Gewone ChatGPT-gesprekken en gebruik op andere apparaten worden niet automatisch ingelezen. Volledige Codex-functionaliteit van CodexBar en codex-usage is nog niet bereikt.
 
-De volgende update geeft prioriteit aan de geteste codex-usage-engine en veilige migratie, gevolgd door taakbomen, agenttypen en analyse per uur. Lokale records van Claude Code, Gemini CLI en CC Switch worden ondersteund; officiële factuurinterfaces en extra clients blijven gepland zonder vaste datum.
+Versie 1.4 richt zich op veelgebruikte Chinese codingplatforms: connectors voor Qwen Code, Kimi Code CLI en CodeBuddy, plus correcte herkenning van GLM-, Qwen-, Kimi-, MiniMax- en DeepSeek-modellen via Claude Code, CC Switch of compatibele gateways. De Codex-engine blijft binnen hetzelfde dashboard in ontwikkeling. Zie de [acceptatiecriteria](DOMESTIC-COMPATIBILITY.md).
 
 [Roadmap](../ROADMAP.md#nederlands) · [Dekking](COMPATIBILITY.md) · [Releasegrenzen](RELEASE.md) · [Validatie](VALIDATION.md)
 
