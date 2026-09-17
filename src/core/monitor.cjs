@@ -15,11 +15,12 @@ function overlapKeys(e){
  return keys;
 }
 function overlapMatches(event,peers){
- const keys=new Set(overlapKeys(event)),matches=[];
- for(const peer of peers){if(peer.id===event.id||overlapKeys(peer).some(key=>keys.has(key)))matches.push(peer);}
- const unique=[...new Map(matches.map(peer=>[peer.id,peer])).values()];
+ const keys=new Set(overlapKeys(event)),signatureKeys=[...keys].filter(key=>key.startsWith('sig:')),matches=[];
+ for(const peer of peers){const similar=overlapKeys(peer).some(key=>signatureKeys.includes(key));if(peer.id===event.id||similar)matches.push({peer,exact:peer.id===event.id&&similar});}
+ const exactIds=new Set(matches.filter(item=>item.exact).map(item=>item.peer.id));
+ const unique=[...new Map(matches.map(item=>[item.peer.id,item.peer])).values()];
  if(!unique.length)return null;
- const exact=unique.some(peer=>peer.id===event.id);
+ const exact=unique.some(peer=>exactIds.has(peer.id));
  return {kind:exact?'exact':'possible',count:unique.length,sources:[...new Set(unique.map(peer=>peer.sourceId).filter(Boolean))]};
 }
 function providerIdentity(provider,model,authoritative=false){
