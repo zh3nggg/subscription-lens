@@ -1440,6 +1440,18 @@ window.LensLocales = {
     "Based on {n} minutes of valid observations",
     "Gebaseerd op {n} minuten geldige metingen"
   ],
+  "全部来源": [
+    "All sources",
+    "Alle bronnen"
+  ],
+  "精确去重": [
+    "Exact duplicates removed",
+    "Exacte duplicaten verwijderd"
+  ],
+  "精确重复记录只计一次，可能重叠仍保留提示。": [
+    "Exact duplicate records are counted once; possible overlaps remain flagged.",
+    "Exacte dubbele records tellen eenmaal mee; mogelijke overlap blijft gemarkeerd."
+  ],
   "高级：手动添加其他来源": [
     "Advanced: add another source manually",
     "Geavanceerd: een andere bron handmatig toevoegen"

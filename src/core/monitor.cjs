@@ -30,6 +30,20 @@ function overlapMatches(event,peers){
  const exact=unique.some(peer=>exactIds.has(peer.id));
  return {kind:exact?'exact':'possible',count:unique.length,sources:[...new Set(unique.map(peer=>peer.sourceId).filter(Boolean))]};
 }
+function mergeOverlap(a,b){if(!a)return b;if(!b)return a;return {kind:a.kind==='exact'||b.kind==='exact'?'exact':'possible',count:Math.max(a.count||0,b.count||0),sources:[...new Set([...(a.sources||[]),...(b.sources||[])])]};}
+function unionRows(rows){
+ const included=[],ids=new Map(),signatures=new Map();
+ const add=(map,key,index)=>{if(!key)return;const list=map.get(key)||[];list.push(index);map.set(key,list);};
+ for(const event of rows){
+  const candidates=new Set();for(const key of overlapKeys(event)){const map=key.startsWith('id:')?ids:signatures;for(const index of map.get(key)||[])candidates.add(index);}
+  let exactIndex=null;const possible=[];
+  for(const index of candidates){const peer=included[index];if(!peer||peer.sourceId===event.sourceId)continue;const match=overlapMatches(event,[peer]);if(!match)continue;if(match.kind==='exact')exactIndex=index;else possible.push(index);}
+  if(exactIndex!==null){included[exactIndex]={...included[exactIndex],overlap:mergeOverlap(included[exactIndex].overlap,{kind:'exact',count:1,sources:[event.sourceId]})};continue;}
+  let current=event.overlap;for(const index of possible){const peer=included[index],match=overlapMatches(event,[peer]);current=mergeOverlap(current,match);included[index]={...peer,overlap:mergeOverlap(peer.overlap,match)};}
+  const index=included.length;included.push(current?{...event,overlap:current}:event);for(const key of overlapKeys(event)){add(key.startsWith('id:')?ids:signatures,key,index);}
+ }
+ return included;
+}
 function providerIdentity(provider,model,authoritative=false){
  const p=String(provider||'').trim().toLowerCase(),m=String(model||'').trim().toLowerCase();
  if(authoritative)return label(provider);
@@ -148,9 +162,9 @@ class Monitor{
  checkpoint(s,file,offset,st){this.store.db.prepare('INSERT INTO monitor_files VALUES(?,?,?,?,?) ON CONFLICT(connection,path) DO UPDATE SET offset=excluded.offset,mtime=excluded.mtime,size=excluded.size').run(s.id,file,offset,st.mtimeMs,st.size);}
  sourcesInfo(){return this.sources.map(s=>({...s,...(this.states[s.id]||{state:'idle'}),records:this.store.db.prepare('SELECT COUNT(*) n FROM monitor_events WHERE connection=?').get(s.id).n}));}
  compatibility(){return compatibilityCatalog.map(item=>({...item,connected:item.kind?this.sources.some(source=>source.kind===item.kind):false}));}
- query(filters,range,catalog){const source=this.sources.find(s=>s.id===filters.connection)||this.sources[0];const rows=source?this.store.db.prepare('SELECT data FROM monitor_events WHERE connection=? AND at>=? AND at<? ORDER BY at DESC,id').all(source.id,range.from,range.to).map(r=>({...JSON.parse(r.data),sourceId:source.id})):[];
+ query(filters,range,catalog){const allSources=filters.connection==='all',source=allSources?null:this.sources.find(s=>s.id===filters.connection)||this.sources[0];const rows=allSources?this.store.db.prepare('SELECT connection AS sourceId,data FROM monitor_events WHERE at>=? AND at<? ORDER BY at DESC,id').all(range.from,range.to).map(r=>({...JSON.parse(r.data),sourceId:r.sourceId})):source?this.store.db.prepare('SELECT data FROM monitor_events WHERE connection=? AND at>=? AND at<? ORDER BY at DESC,id').all(source.id,range.from,range.to).map(r=>({...JSON.parse(r.data),sourceId:source.id})):[];
  const peers=source?this.store.db.prepare('SELECT connection AS sourceId,data FROM monitor_events WHERE connection<>? AND at>=? AND at<? ORDER BY at DESC,id').all(source.id,range.from,range.to).map(r=>({...JSON.parse(r.data),sourceId:r.sourceId})):[];
- const annotated=rows.map(e=>{const overlap=overlapMatches(e,peers);return overlap?{...e,overlap}:e;});
+ const annotated=allSources?unionRows(rows):rows.map(e=>{const overlap=overlapMatches(e,peers);return overlap?{...e,overlap}:e;});
  const providers=[...new Set(annotated.map(r=>r.provider))].sort(),models=[...new Set(annotated.map(r=>r.model))].sort();const search=String(filters.query||'').slice(0,200).toLowerCase();
  const selected=annotated.filter(e=>(!filters.provider||e.provider===filters.provider)&&(!filters.model||e.model===filters.model)&&(!filters.overlap||e.overlap?.kind===filters.overlap)&&(!filters.failed||e.status!==null&&(e.status<200||e.status>=400))&&(!search||[e.provider,e.model,e.session,e.project].join(' ').toLowerCase().includes(search)));
  const groups=new Map(),modelGroups=new Map(),days=new Map();let tokens=0,input=0,cached=0,output=0,pricedTokens=0,estimated=0n,reported=0n,sourceCredits=0n,sourceCreditRecords=0,estimatedRecords=0,reportedRecords=0,unpriced=0,knownStatus=0,failed=0;const latency=[],ttft=[];
@@ -164,7 +178,7 @@ class Monitor{
  const finish=map=>[...map.values()].map(g=>({...g,estimated:dollars(g.estimated.toString()),reported:dollars(g.reported.toString()),costPerMillion:perMillion(g.estimated+g.reported,g.pricedTokens),estimatedCostPerMillion:perMillion(g.estimated,g.pricedTokens),reportedCostPerMillion:perMillion(g.reported,g.pricedTokens)}));const percentile=(v,p)=>v.length?[...v].sort((a,b)=>a-b)[Math.ceil(v.length*p)-1]:null;
  const limit=Math.max(1,Math.min(200,Math.floor(Number(filters.limit)||50))),offset=Math.max(0,Math.floor(Number(filters.offset)||0)),sorted=filters.sort==='cost'?[...filtered].sort((a,b)=>(b.usd??-1)-(a.usd??-1)):filtered;
  const overlapRecords=filtered.filter(e=>e.overlap).length,overlapExact=filtered.filter(e=>e.overlap?.kind==='exact').length,overlapPossible=filtered.filter(e=>e.overlap?.kind==='possible').length,overlapSources=[...new Set(filtered.flatMap(e=>e.overlap?.sources||[]))];
- return {source:source?.id||null,sources:this.sourcesInfo(),compatibility:this.compatibility(),providers,models,rates:Object.values(rates),summary:{estimatedRecords,reportedRecords,sourceCreditRecords,sourceCredits:dollars(sourceCredits.toString()),requests:filtered.length,tokens,input,cached,output,pricedTokens,estimated:dollars(estimated.toString()),reported:dollars(reported.toString()),costPerMillion:perMillion(estimated+reported,pricedTokens),estimatedCostPerMillion:perMillion(estimated,pricedTokens),reportedCostPerMillion:perMillion(reported,pricedTokens),unpriced,overlapRecords,overlapExact,overlapPossible,overlapSources,knownStatus,failed,successRate:knownStatus?(knownStatus-failed)/knownStatus:null,p50:percentile(latency,.5),p95:percentile(latency,.95),ttft:percentile(ttft,.5)},groups:finish(groups),modelGroups:finish(modelGroups),days:finish(days).sort((a,b)=>a.key.localeCompare(b.key)),rows:filters.export?sorted:sorted.slice(offset,offset+limit),offset,limit,range};
+ return {source:allSources?'all':source?.id||null,sources:this.sourcesInfo(),compatibility:this.compatibility(),providers,models,rates:Object.values(rates),summary:{estimatedRecords,reportedRecords,sourceCreditRecords,sourceCredits:dollars(sourceCredits.toString()),requests:filtered.length,tokens,input,cached,output,pricedTokens,estimated:dollars(estimated.toString()),reported:dollars(reported.toString()),costPerMillion:perMillion(estimated+reported,pricedTokens),estimatedCostPerMillion:perMillion(estimated,pricedTokens),reportedCostPerMillion:perMillion(reported,pricedTokens),unpriced,overlapRecords,overlapExact,overlapPossible,overlapSources,knownStatus,failed,successRate:knownStatus?(knownStatus-failed)/knownStatus:null,p50:percentile(latency,.5),p95:percentile(latency,.95),ttft:percentile(ttft,.5)},groups:finish(groups),modelGroups:finish(modelGroups),days:finish(days).sort((a,b)=>a.key.localeCompare(b.key)),rows:filters.export?sorted:sorted.slice(offset,offset+limit),offset,limit,range};
  }
 }
 module.exports={Monitor,normalized,providerIdentity,ccRecord,jsonRecord,claudeRecord,geminiRecords,qwenRecord,kimiRecord,codebuddyRecord,qoderRecord,cost,overlapKeys,overlapMatches};
