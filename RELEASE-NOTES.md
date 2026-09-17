@@ -1,3 +1,13 @@
+# Subscription Lens 1.6.0
+
+## 用量趋势分析升级
+
+- 用量趋势支持当前周期、最近 7/30/90 天和全部本地历史。
+- 可在日趋势、累计趋势与模型分布之间切换。
+- 成本与 Tokens 指标可独立切换，统计卡片同步显示日均、峰值日、活跃天数和前后周期变化。
+- 模型分布基于筛选后的历史记录聚合，帮助识别长期使用模式。
+
+The overview trend explorer now supports selectable ranges (current period, 7/30/90 days and all local history), daily or cumulative charts, and model distribution. Cost and token metrics can be switched independently.
 # Subscription Lens 1.5.5
 
 Windows x64 stable release · 中文 / English / Nederlands
@@ -219,3 +229,4 @@ De Windows-taakbalk en venstermetadata gebruiken nu de Subscription Lens-identit
 See [source setup](https://github.com/zh3nggg/subscription-lens/blob/main/docs/PROVIDER-MONITORING.md), [validation](https://github.com/zh3nggg/subscription-lens/blob/main/docs/VALIDATION.md) and [third-party notices](https://github.com/zh3nggg/subscription-lens/blob/main/THIRD-PARTY-NOTICES.md).
 
 Developed with assistance from **GPT-6 Astra**. CodexBar and CC Switch are references; MIT-licensed codex-usage source is retained with its notices.
+

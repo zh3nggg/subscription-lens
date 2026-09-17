@@ -214,3 +214,28 @@ body:not(.compact-mode) .quota-card .quota-forecast-value span{display:block;mar
 body:not(.compact-mode) .quota-card .quota-forecast-note{margin-top:8px;padding-top:7px;border-top:1px solid color-mix(in srgb,var(--line) 78%,transparent);font-size:10px}
 body:not(.compact-mode) .quota-card .quota-forecast-empty{padding:10px 0 1px}
 @media(max-width:420px){body:not(.compact-mode) .quota-card .quota-forecast-head{align-items:flex-start;flex-direction:column}.quota-card .quota-forecast-head .segments{width:100%;display:flex}.quota-card .quota-forecast-head .segments button{flex:1}}
+
+/* 1.6 trend explorer: one glance for the overview, deeper answers on demand. */
+body:not(.compact-mode) .trend-card{overflow:hidden}
+body:not(.compact-mode) .trend-controls{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap}
+body:not(.compact-mode) .trend-controls select{min-width:116px;padding-top:7px;padding-bottom:7px}
+body:not(.compact-mode) .trend-view-tabs{width:max-content;margin:9px 14px 0}
+body:not(.compact-mode) .trend-view-tabs button{font-size:11px}
+body:not(.compact-mode) .trend-card .chart-area{min-height:178px;padding:6px 14px 0}
+body:not(.compact-mode) .trend-svg{display:block;width:100%;height:178px;overflow:visible}
+body:not(.compact-mode) .trend-svg .axis-label{fill:var(--muted);font-size:9px}
+body:not(.compact-mode) .trend-svg .grid{stroke:var(--line);stroke-dasharray:2 3;stroke-width:1}
+body:not(.compact-mode) .trend-svg .bar{fill:var(--text);opacity:.78;transition:opacity .15s ease}
+body:not(.compact-mode) .trend-svg .chart-hit:hover .bar{opacity:1}
+body:not(.compact-mode) .trend-svg .chart-hit-area{fill:transparent;cursor:pointer}
+body:not(.compact-mode) .trend-svg .trend-line{fill:none;stroke:#0a84ff;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+body:not(.compact-mode) .trend-svg .trend-point{fill:var(--card);stroke:#0a84ff;stroke-width:2}
+body:not(.compact-mode) .trend-models{display:grid;gap:11px;width:100%;padding:7px 4px 5px}
+body:not(.compact-mode) .trend-model-row{min-width:0}
+body:not(.compact-mode) .trend-model-meta{display:flex;justify-content:space-between;gap:12px;font-size:11px;margin-bottom:5px}
+body:not(.compact-mode) .trend-model-meta strong{font-weight:550;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body:not(.compact-mode) .trend-model-meta span{color:var(--muted);font-variant-numeric:tabular-nums;white-space:nowrap}
+body:not(.compact-mode) .trend-model-track{height:7px;border-radius:99px;background:var(--subtle);overflow:hidden}
+body:not(.compact-mode) .trend-model-track span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#0a84ff,#64d2ff)}
+body:not(.compact-mode) .trend-card .trend-footer{padding-top:2px}
+@media(max-width:720px){body:not(.compact-mode) .trend-controls{justify-content:flex-start;margin-top:5px}.trend-card .panel-head{align-items:flex-start;flex-direction:column}body:not(.compact-mode) .trend-view-tabs{margin-left:10px}.trend-card .trend-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}

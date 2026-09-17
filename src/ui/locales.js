@@ -1971,5 +1971,41 @@ window.LensLocales = {
   "查看模型建议": [
     "View model recommendations",
     "Modeladvies bekijken"
+  ],
+  "每日趋势": [
+    "Daily trend",
+    "Dagelijkse trend"
+  ],
+  "累计趋势": [
+    "Cumulative trend",
+    "Cumulatieve trend"
+  ],
+  "模型分布": [
+    "Model distribution",
+    "Modelverdeling"
+  ],
+  "当前周期": [
+    "Current period",
+    "Huidige periode"
+  ],
+  "最近 30 天": [
+    "Last 30 days",
+    "Laatste 30 dagen"
+  ],
+  "最近 90 天": [
+    "Last 90 days",
+    "Laatste 90 dagen"
+  ],
+  "全部历史": [
+    "All history",
+    "Volledige geschiedenis"
+  ],
+  "按模型查看所选时间范围": [
+    "Models in selected range",
+    "Modellen in geselecteerde periode"
+  ],
+  "点击图表查看当天明细": [
+    "Select a chart point to inspect that day",
+    "Selecteer een punt voor die dag"
   ]
 };
