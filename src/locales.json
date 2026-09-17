@@ -1419,6 +1419,30 @@
     "Possible overlaps",
     "Mogelijke overlap"
   ],
+  "预估剩余时间": [
+    "Estimated remaining time",
+    "Geschatte resterende tijd"
+  ],
+  "本额度窗口累计": [
+    "Full quota window",
+    "Volledig quotavenster"
+  ],
+  "最近24小时": [
+    "Recent 24 hours",
+    "Afgelopen 24 uur"
+  ],
+  "最近2小时": [
+    "Recent 2 hours",
+    "Afgelopen 2 uur"
+  ],
+  "当前模式暂无足够观测。": [
+    "There are not enough observations for this mode yet.",
+    "Er zijn nog niet genoeg metingen voor deze modus."
+  ],
+  "按 {n} 分钟有效观测推算": [
+    "Based on {n} minutes of valid observations",
+    "Gebaseerd op {n} minuten geldige metingen"
+  ],
   "高级：手动添加其他来源": [
     "Advanced: add another source manually",
     "Geavanceerd: een andere bron handmatig toevoegen"

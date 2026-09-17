@@ -22,6 +22,19 @@ test('quota estimates use the complete current window instead of a rolling two-h
   assert.equal(r.forecast.scope,'quota_window');
   assert.equal(r.forecast.samples,3);
 });
+test('quota estimates expose selectable recent 24-hour and two-hour baselines',()=>{
+  const longWindow={...window,minutes:10080};
+  const history=[
+    {limit:'codex',window:'primary',reset:longWindow.resetsAt,at:now-90*60000,used:20},
+    {limit:'codex',window:'primary',reset:longWindow.resetsAt,at:now-45*60000,used:35},
+    {limit:'codex',window:'primary',reset:longWindow.resetsAt,at:now-60000,used:50}
+  ];
+  const r=quotaOutlook({...longWindow,used:50},history,{now,live:true});
+  assert.equal(r.forecasts.quota_window.scope,'quota_window');
+  assert.equal(r.forecasts.recent_24h.scope,'recent_24h');
+  assert.equal(r.forecasts.recent_2h.scope,'recent_2h');
+  assert.equal(r.forecasts.recent_2h.samples,3);
+});
 test('quota estimates report a stable pace when no usage change is observed',()=>{const stable=samples.map(s=>({...s,used:60}));const r=quotaOutlook({...window,used:60},stable,{now,live:true});assert.equal(r.state,'on_track');assert.equal(r.forecast.percentPerHour,0);assert.equal(r.forecast.seconds,r.secondsToReset);});
 test('quota advice appears only for clear early exhaustion or underuse',()=>{const reset=7200;assert.equal(quotaAdvice({secondsToReset:reset,forecast:{fastSeconds:6000,seconds:5400}}),'early');assert.equal(quotaAdvice({secondsToReset:reset,forecast:{fastSeconds:10000,seconds:9500}}),'underuse');assert.equal(quotaAdvice({secondsToReset:reset,forecast:{fastSeconds:8000,seconds:8500}}),null);assert.equal(quotaAdvice({secondsToReset:reset,forecast:null}),null);});
 test('model mix advice shifts toward lower intensity when quota would run out early',()=>{const models=[{model:'gpt-6-astra',tokens:700,usd:7},{model:'gpt-5.6-luna',tokens:300,usd:1}],outlook={secondsToReset:7200,forecast:{seconds:3600}};const advice=modelMixAdvice(models,outlook);assert.equal(advice.state,'ready');assert.equal(advice.direction,'reduce');assert.equal(advice.targetModel,'gpt-5.6-luna');assert.ok(advice.recommended.find(m=>m.model==='gpt-5.6-luna').share>.3);assert.equal(advice.basis,'api_equivalent');});

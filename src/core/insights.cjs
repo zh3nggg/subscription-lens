@@ -22,10 +22,26 @@ function continuousDays(days,from,to){
   const byDate=new Map(days.map(d=>[d.date,d]));const start=new Date(from),end=new Date(new Date(to).getTime()-1);start.setHours(0,0,0,0);const count=Math.round((Date.UTC(end.getFullYear(),end.getMonth(),end.getDate())-Date.UTC(start.getFullYear(),start.getMonth(),start.getDate()))/86400000)+1;
   if(count<1||count>370)return days;const result=[];for(let d=new Date(start);d<=end;d.setDate(d.getDate()+1)){const date=dayKey(d);result.push(byDate.get(date)||{date,tokens:0,usd:0,amount:'0',events:0});}return result;
 }
+function stableQuotaPoints(points){
+  for(let i=points.length-1;i>0;i--)if(points[i].used<points[i-1].used)return points.slice(i);
+  return points;
+}
+function forecastFromQuotaPoints(points,remaining,reset,now,scope){
+  if(points.length<3)return null;
+  const first=points[0],last=points.at(-1),minutes=(last.at-first.at)/60000,delta=last.used-first.used;
+  if(minutes<15||delta<0)return null;
+  const secondsToReset=(reset-now)/1000;
+  if(delta===0)return {minutes,samples:points.length,percentPerHour:0,seconds:secondsToReset,fastSeconds:secondsToReset,slowSeconds:secondsToReset,scope,from:new Date(first.at).toISOString(),to:new Date(last.at).toISOString()};
+  const rate=delta/minutes,seconds=remaining/rate*60;
+  const fastSeconds=Math.max(0,remaining-1)/((delta+1)/minutes)*60;
+  const slowSeconds=delta>1?(remaining+1)/((delta-1)/minutes)*60:null;
+  return {minutes,samples:points.length,percentPerHour:rate*60,seconds,fastSeconds,slowSeconds,scope,from:new Date(first.at).toISOString(),to:new Date(last.at).toISOString()};
+}
 function quotaOutlook(window,samples,{now=Date.now(),live=false}={}){
   const at=Date.parse(window.observedAt),reset=window.resetsAt*1000;const remaining=Math.max(0,100-window.used);
   const windowStart=Number.isFinite(reset)&&Number.isFinite(window.minutes)&&window.minutes>0?reset-window.minutes*60000:null;
-  const base={...window,remaining,windowStartAt:windowStart,secondsToReset:Number.isFinite(reset)?Math.max(0,(reset-now)/1000):null,forecast:null};
+  const emptyForecasts={quota_window:null,recent_24h:null,recent_2h:null};
+  const base={...window,remaining,windowStartAt:windowStart,secondsToReset:Number.isFinite(reset)?Math.max(0,(reset-now)/1000):null,forecast:null,forecasts:emptyForecasts};
   if(!Number.isFinite(at)||now-at>180000||at>now+30000||!live)return {...base,state:'stale'};
   if(!Number.isFinite(reset)||reset<=now)return {...base,state:'expired'};
   if(remaining<=0)return {...base,state:'exhausted'};
@@ -33,20 +49,17 @@ function quotaOutlook(window,samples,{now=Date.now(),live=false}={}){
   // seconds behind the local sample write. Keep the upper bound tolerant while
   // using every observation belonging to this exact quota window. The reset
   // epoch isolates samples from previous windows, so no rolling 120-minute
-  // cutoff is needed here.
+  // cutoff is needed for the full-window estimate.
   const latestAt=Math.max(at,now), upperAt=now-at>30000?latestAt+30000:at;
   let points=samples.filter(s=>s.limit===window.limit&&s.window===window.window&&s.reset===window.resetsAt&&s.at<=upperAt&&(!windowStart||s.at>=windowStart)).sort((a,b)=>a.at-b.at);
-  // A decrease is a correction/reset: discard the earlier slope.
-  for(let i=points.length-1;i>0;i--)if(points[i].used<points[i-1].used){points=points.slice(i);break;}
-  if(points.length<3)return {...base,state:'learning'};
-  const first=points[0],last=points.at(-1),minutes=(last.at-first.at)/60000,delta=last.used-first.used;
-  if(minutes<15||delta<0)return {...base,state:'learning'};
+  points=stableQuotaPoints(points);
+  const full=forecastFromQuotaPoints(points,remaining,reset,now,'quota_window');
+  const anchor=points.at(-1)?.at||at;
+  const recent=(hours,scope)=>forecastFromQuotaPoints(points.filter(p=>p.at>=anchor-hours*3600000),remaining,reset,now,scope);
+  const forecasts={quota_window:full,recent_24h:recent(24,'recent_24h'),recent_2h:recent(2,'recent_2h')};
+  if(!full)return {...base,state:'learning',forecasts};
   const secondsToReset=(reset-now)/1000;
-  if(delta===0)return {...base,state:'on_track',forecast:{minutes,samples:points.length,percentPerHour:0,seconds:secondsToReset,fastSeconds:secondsToReset,slowSeconds:secondsToReset,scope:'quota_window',from:new Date(first.at).toISOString(),to:new Date(last.at).toISOString()}};
-  const rate=delta/minutes;const seconds=remaining/rate*60;
-  const fastSeconds=Math.max(0,remaining-1)/((delta+1)/minutes)*60;
-  const slowSeconds=delta>1?(remaining+1)/((delta-1)/minutes)*60:null;
-  return {...base,state:slowSeconds!==null&&slowSeconds<secondsToReset?'risk':fastSeconds>=secondsToReset?'on_track':'uncertain',forecast:{minutes,samples:points.length,percentPerHour:rate*60,seconds,fastSeconds,slowSeconds,scope:'quota_window',from:new Date(first.at).toISOString(),to:new Date(last.at).toISOString()}};
+  return {...base,state:full.slowSeconds!==null&&full.slowSeconds<secondsToReset?'risk':full.fastSeconds>=secondsToReset?'on_track':'uncertain',forecast:full,forecasts};
 }
 function quotaAdvice(outlook){const reset=Number(outlook?.secondsToReset),forecast=outlook?.forecast;if(!forecast||!Number.isFinite(reset)||reset<=0)return null;const early=Number.isFinite(forecast.fastSeconds)&&forecast.fastSeconds<reset;const underuse=Number.isFinite(forecast.seconds)&&forecast.seconds>reset*1.25;return early?'early':underuse?'underuse':null;}
 function modelMixAdvice(models,outlook){
