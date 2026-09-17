@@ -193,3 +193,24 @@ body:not(.compact-mode) .pill{border:1px solid transparent}
 body:not(.compact-mode) .pill.green{background:#19875414}
 body:not(.compact-mode) .pill.amber{background:#b7791f18}
 @media(prefers-reduced-motion:reduce){body:not(.compact-mode) .button,body:not(.compact-mode) select,body:not(.compact-mode) .input{transition:none}}
+
+/* 1.5.5 quota card: make the forecast read as one calm summary instead of a
+   second form. Keep the same controls and data while clarifying hierarchy. */
+body:not(.compact-mode) .quota-card{overflow:hidden}
+body:not(.compact-mode) .quota-card .quota-main{padding-top:10px;padding-bottom:8px}
+body:not(.compact-mode) .quota-card .quota-number{font-variant-numeric:tabular-nums}
+body:not(.compact-mode) .quota-card .quota-meter{height:6px;background:#ececf0;margin-bottom:9px}
+body:not(.compact-mode) .quota-card .quota-meter span{background:var(--text)}
+body:not(.compact-mode) .quota-card .pace-line{min-height:24px;color:var(--muted)}
+body:not(.compact-mode) .quota-card .pace-line strong{color:var(--text);font-weight:500}
+body:not(.compact-mode) .quota-card .quota-forecast{margin:10px 14px 0;padding:11px 13px 10px;border-radius:13px;background:linear-gradient(180deg,var(--subtle),color-mix(in srgb,var(--subtle) 72%,var(--card)));box-shadow:inset 0 1px 0 #fff8}
+body:not(.compact-mode) .quota-card .quota-forecast-head{align-items:center;gap:8px}
+body:not(.compact-mode) .quota-card .quota-forecast-head>span{color:var(--text);font-size:10px;font-weight:600;letter-spacing:.1px}
+body:not(.compact-mode) .quota-card .quota-forecast-head .segments{padding:2px;border-radius:8px}
+body:not(.compact-mode) .quota-card .quota-forecast-head .segments button{padding:4px 7px;font-size:10px}
+body:not(.compact-mode) .quota-card .quota-forecast-value{display:block;margin-top:10px}
+body:not(.compact-mode) .quota-card .quota-forecast-value strong{display:block;font-size:23px;line-height:1.12;letter-spacing:-.6px;font-variant-numeric:tabular-nums}
+body:not(.compact-mode) .quota-card .quota-forecast-value span{display:block;margin-top:3px;font-size:10px;color:var(--muted)}
+body:not(.compact-mode) .quota-card .quota-forecast-note{margin-top:8px;padding-top:7px;border-top:1px solid color-mix(in srgb,var(--line) 78%,transparent);font-size:10px}
+body:not(.compact-mode) .quota-card .quota-forecast-empty{padding:10px 0 1px}
+@media(max-width:420px){body:not(.compact-mode) .quota-card .quota-forecast-head{align-items:flex-start;flex-direction:column}.quota-card .quota-forecast-head .segments{width:100%;display:flex}.quota-card .quota-forecast-head .segments button{flex:1}}
