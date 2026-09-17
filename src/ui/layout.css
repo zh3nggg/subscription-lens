@@ -215,6 +215,20 @@ body:not(.compact-mode) .quota-card .quota-forecast-note{margin-top:8px;padding-
 body:not(.compact-mode) .quota-card .quota-forecast-empty{padding:10px 0 1px}
 @media(max-width:420px){body:not(.compact-mode) .quota-card .quota-forecast-head{align-items:flex-start;flex-direction:column}.quota-card .quota-forecast-head .segments{width:100%;display:flex}.quota-card .quota-forecast-head .segments button{flex:1}}
 
+/* 1.6.1 usage navigation and quota rhythm pass. */
+body:not(.compact-mode) .usage-tabs{min-width:245px}
+body:not(.compact-mode) .usage-tabs button{min-width:72px}
+body:not(.compact-mode) .usage-breadcrumb{display:flex;align-items:center;gap:7px;margin:-2px 0 8px;color:var(--muted);font-size:11px}
+body:not(.compact-mode) .usage-breadcrumb strong{color:var(--text);font-weight:550;max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+body:not(.compact-mode) .table-link{padding:0;border:0;background:none;color:inherit;text-align:left;cursor:pointer}
+body:not(.compact-mode) .table-link:hover strong{text-decoration:underline;text-underline-offset:3px}
+body:not(.compact-mode) .quota-card .quota-forecast{margin:9px 14px 0;padding:11px 12px 10px;border:1px solid var(--line);border-radius:12px;background:var(--subtle);box-shadow:none}
+body:not(.compact-mode) .quota-card .quota-forecast-head{padding-bottom:1px}
+body:not(.compact-mode) .quota-card .quota-forecast-value{margin-top:9px;padding-top:0}
+body:not(.compact-mode) .quota-card .quota-forecast-note{margin-top:8px;padding-top:8px}
+body:not(.compact-mode) .quota-card .quota-footer{margin-top:9px;padding-top:9px;border-top:1px solid var(--line)}
+@media(max-width:720px){body:not(.compact-mode) .usage-tabs{min-width:0;width:100%}body:not(.compact-mode) .usage-tabs button{flex:1}.usage-breadcrumb{margin-top:2px}}
+
 /* 1.6 trend explorer: one glance for the overview, deeper answers on demand. */
 body:not(.compact-mode) .trend-card{overflow:hidden}
 body:not(.compact-mode) .trend-controls{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap}

@@ -2007,5 +2007,13 @@ window.LensLocales = {
   "点击图表查看当天明细": [
     "Select a chart point to inspect that day",
     "Selecteer een punt voor die dag"
+  ],
+  "查看会话": [
+    "View sessions",
+    "Sessies bekijken"
+  ],
+  "记录": [
+    "Records",
+    "Records"
   ]
 };

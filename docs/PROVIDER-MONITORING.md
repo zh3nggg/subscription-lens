@@ -1,4 +1,4 @@
-# Provider monitoring · 1.6.0 stable
+# Provider monitoring · 1.6.1 stable
 
 Open **Connections → Providers**. Tools installed in standard folders are detected locally; connect one or all in a click. Use **Add manually** only for custom locations, then open **Overview → Providers**.
 The app reads the selected local source every 15 seconds while running. No cloud account or API key is required for these connectors.
@@ -60,4 +60,5 @@ Unknown or malformed records do not become zero usage. The source footer reports
 ## Local release retention
 
 Keep the latest verified stable package and latest verified preview package. Verify checksums and tests before replacing either slot. Never call a preview stable to fill an empty slot. Until the first stable release, keep the preceding preview as a rollback copy. Source code and app data are outside package cleanup.
+
 

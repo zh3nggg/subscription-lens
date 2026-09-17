@@ -1,3 +1,12 @@
+# Subscription Lens 1.6.1
+
+## 用量导航与额度卡片
+
+- 用量页改为“项目 / 会话 / 记录”三级导航：项目进入项目内会话，会话进入会话记录。
+- 会话和记录标签支持直接查看全部项目范围的数据。
+- 额度卡片统一间距、分隔线和操作区，预测内容层级更清晰。
+
+The usage page now follows a project → session → record hierarchy while keeping global session and record views available. The quota card spacing and dividers were refined for a consistent, compact layout.
 # Subscription Lens 1.6.0
 
 ## 用量趋势分析升级
@@ -229,4 +238,5 @@ De Windows-taakbalk en venstermetadata gebruiken nu de Subscription Lens-identit
 See [source setup](https://github.com/zh3nggg/subscription-lens/blob/main/docs/PROVIDER-MONITORING.md), [validation](https://github.com/zh3nggg/subscription-lens/blob/main/docs/VALIDATION.md) and [third-party notices](https://github.com/zh3nggg/subscription-lens/blob/main/THIRD-PARTY-NOTICES.md).
 
 Developed with assistance from **GPT-6 Astra**. CodexBar and CC Switch are references; MIT-licensed codex-usage source is retained with its notices.
+
 

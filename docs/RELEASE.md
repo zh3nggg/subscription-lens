@@ -1,4 +1,4 @@
-# Subscription Lens 1.6.0
+# Subscription Lens 1.6.1
 
 Windows x64 stable release · 中文 / English / Nederlands
 
@@ -23,4 +23,5 @@ Windows x64 stable release · 中文 / English / Nederlands
 See [release notes](../RELEASE-NOTES.md), [source setup](PROVIDER-MONITORING.md), [validation](VALIDATION.md) and [third-party notices](../THIRD-PARTY-NOTICES.md).
 
 Developed with assistance from **GPT-6 Astra**.
+
 
