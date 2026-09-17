@@ -1,4 +1,4 @@
-# Subscription Lens 1.5.1
+# Subscription Lens 1.5.2
 
 Windows x64 stable release · 中文 / English / Nederlands
 

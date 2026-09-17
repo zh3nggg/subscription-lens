@@ -1,3 +1,33 @@
+# Subscription Lens 1.5.2
+
+Windows x64 stable release · 中文 / English / Nederlands
+
+## 新增与修复
+
+- 重排总览首屏：额度、账期和用量分布形成清晰的主次层级。
+- 供应商用量面板改为居中图表、图例和摘要信息布局，减少大块空白。
+- 增加供应商／模型数、请求数和已计价 Tokens 摘要。
+- 增加“点击供应商查看模型用量”和“点击模型查看记录”的交互提示。
+- 保持三语言界面、Tokens／费用切换、扇区悬停高亮和模型下钻。
+
+## What's new
+
+- The overview now uses a clearer first-screen hierarchy for quota, billing and usage distribution.
+- Provider usage cards center the chart and legend and add compact summary metrics for providers/models, requests and priced tokens.
+- Contextual guidance explains the provider-to-model and model-to-record drill-down flow.
+
+## Nieuw
+
+- Het overzicht heeft nu een duidelijkere hiërarchie voor quota, facturering en gebruiksverdeling.
+- Aanbiederskaarten centreren de grafiek en legenda en tonen compacte statistieken voor aanbieders/modellen, aanvragen en geprijsde tokens.
+- Contextuele aanwijzingen leggen de doorklik van aanbieder naar model en van model naar records uit.
+
+## Upgrade
+
+Run `Subscription-Lens-1.5.2-x64.exe` over an existing installation. The installer keeps the existing application identity, settings and local usage history.
+
+Developed with assistance from **GPT-6 Astra**. See [third-party notices](THIRD-PARTY-NOTICES.md).
+
 # Subscription Lens 1.5.1
 
 Windows x64 stable release · 中文 / English / Nederlands
