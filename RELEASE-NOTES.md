@@ -1,3 +1,32 @@
+# Subscription Lens 1.5.4
+
+Windows x64 stable release · 中文 / English / Nederlands
+
+## 新增与修复
+
+- 总览页面采用更接近原生桌面应用的浅灰画布、白色卡片、细分隔线和克制阴影。
+- 统一按钮、选择框、导航和标签的圆角、悬停、焦点和按下状态。
+- 保留紧凑窗口布局、可访问字号和深色模式适配。
+- 模型建议的红绿增减 bar 和供应商分布摘要继续可用。
+
+## What's new
+
+- The overview uses a calmer native desktop visual system with soft gray surfaces, white cards, fine separators and restrained shadows.
+- Buttons, selects, navigation and segmented controls now share consistent corner radii and interaction states.
+- Compact layouts, accessible text scaling and dark mode remain supported.
+
+## Nieuw
+
+- Het overzicht gebruikt een rustige native desktopstijl met zachte grijze oppervlakken, witte kaarten, fijne scheidingen en subtiele schaduwen.
+- Knoppen, keuzelijsten, navigatie en segmentknoppen delen nu consistente hoeken en interactiestatussen.
+- Compacte indelingen, toegankelijke tekstschaling en de donkere modus blijven ondersteund.
+
+## Upgrade
+
+Run `Subscription-Lens-1.5.4-x64.exe` over an existing installation. The installer keeps the existing application identity, settings and local usage history.
+
+Developed with assistance from **GPT-6 Astra**. See [third-party notices](THIRD-PARTY-NOTICES.md).
+
 # Subscription Lens 1.5.3
 
 Windows x64 stable release · 中文 / English / Nederlands
