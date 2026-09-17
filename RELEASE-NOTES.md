@@ -1,3 +1,31 @@
+# Subscription Lens 1.5.5
+
+Windows x64 stable release · 中文 / English / Nederlands
+
+## 新增与修复
+
+- 用 Codex 本机线程目录中的会话名称显示用量列表，项目名和短 UID 作为辅助信息。
+- 搜索支持会话名称；名称索引不可用时自动回退到 UID。
+- 只读读取本机索引，不读取或保存聊天正文。
+
+## What's new
+
+- Usage sessions now show conversation names from Codex's local thread catalog, with project and a short ID as supporting context.
+- Search also matches conversation names and safely falls back to IDs when the catalog is unavailable.
+- The catalog is read-only; chat content is never read or stored.
+
+## Nieuw
+
+- Gebruikssessies tonen nu conversatienamen uit de lokale Codex-threadcatalogus, met project en korte ID als extra context.
+- Zoeken werkt ook op conversatienamen en valt veilig terug op ID's als de catalogus niet beschikbaar is.
+- De catalogus wordt alleen-lezen geopend; chatinhoud wordt nooit gelezen of opgeslagen.
+
+## Upgrade
+
+Run `Subscription-Lens-1.5.5-x64.exe` over an existing installation. The installer keeps the existing application identity, settings and local usage history.
+
+Developed with assistance from **GPT-6 Astra**. See [third-party notices](THIRD-PARTY-NOTICES.md).
+
 # Subscription Lens 1.5.4
 
 Windows x64 stable release · 中文 / English / Nederlands
