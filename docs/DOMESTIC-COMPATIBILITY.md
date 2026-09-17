@@ -1,10 +1,10 @@
 # 1.5 国产 Agent 兼容目标
 
-本文件定义 1.4 系列的验收边界。名单会随官方接口变化调整。
+本文件定义 1.5 系列的验收边界。名单会随官方接口变化调整。
 
 ## 首批范围
 
-| 接入对象 | 目标方式 | 1.4 验收要求 |
+| 接入对象 | 目标方式 | 1.5 验收要求 |
 | --- | --- | --- |
 | Qwen Code | 只读解析 `usage/token-usage-YYYY-MM.jsonl` | 已接入每请求模型、Tokens、缓存、推理与 API 时长；后续补本地 OTLP 接收器 |
 | Kimi Code CLI | 只读解析 `KIMI_CODE_HOME` 下主代理与子代理的 `usage.record` | 已接入 per-turn 增量，跳过 session 累计行；后续补旧版 Kimi CLI |
