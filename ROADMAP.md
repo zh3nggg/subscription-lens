@@ -4,7 +4,7 @@
 
 ## English
 
-### Current release: 1.6.3 stable
+### Current release: 1.6.4 stable
 
 Windows desktop app for Codex subscriptions, with Chinese, English and Dutch UI. Local usage analytics, account quota, full-active-window forecasting, billing comparison, compact view and optional notifications are available. Full Codex feature parity with CodexBar and codex-usage is **not yet complete**. See [coverage](docs/COMPATIBILITY.md).
 
@@ -24,7 +24,7 @@ Current scope includes Codex subscriptions and optional local records from Qwen 
 
 ## 简体中文
 
-### 当前版本：1.6.3 正式版
+### 当前版本：1.6.4 正式版
 
 面向 Codex 套餐的 Windows 桌面应用，支持中文、英语、荷兰语。已提供本地用量分析、账户额度、完整额度窗口预测、账期对比、专注窗口和可选提醒。**尚未完整覆盖 CodexBar 与 codex-usage 的 Codex 功能**，详见[覆盖清单](docs/COMPATIBILITY.md)。
 
@@ -44,7 +44,7 @@ Current scope includes Codex subscriptions and optional local records from Qwen 
 
 ## Nederlands
 
-### Huidige versie: 1.6.3 stable
+### Huidige versie: 1.6.4 stable
 
 Een Windows-desktopapp voor Codex-abonnementen, in het Chinees, Engels en Nederlands. Lokale gebruiksanalyse, accountlimieten, voorspellingen over het volledige actieve venster, periodevergelijking, compacte weergave en optionele meldingen zijn beschikbaar. **Volledige Codex-functionaliteit van CodexBar en codex-usage is nog niet bereikt.** Zie het [overzicht](docs/COMPATIBILITY.md).
 
@@ -61,6 +61,7 @@ Een Windows-desktopapp voor Codex-abonnementen, in het Chinees, Engels en Nederl
 De eerste acceptatieset en bewijsniveaus staan in [compatibiliteit met Chinese platforms](docs/DOMESTIC-COMPATIBILITY.md). Gesloten IDE-producten zonder gedocumenteerde export, log of API blijven kandidaat.
 
 De huidige scope omvat Codex-abonnementen en lokale records van Qwen Code, Kimi Code, CodeBuddy Code, Qoder, CC Switch, Claude Code, Gemini CLI en JSONL. Qoder Credits blijven in de oorspronkelijke eenheid en worden niet opgeteld bij API-equivalente USD. Versie 1.5 breidt dit uit volgens bewijsniveau; IDE-formaten zonder stabiele bron blijven kandidaat.
+
 
 
 

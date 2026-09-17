@@ -1,3 +1,11 @@
+# Subscription Lens 1.6.4
+
+## 额度预测卡片间距
+
+- 修复概览网格拉伸导致预测框贴住卡片底边的问题。
+- 预测框左右边距调整为 10px，并加入对称底部间距。
+
+Fixed overview grid stretching that could pin the forecast panel to the card bottom. The forecast panel now uses a 10px horizontal inset and matching bottom spacing.
 # Subscription Lens 1.6.3
 
 ## 额度文案与任务栏身份加固
@@ -255,6 +263,7 @@ De Windows-taakbalk en venstermetadata gebruiken nu de Subscription Lens-identit
 See [source setup](https://github.com/zh3nggg/subscription-lens/blob/main/docs/PROVIDER-MONITORING.md), [validation](https://github.com/zh3nggg/subscription-lens/blob/main/docs/VALIDATION.md) and [third-party notices](https://github.com/zh3nggg/subscription-lens/blob/main/THIRD-PARTY-NOTICES.md).
 
 Developed with assistance from **GPT-6 Astra**. CodexBar and CC Switch are references; MIT-licensed codex-usage source is retained with its notices.
+
 
 
 
