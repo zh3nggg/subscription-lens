@@ -1,3 +1,32 @@
+# Subscription Lens 1.5.3
+
+Windows x64 stable release · 中文 / English / Nederlands
+
+## 新增与修复
+
+- 模型组合建议页使用“当前占比底条 + 建议变化段 + 目标刻度”的可视化。
+- 建议增加的模型使用绿色显示，建议降低的模型使用红色显示。
+- 同时展示建议占比、当前占比和变化百分比，并增加图例说明。
+- 保持键盘可访问性、响应式布局和三语言支持。
+
+## What's new
+
+- Model-mix recommendations now show the current share, a suggested change segment and a target marker in one bar.
+- Green marks recommended increases and red marks recommended reductions.
+- Suggested share, current share and percentage change are shown together with a legend.
+
+## Nieuw
+
+- Modelmixadviezen tonen nu het huidige aandeel, de aanbevolen wijziging en een doelmarkering in één balk.
+- Groen markeert verhogingen en rood markeert verlagingen.
+- Het aanbevolen aandeel, huidige aandeel en wijzigingspercentage staan samen met een legenda.
+
+## Upgrade
+
+Run `Subscription-Lens-1.5.3-x64.exe` over an existing installation. The installer keeps the existing application identity, settings and local usage history.
+
+Developed with assistance from **GPT-6 Astra**. See [third-party notices](THIRD-PARTY-NOTICES.md).
+
 # Subscription Lens 1.5.2
 
 Windows x64 stable release · 中文 / English / Nederlands
