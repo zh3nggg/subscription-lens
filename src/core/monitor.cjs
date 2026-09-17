@@ -7,6 +7,13 @@ const label=(s,fallback='unknown')=>typeof s==='string'&&s.trim()?s.replace(/[\x
 const count=v=>Number.isSafeInteger(v)&&v>=0?v:null;
 const cost=v=>{if(v===null||v===undefined||v==='')return null;try{const n=decimalUnits(v,15);return n<=1000000000n*10n**15n?n.toString():null;}catch{return null;}};
 const instant=v=>{const n=typeof v==='number'?(v<1e12?v*1000:v):Date.parse(v);return Number.isFinite(n)&&n>0&&n<=8640000000000000?new Date(n).toISOString():null;};
+const compatibilityCatalog=[
+ {id:'qoder',name:'Qoder',level:'supported',kind:'qoder',detailKey:'Qoder Quest 本机上下文快照与 stream JSON；Credits 单独保留'},
+ {id:'codebuddy',name:'CodeBuddy',level:'supported',kind:'codebuddy',detailKey:'本机项目 JSONL 用量；只读解析，不读取配置密钥'},
+ {id:'deepseek',name:'DeepSeek',level:'partial',kind:null,detailKey:'通过 CC Switch、兼容网关或 JSONL 导入；暂无独立客户端连接器'},
+ {id:'trae',name:'TRAE',level:'candidate',kind:null,detailKey:'等待稳定的本地导出或日志格式；可先使用 JSONL 导入'},
+ {id:'cursor',name:'Cursor',level:'candidate',kind:null,detailKey:'等待稳定的本地导出或日志格式；暂不读取凭据或网页数据'}
+];
 function overlapKeys(e){
  const keys=[];if(e.id)keys.push('id:'+e.id);
  const at=Date.parse(e.at);if(!Number.isFinite(at))return keys;
@@ -140,6 +147,7 @@ class Monitor{
  }return {imported,invalid,files:files.length};}
  checkpoint(s,file,offset,st){this.store.db.prepare('INSERT INTO monitor_files VALUES(?,?,?,?,?) ON CONFLICT(connection,path) DO UPDATE SET offset=excluded.offset,mtime=excluded.mtime,size=excluded.size').run(s.id,file,offset,st.mtimeMs,st.size);}
  sourcesInfo(){return this.sources.map(s=>({...s,...(this.states[s.id]||{state:'idle'}),records:this.store.db.prepare('SELECT COUNT(*) n FROM monitor_events WHERE connection=?').get(s.id).n}));}
+ compatibility(){return compatibilityCatalog.map(item=>({...item,connected:item.kind?this.sources.some(source=>source.kind===item.kind):false}));}
  query(filters,range,catalog){const source=this.sources.find(s=>s.id===filters.connection)||this.sources[0];const rows=source?this.store.db.prepare('SELECT data FROM monitor_events WHERE connection=? AND at>=? AND at<? ORDER BY at DESC,id').all(source.id,range.from,range.to).map(r=>({...JSON.parse(r.data),sourceId:source.id})):[];
  const peers=source?this.store.db.prepare('SELECT connection AS sourceId,data FROM monitor_events WHERE connection<>? AND at>=? AND at<? ORDER BY at DESC,id').all(source.id,range.from,range.to).map(r=>({...JSON.parse(r.data),sourceId:r.sourceId})):[];
  const annotated=rows.map(e=>{const overlap=overlapMatches(e,peers);return overlap?{...e,overlap}:e;});
@@ -156,7 +164,7 @@ class Monitor{
  const finish=map=>[...map.values()].map(g=>({...g,estimated:dollars(g.estimated.toString()),reported:dollars(g.reported.toString()),costPerMillion:perMillion(g.estimated+g.reported,g.pricedTokens),estimatedCostPerMillion:perMillion(g.estimated,g.pricedTokens),reportedCostPerMillion:perMillion(g.reported,g.pricedTokens)}));const percentile=(v,p)=>v.length?[...v].sort((a,b)=>a-b)[Math.ceil(v.length*p)-1]:null;
  const limit=Math.max(1,Math.min(200,Math.floor(Number(filters.limit)||50))),offset=Math.max(0,Math.floor(Number(filters.offset)||0)),sorted=filters.sort==='cost'?[...filtered].sort((a,b)=>(b.usd??-1)-(a.usd??-1)):filtered;
  const overlapRecords=filtered.filter(e=>e.overlap).length,overlapExact=filtered.filter(e=>e.overlap?.kind==='exact').length,overlapPossible=filtered.filter(e=>e.overlap?.kind==='possible').length;
- return {source:source?.id||null,sources:this.sourcesInfo(),providers,models,rates:Object.values(rates),summary:{estimatedRecords,reportedRecords,sourceCreditRecords,sourceCredits:dollars(sourceCredits.toString()),requests:filtered.length,tokens,input,cached,output,pricedTokens,estimated:dollars(estimated.toString()),reported:dollars(reported.toString()),costPerMillion:perMillion(estimated+reported,pricedTokens),estimatedCostPerMillion:perMillion(estimated,pricedTokens),reportedCostPerMillion:perMillion(reported,pricedTokens),unpriced,overlapRecords,overlapExact,overlapPossible,knownStatus,failed,successRate:knownStatus?(knownStatus-failed)/knownStatus:null,p50:percentile(latency,.5),p95:percentile(latency,.95),ttft:percentile(ttft,.5)},groups:finish(groups),modelGroups:finish(modelGroups),days:finish(days).sort((a,b)=>a.key.localeCompare(b.key)),rows:filters.export?sorted:sorted.slice(offset,offset+limit),offset,limit,range};
+ return {source:source?.id||null,sources:this.sourcesInfo(),compatibility:this.compatibility(),providers,models,rates:Object.values(rates),summary:{estimatedRecords,reportedRecords,sourceCreditRecords,sourceCredits:dollars(sourceCredits.toString()),requests:filtered.length,tokens,input,cached,output,pricedTokens,estimated:dollars(estimated.toString()),reported:dollars(reported.toString()),costPerMillion:perMillion(estimated+reported,pricedTokens),estimatedCostPerMillion:perMillion(estimated,pricedTokens),reportedCostPerMillion:perMillion(reported,pricedTokens),unpriced,overlapRecords,overlapExact,overlapPossible,knownStatus,failed,successRate:knownStatus?(knownStatus-failed)/knownStatus:null,p50:percentile(latency,.5),p95:percentile(latency,.95),ttft:percentile(ttft,.5)},groups:finish(groups),modelGroups:finish(modelGroups),days:finish(days).sort((a,b)=>a.key.localeCompare(b.key)),rows:filters.export?sorted:sorted.slice(offset,offset+limit),offset,limit,range};
  }
 }
 module.exports={Monitor,normalized,providerIdentity,ccRecord,jsonRecord,claudeRecord,geminiRecords,qwenRecord,kimiRecord,codebuddyRecord,qoderRecord,cost,overlapKeys,overlapMatches};

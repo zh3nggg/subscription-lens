@@ -1304,6 +1304,50 @@ window.LensLocales = {
     "Manage sources",
     "Bronnen beheren"
   ],
+  "平台兼容性": [
+    "Platform compatibility",
+    "Platformcompatibiliteit"
+  ],
+  "仅在有明确本地数据来源时标记为已支持": [
+    "A platform is supported only when a clear local data source exists",
+    "Een platform wordt alleen ondersteund bij een duidelijke lokale gegevensbron"
+  ],
+  "证据分级": [
+    "Evidence levels",
+    "Bewijsniveaus"
+  ],
+  "已支持": [
+    "Supported",
+    "Ondersteund"
+  ],
+  "部分支持": [
+    "Partial",
+    "Gedeeltelijk"
+  ],
+  "候选": [
+    "Candidate",
+    "Kandidaat"
+  ],
+  "Qoder Quest 本机上下文快照与 stream JSON；Credits 单独保留": [
+    "Qoder Quest local context snapshots and stream JSON; Credits remain separate",
+    "Lokale contextsnapshots en stream-JSON van Qoder Quest; Credits blijven afzonderlijk"
+  ],
+  "本机项目 JSONL 用量；只读解析，不读取配置密钥": [
+    "Local project JSONL usage; read-only parsing without configuration keys",
+    "Lokale JSONL-gebruiksgegevens; alleen-lezen parsing zonder configuratiesleutels"
+  ],
+  "通过 CC Switch、兼容网关或 JSONL 导入；暂无独立客户端连接器": [
+    "Import through CC Switch, a compatible gateway or JSONL; no dedicated client connector yet",
+    "Importeer via CC Switch, een compatibele gateway of JSONL; nog geen eigen clientconnector"
+  ],
+  "等待稳定的本地导出或日志格式；可先使用 JSONL 导入": [
+    "Waiting for a stable local export or log format; JSONL import is available meanwhile",
+    "Wachten op een stabiel lokaal export- of logformaat; JSONL-import is voorlopig beschikbaar"
+  ],
+  "等待稳定的本地导出或日志格式；暂不读取凭据或网页数据": [
+    "Waiting for a stable local export or log format; credentials and web data are not read",
+    "Wachten op een stabiel lokaal export- of logformaat; inloggegevens en webgegevens worden niet gelezen"
+  ],
   "添加使用记录": [
     "Add usage records",
     "Gebruiksgegevens toevoegen"
