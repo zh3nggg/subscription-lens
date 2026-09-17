@@ -1,4 +1,4 @@
-# Provider monitoring · 1.4.5 beta
+# Provider monitoring · 1.5.0-beta.1 preview
 
 Open **Connections → Providers**. Tools installed in standard folders are detected locally; connect one or all in a click. Use **Add manually** only for custom locations, then open **Overview → Providers**.
 The app reads the selected local source every 15 seconds while running. No cloud account or API key is required for these connectors.
