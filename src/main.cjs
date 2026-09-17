@@ -13,7 +13,10 @@ const lock=app.requestSingleInstanceLock();if(!lock){app.quit();}else{
 let win,service,tray,quitting=false,changeTimer,lastRefresh=0,compactMode=false,pinned=false,normalBounds=null;
 const t=(key,params)=>translate(key,resolveLanguage(service?.settings.language,app.getLocale()),params);
 const ui=pathToFileURL(path.join(__dirname,'ui','index.html')).href;
-const icon=path.join(__dirname,'../assets/icon.png');
+// Windows shell identity is keyed from the executable and a real multi-size
+// ICO. Keep PNG for platforms/components that prefer raster tray assets.
+const iconPng=path.join(__dirname,'../assets/icon.png');
+const icon=process.platform==='win32'?path.join(__dirname,'../assets/icon.ico'):iconPng;
 function changed(){clearTimeout(changeTimer);changeTimer=setTimeout(()=>{if(win&&!win.isDestroyed())win.webContents.send('lens:changed');updateTray();},250);}
 function show(){if(win){if(win.isMinimized())win.restore();win.show();win.focus();}}
 function configureDesktop(){nativeTheme.themeSource=service.settings.theme;if(win)win.setBackgroundColor(nativeTheme.shouldUseDarkColors?'#212121':'#ffffff');if(tray){tray.destroy();tray=null;}if(service.settings.tray&&!tray){tray=new Tray(nativeImage.createFromPath(icon));tray.setToolTip(t("余量"));tray.setContextMenu(Menu.buildFromTemplate([{label:t("打开余量"),click:show},{label:t("刷新用量"),click:()=>service.scan()},{type:'separator'},{label:t("退出"),click:()=>app.quit()}]));tray.on('double-click',show);tray.on('click',()=>{setCompact(true);show();});}if(!service.settings.tray&&tray){tray.destroy();tray=null;}}

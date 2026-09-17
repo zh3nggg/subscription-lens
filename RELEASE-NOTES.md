@@ -1,3 +1,12 @@
+# Subscription Lens 1.6.2
+
+## Windows 任务栏图标修复
+
+- Windows 运行时任务栏身份改用与安装器一致的多尺寸 `icon.ico`。
+- 保持应用名称、AppUserModelId、窗口图标和桌面快捷方式一致，避免回退到 Electron 图标。
+- 增加安装元数据回归检查。
+
+Windows runtime taskbar identity now uses the same multi-size ICO as the installer, keeping the app name, AppUserModelId, window icon and shortcut metadata aligned.
 # Subscription Lens 1.6.1
 
 ## 用量导航与额度卡片
@@ -238,5 +247,6 @@ De Windows-taakbalk en venstermetadata gebruiken nu de Subscription Lens-identit
 See [source setup](https://github.com/zh3nggg/subscription-lens/blob/main/docs/PROVIDER-MONITORING.md), [validation](https://github.com/zh3nggg/subscription-lens/blob/main/docs/VALIDATION.md) and [third-party notices](https://github.com/zh3nggg/subscription-lens/blob/main/THIRD-PARTY-NOTICES.md).
 
 Developed with assistance from **GPT-6 Astra**. CodexBar and CC Switch are references; MIT-licensed codex-usage source is retained with its notices.
+
 
 
