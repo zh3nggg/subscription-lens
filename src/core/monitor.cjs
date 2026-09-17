@@ -7,6 +7,21 @@ const label=(s,fallback='unknown')=>typeof s==='string'&&s.trim()?s.replace(/[\x
 const count=v=>Number.isSafeInteger(v)&&v>=0?v:null;
 const cost=v=>{if(v===null||v===undefined||v==='')return null;try{const n=decimalUnits(v,15);return n<=1000000000n*10n**15n?n.toString():null;}catch{return null;}};
 const instant=v=>{const n=typeof v==='number'?(v<1e12?v*1000:v):Date.parse(v);return Number.isFinite(n)&&n>0&&n<=8640000000000000?new Date(n).toISOString():null;};
+function overlapKeys(e){
+ const keys=[];if(e.id)keys.push('id:'+e.id);
+ const at=Date.parse(e.at);if(!Number.isFinite(at))return keys;
+ const base=[e.provider,e.model,e.input,e.cached,e.write,e.output,e.reasoning,e.total].join('\u001f'),bucket=Math.floor(at/30000);
+ for(let offset=-1;offset<=1;offset++)keys.push('sig:'+base+':'+(bucket+offset));
+ return keys;
+}
+function overlapMatches(event,peers){
+ const keys=new Set(overlapKeys(event)),matches=[];
+ for(const peer of peers){if(peer.id===event.id||overlapKeys(peer).some(key=>keys.has(key)))matches.push(peer);}
+ const unique=[...new Map(matches.map(peer=>[peer.id,peer])).values()];
+ if(!unique.length)return null;
+ const exact=unique.some(peer=>peer.id===event.id);
+ return {kind:exact?'exact':'possible',count:unique.length,sources:[...new Set(unique.map(peer=>peer.sourceId).filter(Boolean))]};
+}
 function providerIdentity(provider,model,authoritative=false){
  const p=String(provider||'').trim().toLowerCase(),m=String(model||'').trim().toLowerCase();
  if(authoritative)return label(provider);
@@ -124,9 +139,11 @@ class Monitor{
  }return {imported,invalid,files:files.length};}
  checkpoint(s,file,offset,st){this.store.db.prepare('INSERT INTO monitor_files VALUES(?,?,?,?,?) ON CONFLICT(connection,path) DO UPDATE SET offset=excluded.offset,mtime=excluded.mtime,size=excluded.size').run(s.id,file,offset,st.mtimeMs,st.size);}
  sourcesInfo(){return this.sources.map(s=>({...s,...(this.states[s.id]||{state:'idle'}),records:this.store.db.prepare('SELECT COUNT(*) n FROM monitor_events WHERE connection=?').get(s.id).n}));}
- query(filters,range,catalog){const source=this.sources.find(s=>s.id===filters.connection)||this.sources[0];const rows=source?this.store.db.prepare('SELECT data FROM monitor_events WHERE connection=? AND at>=? AND at<? ORDER BY at DESC,id').all(source.id,range.from,range.to).map(r=>JSON.parse(r.data)):[];
- const providers=[...new Set(rows.map(r=>r.provider))].sort(),models=[...new Set(rows.map(r=>r.model))].sort();const search=String(filters.query||'').slice(0,200).toLowerCase();
- const selected=rows.filter(e=>(!filters.provider||e.provider===filters.provider)&&(!filters.model||e.model===filters.model)&&(!filters.failed||e.status!==null&&(e.status<200||e.status>=400))&&(!search||[e.provider,e.model,e.session,e.project].join(' ').toLowerCase().includes(search)));
+ query(filters,range,catalog){const source=this.sources.find(s=>s.id===filters.connection)||this.sources[0];const rows=source?this.store.db.prepare('SELECT data FROM monitor_events WHERE connection=? AND at>=? AND at<? ORDER BY at DESC,id').all(source.id,range.from,range.to).map(r=>({...JSON.parse(r.data),sourceId:source.id})):[];
+ const peers=source?this.store.db.prepare('SELECT connection AS sourceId,data FROM monitor_events WHERE connection<>? AND at>=? AND at<? ORDER BY at DESC,id').all(source.id,range.from,range.to).map(r=>({...JSON.parse(r.data),sourceId:r.sourceId})):[];
+ const annotated=rows.map(e=>{const overlap=overlapMatches(e,peers);return overlap?{...e,overlap}:e;});
+ const providers=[...new Set(annotated.map(r=>r.provider))].sort(),models=[...new Set(annotated.map(r=>r.model))].sort();const search=String(filters.query||'').slice(0,200).toLowerCase();
+ const selected=annotated.filter(e=>(!filters.provider||e.provider===filters.provider)&&(!filters.model||e.model===filters.model)&&(!filters.failed||e.status!==null&&(e.status<200||e.status>=400))&&(!search||[e.provider,e.model,e.session,e.project].join(' ').toLowerCase().includes(search)));
  const groups=new Map(),modelGroups=new Map(),days=new Map();let tokens=0,input=0,cached=0,output=0,pricedTokens=0,estimated=0n,reported=0n,sourceCredits=0n,sourceCreditRecords=0,estimatedRecords=0,reportedRecords=0,unpriced=0,knownStatus=0,failed=0;const latency=[],ttft=[];
  const rates=this.store.get('monitorRates',{});
  const priced=selected.map(e=>{let amount=e.amount,basis=e.basis,priceSource=e.amount===null?null:e.origin;const custom=rates[hash(JSON.stringify([e.provider,e.model]))];if(amount===null&&custom){const usage={input:e.input-e.cached-e.write,cached:e.cached,write:e.write,output:e.output};amount=Object.entries(usage).reduce((n,[key,tokens])=>n+BigInt(tokens)*decimalUnits(custom.rates[key]),0n).toString();basis='estimate';priceSource='custom';}if(amount===null&&e.provider==='OpenAI'){amount=price({...e,model:e.pricingModel,quality:'complete'},catalog).amount;basis='estimate';priceSource=amount===null?null:'catalog';}return {...e,amount,basis,priceSource,usd:dollars(amount)};});
@@ -137,7 +154,8 @@ class Monitor{
  const perMillion=(amount,tokens)=>tokens?dollars(((amount*1000000n)/BigInt(tokens)).toString()):null;
  const finish=map=>[...map.values()].map(g=>({...g,estimated:dollars(g.estimated.toString()),reported:dollars(g.reported.toString()),costPerMillion:perMillion(g.estimated+g.reported,g.pricedTokens),estimatedCostPerMillion:perMillion(g.estimated,g.pricedTokens),reportedCostPerMillion:perMillion(g.reported,g.pricedTokens)}));const percentile=(v,p)=>v.length?[...v].sort((a,b)=>a-b)[Math.ceil(v.length*p)-1]:null;
  const limit=Math.max(1,Math.min(200,Math.floor(Number(filters.limit)||50))),offset=Math.max(0,Math.floor(Number(filters.offset)||0)),sorted=filters.sort==='cost'?[...filtered].sort((a,b)=>(b.usd??-1)-(a.usd??-1)):filtered;
- return {source:source?.id||null,sources:this.sourcesInfo(),providers,models,rates:Object.values(rates),summary:{estimatedRecords,reportedRecords,sourceCreditRecords,sourceCredits:dollars(sourceCredits.toString()),requests:filtered.length,tokens,input,cached,output,pricedTokens,estimated:dollars(estimated.toString()),reported:dollars(reported.toString()),costPerMillion:perMillion(estimated+reported,pricedTokens),estimatedCostPerMillion:perMillion(estimated,pricedTokens),reportedCostPerMillion:perMillion(reported,pricedTokens),unpriced,knownStatus,failed,successRate:knownStatus?(knownStatus-failed)/knownStatus:null,p50:percentile(latency,.5),p95:percentile(latency,.95),ttft:percentile(ttft,.5)},groups:finish(groups),modelGroups:finish(modelGroups),days:finish(days).sort((a,b)=>a.key.localeCompare(b.key)),rows:filters.export?sorted:sorted.slice(offset,offset+limit),offset,limit,range};
+ const overlapRecords=filtered.filter(e=>e.overlap).length,overlapExact=filtered.filter(e=>e.overlap?.kind==='exact').length,overlapPossible=filtered.filter(e=>e.overlap?.kind==='possible').length;
+ return {source:source?.id||null,sources:this.sourcesInfo(),providers,models,rates:Object.values(rates),summary:{estimatedRecords,reportedRecords,sourceCreditRecords,sourceCredits:dollars(sourceCredits.toString()),requests:filtered.length,tokens,input,cached,output,pricedTokens,estimated:dollars(estimated.toString()),reported:dollars(reported.toString()),costPerMillion:perMillion(estimated+reported,pricedTokens),estimatedCostPerMillion:perMillion(estimated,pricedTokens),reportedCostPerMillion:perMillion(reported,pricedTokens),unpriced,overlapRecords,overlapExact,overlapPossible,knownStatus,failed,successRate:knownStatus?(knownStatus-failed)/knownStatus:null,p50:percentile(latency,.5),p95:percentile(latency,.95),ttft:percentile(ttft,.5)},groups:finish(groups),modelGroups:finish(modelGroups),days:finish(days).sort((a,b)=>a.key.localeCompare(b.key)),rows:filters.export?sorted:sorted.slice(offset,offset+limit),offset,limit,range};
  }
 }
-module.exports={Monitor,normalized,providerIdentity,ccRecord,jsonRecord,claudeRecord,geminiRecords,qwenRecord,kimiRecord,codebuddyRecord,qoderRecord,cost};
+module.exports={Monitor,normalized,providerIdentity,ccRecord,jsonRecord,claudeRecord,geminiRecords,qwenRecord,kimiRecord,codebuddyRecord,qoderRecord,cost,overlapKeys,overlapMatches};

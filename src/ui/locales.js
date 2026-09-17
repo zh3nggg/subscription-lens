@@ -1340,6 +1340,18 @@ window.LensLocales = {
     "Totals use the selected source only.",
     "Totalen gebruiken alleen de geselecteerde bron."
   ],
+  "发现 {n} 条跨来源重叠记录": [
+    "Found {n} records that overlap another source",
+    "{n} records overlappen met een andere bron"
+  ],
+  "已匹配其他来源": [
+    "Matched in another source",
+    "Komt overeen met een andere bron"
+  ],
+  "可能与其他来源重复": [
+    "May overlap another source",
+    "Mogelijk overlap met een andere bron"
+  ],
   "请求数": [
     "Requests",
     "Verzoeken"

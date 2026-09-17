@@ -24,6 +24,7 @@ Automatic discovery checks only the standard paths listed above and the Qwen/Kim
 - Tokens include cache subsets only once. Reasoning tokens, where supplied, are included in output rather than added twice.
 - Overview tabs, responsive record pagination and paginated legends keep common screens within the window. Settings and deliberately expanded long details may scroll.
 - The selected source defines the ledger. Different sources are **not added together**, because CC Switch and local CLI logs can describe the same requests.
+- When the selected source has records matching another connected source, the activity view marks exact request-ID matches and possible overlaps (same provider/model/token shape within a short time bucket). These are warnings, not automatic deletions; inspect the source boundary before comparing totals.
 
 ### Qoder capture
 
