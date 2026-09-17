@@ -1,6 +1,7 @@
 'use strict';
 const os=require('node:os'),fs=require('node:fs'),path=require('node:path');
 const {EventEmitter}=require('node:events');
+let DatabaseSync=null;try{({DatabaseSync}=require('node:sqlite'));}catch{/* Older runtimes simply skip the optional Codex title index. */}
 const {Monitor}=require('./monitor.cjs');
 const {Store}=require('./store.cjs'),{Scanner}=require('./scanner.cjs'),{Account}=require('./account.cjs');
 const {price,bundled,validateCatalog}=require('./pricing.cjs');
@@ -24,6 +25,7 @@ class Service extends EventEmitter{
     const freshDevice=createDevice(os.hostname());this.device=normalizeDevice(this.store.get('device'),freshDevice);this.store.set('device',this.device);
     this.devices=this.store.get('devices',{});this.devices[this.device.id]={...this.device,lastSeen:new Date().toISOString()};this.store.set('devices',this.devices);
     this.detectedRoot=process.env.CODEX_HOME||path.join(home,'.codex');this.home=home;
+    this.sessionCatalogCache=new Map();
     this.account=new Account({home:this.settings.accountHome||this.settings.roots[0]||this.detectedRoot,onChange:status=>this.accountChanged(status)});
     this.timer=null;this.accountTimer=null;
   }
@@ -59,34 +61,49 @@ class Service extends EventEmitter{
   setCodexPath(exe){this.settings.codexPath=exe;this.store.set('settings',this.settings);this.account.stop();this.account.preferred=exe;this.emit('changed');}
   catalogImport(json){const c=validateCatalog(json);this.store.set('catalogBackup',this.catalog);this.catalog=c;this.store.set('catalog',c);this.emit('changed');}
   catalogReset(){this.store.set('catalogBackup',this.catalog);this.catalog=bundled;this.store.set('catalog',bundled);this.emit('changed');}
-  select(events,filters){const query=String(filters.query||'').slice(0,200).toLowerCase();return events.filter(e=>(!filters.device||e.device===filters.device)&&(!filters.model||e.model===filters.model)&&(!filters.project||e.project===filters.project)&&(!filters.session||e.session===filters.session)&&(!filters.unpriced||price(e,this.catalog).amount===null)&&(!query||(e.project+' '+e.model+' '+e.session).toLowerCase().includes(query)));}
+  select(events,filters,titles=null){const query=String(filters.query||'').slice(0,200).toLowerCase();return events.filter(e=>(!filters.device||e.device===filters.device)&&(!filters.model||e.model===filters.model)&&(!filters.project||e.project===filters.project)&&(!filters.session||e.session===filters.session)&&(!filters.unpriced||price(e,this.catalog).amount===null)&&(!query||(e.project+' '+e.model+' '+e.session+' '+(titles?.get(e.session)||'')).toLowerCase().includes(query)));}
+  codexSessionTitles(){
+    const result=new Map();if(!DatabaseSync)return result;
+    const roots=[...this.settings.roots,this.detectedRoot].filter(Boolean);
+    for(const root of new Set(roots)){
+      const file=path.join(root,'sqlite','codex-dev.db');let stat;
+      try{stat=fs.statSync(file);if(!stat.isFile())continue;}catch{continue;}
+      const cache=this.sessionCatalogCache.get(file);
+      if(cache&&cache.mtimeMs===stat.mtimeMs){for(const [id,title] of cache.rows)result.set(id,title);continue;}
+      const rows=new Map();
+      let db=null;try{db=new DatabaseSync(file,{readOnly:true});for(const row of db.prepare('SELECT thread_id,display_title FROM local_thread_catalog WHERE thread_id IS NOT NULL AND display_title IS NOT NULL').all()){const id=String(row.thread_id),title=String(row.display_title).trim();if(id&&title&&title.length<=240)rows.set(id,title);}}catch{/* The usage monitor remains usable when the optional index is locked or unavailable. */}finally{try{db?.close();}catch{/* Ignore close failures from an unavailable optional index. */}}
+      this.sessionCatalogCache.set(file,{mtimeMs:stat.mtimeMs,rows});for(const [id,title] of rows)result.set(id,title);
+    }
+    return result;
+  }
   query(filters={}){
     const now=this.now(),settings=this.effectiveSettings();const period=['today','week','month','cycle','all'].includes(filters.period)?filters.period:'month';let r=range(period,settings,now);
     if(filters.day&&validDate(filters.day)){const d=new Date(filters.day+'T00:00:00'),end=new Date(d);end.setDate(end.getDate()+1);r={from:d.toISOString(),to:new Date(Math.min(end.getTime(),now.getTime()+1)).toISOString()};}
-    const raw=this.store.events(r.from,r.to,this.device.id),events=this.select(raw,filters),a=aggregate(events,this.catalog);
+    const sessionTitles=this.codexSessionTitles();
+    const raw=this.store.events(r.from,r.to,this.device.id),events=this.select(raw,filters,sessionTitles),a=aggregate(events,this.catalog);
     for(const event of raw)if(!this.devices[event.device])this.devices[event.device]={id:event.device,label:event.device===this.device.id?this.device.label:'Imported device',createdAt:event.at,lastSeen:event.at};
     this.devices[this.device.id]={...this.devices[this.device.id],lastSeen:new Date().toISOString()};this.store.set('devices',this.devices);
     const deviceRows=Object.values(this.devices).map(device=>{const deviceEvents=raw.filter(event=>event.device===device.id),summary=aggregate(deviceEvents,this.catalog).summary;return {...device,local:device.id===this.device.id,summary,lastSeen:deviceEvents.reduce((last,event)=>last>event.at?last:event.at,device.lastSeen||null)};}).filter(device=>device.local||device.summary.events>0).sort((a,b)=>b.summary.tokens-a.summary.tokens||a.label.localeCompare(b.label));
     const quota=this.account.status.quota||this.store.get('recordQuota');const samples=this.store.quotaSamples(this.account.status.identity);
     const outlooks=(quota?.windows||[]).map(w=>{const outlook=quotaOutlook({...w,observedAt:w.observedAt||quota.observedAt},samples,{now:now.getTime(),live:this.settings.accountEnabled&&this.account.status.state==='connected'&&quota.source==='account'});return {...outlook,advice:quotaAdvice(outlook)};});
     const primaryOutlook=[...(outlooks.filter(w=>w.limit==='codex').length?outlooks.filter(w=>w.limit==='codex'):outlooks)].sort((a,b)=>b.used-a.used)[0];
-    const recentFrom=new Date(now.getTime()-14*86400000).toISOString(),recent=aggregate(this.select(this.store.events(recentFrom,new Date(now.getTime()+1).toISOString(),this.device.id),filters),this.catalog);
+    const recentFrom=new Date(now.getTime()-14*86400000).toISOString(),recent=aggregate(this.select(this.store.events(recentFrom,new Date(now.getTime()+1).toISOString(),this.device.id),filters,sessionTitles),this.catalog);
     // Model recommendations should describe the same quota window as the
     // remaining-time forecast. Fall back to the existing 14-day baseline only
     // when the provider does not expose a window duration yet.
     let modelHistory=recent,historyScope='recent_history';
     if(primaryOutlook&&Number.isFinite(primaryOutlook.windowStartAt)){
       const windowFrom=new Date(primaryOutlook.windowStartAt).toISOString();
-      const windowEvents=this.select(this.store.events(windowFrom,new Date(now.getTime()+1).toISOString(),this.device.id),filters);
+      const windowEvents=this.select(this.store.events(windowFrom,new Date(now.getTime()+1).toISOString(),this.device.id),filters,sessionTitles);
       modelHistory=aggregate(windowEvents,this.catalog);historyScope='quota_window';
     }
     const mixAdvice={...modelMixAdvice(modelHistory.models,primaryOutlook),historyScope};
     const c=cycleWindow(settings,now),cycleRaw=period==='cycle'&&!filters.day?raw:this.store.events(new Date(c.start+'T00:00:00').toISOString(),new Date(Math.min(new Date(c.end+'T00:00:00').getTime(),now.getTime()+1)).toISOString(),this.device.id);
-    const ca=aggregate(this.select(cycleRaw,filters),this.catalog),paid=settings.paid===null?null:settings.paid+settings.extra;
+    const ca=aggregate(this.select(cycleRaw,filters,sessionTitles),this.catalog),paid=settings.paid===null?null:settings.paid+settings.extra;
     const duration=new Date(r.to)-new Date(r.from);let comparison=null;
-    if(period!=='all'&&duration>0){const previousRange={from:new Date(new Date(r.from).getTime()-duration).toISOString(),to:r.from};const previous=aggregate(this.select(this.store.events(previousRange.from,previousRange.to),filters),this.catalog).summary;comparison={range:previousRange,usd:previous.usd,tokens:previous.tokens,events:previous.events,change:previous.usd>0?(a.summary.usd-previous.usd)/previous.usd:null};}
+    if(period!=='all'&&duration>0){const previousRange={from:new Date(new Date(r.from).getTime()-duration).toISOString(),to:r.from};const previous=aggregate(this.select(this.store.events(previousRange.from,previousRange.to),filters,sessionTitles),this.catalog).summary;comparison={range:previousRange,usd:previous.usd,tokens:previous.tokens,events:previous.events,change:previous.usd>0?(a.summary.usd-previous.usd)/previous.usd:null};}
     const offset=Math.max(0,Math.min(1000000,Math.floor(Number(filters.offset)||0))),limit=Math.max(1,Math.min(200,Math.floor(Number(filters.limit)||50)));
-    const sessionRows=filters.sort==='recent'?[...a.sessions].sort((x,y)=>y.last.localeCompare(x.last)):a.sessions;
+    const sessionRows=(filters.sort==='recent'?[...a.sessions].sort((x,y)=>y.last.localeCompare(x.last)):a.sessions).map(row=>({...row,title:sessionTitles.get(row.key)||null}));
     const stats=this.store.stats(),fileStats=this.store.fileStats();
     return {monitor:this.monitor.query(filters,r,this.catalog),period,range:r,summary:{...a.summary,diff:period==='cycle'&&paid!==null&&events.length?a.summary.usd-paid:null,ratio:period==='cycle'&&paid>0&&events.length?a.summary.usd/paid:null},models:a.models,projects:a.projects.slice(0,50),sessions:sessionRows.slice(offset,offset+limit),sessionTotal:a.sessions.length,days:continuousDays(a.days,period==='all'?(a.days[0]?.date?new Date(a.days[0].date+'T00:00:00').toISOString():r.to):r.from,r.to),rows:(filters.sort==='cost'?[...a.rows].sort((x,y)=>(y.price.usd??-1)-(x.price.usd??-1)||y.at.localeCompare(x.at)):a.rows.reverse()).slice(offset,offset+limit),offset,limit,quota,outlooks,comparison,
       cycle:{...c,...ca.summary,paid,extra:settings.extra,diff:paid!==null&&ca.summary.events?ca.summary.usd-paid:null,progress:paid>0?ca.summary.usd/paid:null,remaining:paid!==null?Math.max(0,paid-ca.summary.usd):null,elapsedDays:Math.max(0,(Math.min(now,new Date(c.end+'T00:00:00'))-new Date(c.start+'T00:00:00'))/86400000),days:Math.round((Date.parse(c.end+'T12:00:00Z')-Date.parse(c.start+'T12:00:00Z'))/86400000)},
