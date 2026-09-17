@@ -152,3 +152,17 @@ body:not(.compact-mode) .notice{margin-bottom:7px;padding:7px 10px}
 }
 
 .overview-expanded .model-advice-card .panel-head{padding-top:11px}.overview-expanded .model-advice-card{overflow:hidden}
+
+/* Give the overview distribution panel a deliberate center of gravity instead of
+   stretching the chart into a mostly empty card beside the quota stack. */
+body:not(.compact-mode) .overview-primary .distribution-panel{display:flex;flex-direction:column;align-self:stretch}
+body:not(.compact-mode) .overview-primary .distribution-panel .distribution-body{flex:1;min-height:190px;align-items:center}
+body:not(.compact-mode) .overview-primary .distribution-panel .distribution-legend{display:flex;flex-direction:column;justify-content:center}
+.distribution-insights{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:10px 0 0}
+.distribution-insights>div{min-width:0;padding:9px 12px;border-right:1px solid var(--line)}
+.distribution-insights>div:last-child{border-right:0}
+.distribution-insights span{display:block;color:var(--muted);font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.distribution-insights strong{display:block;margin-top:3px;font-size:16px;font-weight:550;letter-spacing:-.2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
+.distribution-guidance{margin:8px 0 0;color:var(--muted);font-size:10px}
+@media(max-width:900px){.distribution-insights>div{padding-left:8px;padding-right:8px}.distribution-insights strong{font-size:14px}}
+@media(max-height:720px){body:not(.compact-mode) .overview-primary .distribution-panel .distribution-body{min-height:145px}.distribution-insights{margin-top:6px}.distribution-insights>div{padding-top:6px;padding-bottom:6px}.distribution-guidance{margin-top:5px}}

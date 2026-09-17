@@ -1588,6 +1588,18 @@ window.LensLocales = {
     "Usage by provider",
     "Gebruik per aanbieder"
   ],
+  "分布摘要": [
+    "Distribution summary",
+    "Samenvatting van verdeling"
+  ],
+  "点击供应商查看模型用量": [
+    "Select a provider to inspect model usage",
+    "Selecteer een aanbieder om modelgebruik te bekijken"
+  ],
+  "点击模型查看记录": [
+    "Select a model to inspect its records",
+    "Selecteer een model om de records te bekijken"
+  ],
   "统计指标": [
     "Metric",
     "Maatstaf"
