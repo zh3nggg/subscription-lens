@@ -1,3 +1,11 @@
+# Subscription Lens 1.6.3
+
+## 额度文案与任务栏身份加固
+
+- 删除额度预测卡片中重复的“预计剩余”标签。
+- Windows 窗口实例显式设置 ICO 图标，与 AppUserModelId 和安装器快捷方式保持一致。
+
+Removed the redundant forecast label and explicitly applied the product ICO to each Windows window instance so taskbar identity stays aligned with the installer and AppUserModelId.
 # Subscription Lens 1.6.2
 
 ## Windows 任务栏图标修复
@@ -247,6 +255,7 @@ De Windows-taakbalk en venstermetadata gebruiken nu de Subscription Lens-identit
 See [source setup](https://github.com/zh3nggg/subscription-lens/blob/main/docs/PROVIDER-MONITORING.md), [validation](https://github.com/zh3nggg/subscription-lens/blob/main/docs/VALIDATION.md) and [third-party notices](https://github.com/zh3nggg/subscription-lens/blob/main/THIRD-PARTY-NOTICES.md).
 
 Developed with assistance from **GPT-6 Astra**. CodexBar and CC Switch are references; MIT-licensed codex-usage source is retained with its notices.
+
 
 
 

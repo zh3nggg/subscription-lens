@@ -64,7 +64,13 @@ function register(){
 async function create(){
   service=new Service(app.getPath('userData'));service.on('changed',changed);service.on('alert',notifyQuota);
   win=new BrowserWindow({width:1100,height:720,minWidth:760,minHeight:560,show:false,title:t("余量"),icon,backgroundColor:'#ffffff',autoHideMenuBar:true,webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true,backgroundThrottling:!process.env.LENS_TEST_HIDDEN}});
-  if(process.platform==='win32'&&typeof win.setAppDetails==='function')win.setAppDetails({appId:APP_USER_MODEL_ID,appIconPath:icon,appIconIndex:0,relaunchDisplayName:'Subscription Lens',relaunchIcon:icon});
+  if(process.platform==='win32'){
+    // Set the icon on the window object as well as the shell metadata. This
+    // prevents Windows from deriving the taskbar identity from electron.exe
+    // when a shortcut was launched from an older shell cache.
+    try{win.setIcon(nativeImage.createFromPath(icon));}catch{/* Keep startup usable if a shell icon API is unavailable. */}
+    if(typeof win.setAppDetails==='function')win.setAppDetails({appId:APP_USER_MODEL_ID,appIconPath:icon,appIconIndex:0,relaunchDisplayName:'Subscription Lens',relaunchIcon:icon});
+  }
   Menu.setApplicationMenu(null);win.webContents.setWindowOpenHandler(()=>({action:'deny'}));win.webContents.on('will-navigate',e=>e.preventDefault());win.webContents.session.setPermissionRequestHandler((_,__,callback)=>callback(false));win.webContents.session.setPermissionCheckHandler(()=>false);
   win.on('close',e=>{if(service.settings.tray&&!quitting){e.preventDefault();win.hide();}});
   register();configureDesktop();await win.loadURL(ui);if(process.env.LENS_TEST_HIDDEN!=='1')win.show();service.start();

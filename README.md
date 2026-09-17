@@ -30,11 +30,11 @@ The Codex overview can recommend a model mix from the last 14 days of model usag
 
 ## Download and get started
 
-**1.6.2 Stable · Windows x64.** The current collector does not yet handle all client record formats; totals may be too high or too low. Costs are estimates, not a bill or guaranteed savings. The build is unsigned and has no automatic updater.
+**1.6.3 Stable · Windows x64.** The current collector does not yet handle all client record formats; totals may be too high or too low. Costs are estimates, not a bill or guaranteed savings. The build is unsigned and has no automatic updater.
 
-[Download 1.6.2](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.6.2)
+[Download 1.6.3](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.6.3)
 
-Use `Subscription-Lens-1.6.2-x64.exe` for a first installation or an upgrade. Close Subscription Lens, run the installer, and keep the existing installation folder (for example, `D:\SubLens`) when upgrading. It replaces the old app and retains settings and local usage history. Use the portable ZIP only for a separate, no-install copy: extract it to its own folder and run `Subscription Lens.exe`; it does not update an installed copy.
+Use `Subscription-Lens-1.6.3-x64.exe` for a first installation or an upgrade. Close Subscription Lens, run the installer, and keep the existing installation folder (for example, `D:\SubLens`) when upgrading. It replaces the old app and retains settings and local usage history. Use the portable ZIP only for a separate, no-install copy: extract it to its own folder and run `Subscription Lens.exe`; it does not update an installed copy.
 
 1. Select **Start monitoring** to read the default Codex folder, or **Choose folder** for a custom folder containing `sessions` or `archived_sessions`.
 2. Open **Connections → Connect account** to query limits through your locally installed Codex. If signed out, use **Sign in to ChatGPT**.
@@ -98,6 +98,7 @@ Developed with assistance from **GPT-6 Astra**.
 [CodexBar](https://github.com/steipete/CodexBar) informs the quota and desktop interaction requirements. MIT-licensed [codex-usage](https://github.com/zJay26/codex-usage) source is retained with its notices for future accounting-engine integration.
 
 MIT. See [third-party notices](THIRD-PARTY-NOTICES.md) for attribution and licenses. This is an independent project, not affiliated with OpenAI or endorsed by the referenced projects.
+
 
 
 
