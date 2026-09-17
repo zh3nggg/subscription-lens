@@ -1696,6 +1696,26 @@ window.LensLocales = {
     "Model mix",
     "Modelmix"
   ],
+  "当前占比": [
+    "Current share",
+    "Huidig aandeel"
+  ],
+  "建议占比": [
+    "Suggested share",
+    "Aanbevolen aandeel"
+  ],
+  "增加": [
+    "Increase",
+    "Verhogen"
+  ],
+  "降低": [
+    "Reduce",
+    "Verlagen"
+  ],
+  "保持": [
+    "Keep",
+    "Behouden"
+  ],
   "正在学习你的模型习惯和额度速度": [
     "Learning your model habits and quota pace",
     "Je modelgewoonten en quotatempo worden geleerd"
