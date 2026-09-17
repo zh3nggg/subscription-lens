@@ -25,6 +25,7 @@ Automatic discovery checks only the standard paths listed above and the Qwen/Kim
 - Overview tabs, responsive record pagination and paginated legends keep common screens within the window. Settings and deliberately expanded long details may scroll.
 - The selected source defines the ledger. Different sources are **not added together**, because CC Switch and local CLI logs can describe the same requests.
 - When the selected source has records matching another connected source, the activity view marks exact request-ID matches and possible overlaps (same provider/model/token shape within a short time bucket). These are warnings, not automatic deletions; inspect the source boundary before comparing totals.
+- CSV exports include anonymous source IDs, overlap type and overlapping source IDs so duplicate-billing reviews can be continued outside the app. Local paths, credentials and chat content are not exported.
 
 ### Qoder capture
 
