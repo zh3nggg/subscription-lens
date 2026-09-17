@@ -1400,6 +1400,22 @@ window.LensLocales = {
     "Overlapping sources",
     "Overlappende bronnen"
   ],
+  "重叠筛选": [
+    "Overlap filter",
+    "Overlapfilter"
+  ],
+  "全部记录": [
+    "All records",
+    "Alle records"
+  ],
+  "精确重叠": [
+    "Exact overlaps",
+    "Exacte overlap"
+  ],
+  "可能重叠": [
+    "Possible overlaps",
+    "Mogelijke overlap"
+  ],
   "请求数": [
     "Requests",
     "Verzoeken"
