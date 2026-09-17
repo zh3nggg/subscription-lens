@@ -1416,6 +1416,14 @@ window.LensLocales = {
     "Possible overlaps",
     "Mogelijke overlap"
   ],
+  "高级：手动添加其他来源": [
+    "Advanced: add another source manually",
+    "Geavanceerd: een andere bron handmatig toevoegen"
+  ],
+  "适用于自定义目录、网关导出或 API JSONL 文件。": [
+    "For custom folders, gateway exports or API JSONL files.",
+    "Voor aangepaste mappen, gateway-exports of API-JSONL-bestanden."
+  ],
   "请求数": [
     "Requests",
     "Verzoeken"
