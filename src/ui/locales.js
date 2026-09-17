@@ -1396,6 +1396,10 @@ window.LensLocales = {
     "May overlap another source",
     "Mogelijk overlap met een andere bron"
   ],
+  "重叠来源": [
+    "Overlapping sources",
+    "Overlappende bronnen"
+  ],
   "请求数": [
     "Requests",
     "Verzoeken"
