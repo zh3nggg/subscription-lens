@@ -1,3 +1,12 @@
+# Subscription Lens 1.6.5
+
+## 概览首屏布局修复
+
+- 额度预测框使用对称的底部间距，并降低左右内缩。
+- 小窗口压缩分布与趋势面板，避免首屏纵向溢出。
+- 中等高度窗口使用紧凑分栏，保持概览无需滚动即可阅读。
+
+The quota forecast panel now has symmetric bottom spacing and a smaller horizontal inset. Compact windows reduce distribution and trend panel density, while medium-height windows use the tabbed layout to keep the overview scroll-free.
 # Subscription Lens 1.6.4
 
 ## 额度预测卡片间距
@@ -263,6 +272,7 @@ De Windows-taakbalk en venstermetadata gebruiken nu de Subscription Lens-identit
 See [source setup](https://github.com/zh3nggg/subscription-lens/blob/main/docs/PROVIDER-MONITORING.md), [validation](https://github.com/zh3nggg/subscription-lens/blob/main/docs/VALIDATION.md) and [third-party notices](https://github.com/zh3nggg/subscription-lens/blob/main/THIRD-PARTY-NOTICES.md).
 
 Developed with assistance from **GPT-6 Astra**. CodexBar and CC Switch are references; MIT-licensed codex-usage source is retained with its notices.
+
 
 
 

@@ -14,7 +14,9 @@ function fitOverview(main){
  const distribution=main.querySelector('.distribution-panel'),two=main.querySelector('.two-col'),advice=main.querySelector('.model-advice-card');if(!distribution)return;
  const trend=two?.querySelector(':scope > section:not(.distribution-panel)'),project=two?.querySelector('.project-card'),decision=main.querySelector('.decision-grid'),metrics=main.querySelector(':scope > .metrics');
  let summary=null;if(!state.multi&&decision){summary=document.createElement('div');summary.className='overview-primary';summary.append(decision,distribution);if(metrics)main.insertBefore(metrics,two||main.firstChild);main.insertBefore(summary,two||main.querySelector('.overview-footer'));}
- const expanded=innerHeight>=820&&innerWidth>=980;main.classList.toggle('overview-expanded',expanded);
+ // Keep the first overview screen scroll-free. The expanded multi-card layout
+ // needs more vertical room once quota forecasts and model advice are present.
+ const expanded=innerHeight>=1000&&innerWidth>=980;main.classList.toggle('overview-expanded',expanded);
  if(expanded){if(advice&&two)two.append(advice);return;}
  let performance=null;if(state.multi){const metrics=main.querySelector('.monitor-metrics');if(metrics){performance=document.createElement('section');performance.className='panel performance-panel';const grid=document.createElement('div');grid.className='metrics performance-metrics';[...metrics.children].slice(3).forEach(n=>grid.append(n));performance.append(grid);}}
  const panels=[...(!state.multi?[['summary','总览',summary]]:[['distribution','用量分布',distribution]]),['advice','模型建议',advice],['trend','用量趋势',trend],['projects','项目',project],['performance','性能',performance]].filter(([, ,node])=>node);
