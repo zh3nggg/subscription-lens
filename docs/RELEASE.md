@@ -1,38 +1,23 @@
-# Subscription Lens 1.4.5
+# Subscription Lens 1.5.1
 
-Windows x64 · 中文 / English / Nederlands
+Windows x64 stable release · 中文 / English / Nederlands
 
-## 新增功能
+## Release boundary
 
-- 自动发现 Qwen Code、Kimi Code、CodeBuddy Code、CC Switch、Claude Code 与 Gemini CLI 的常用本机目录，可一键连接单个或全部已安装工具；特殊路径继续支持手动选择。
-- Codex 总览新增模型组合建议：结合近 14 天模型使用比例、API 等价强度和当前额度预测，建议提高或降低各模型比例，使使用速度更接近窗口重置时间。
-- 建议显示学习状态和可信度。OpenAI 未提供各模型的套餐额度精确换算权重，因此建议会随额度观测继续校准，不承诺精确耗尽额度。
-- 模型建议在小窗口中作为独立标签，在高窗口中与趋势和项目并列，保持总览无整页滚动。
-- 保留供应商 → 模型环形图、多来源明细与性能、自定义计价、套餐实付对比、专注窗口和三语言支持。
-- 新安装包沿用原安装身份与目录，原位替换旧版并保留设置和用量。
-- Qoder Quest 支持读取 Windows 本机 `%APPDATA%\Qoder\logs` 的 `agent.log` 上下文快照；每个会话只保留最新快照并标记为 Tokens 估算，原始 Credits 仍单独展示。
+- The provider overview combines connected sources in an all-source ledger and suppresses exact duplicate requests. Possible overlaps remain visible with provenance; selecting one source keeps a source-specific ledger.
+- Provider and model rings use a distinct color palette with synchronized hover and keyboard focus between slices and legend entries.
+- Average cost per 1M tokens, Tokens/cost switching, model drill-down, Qoder local records and Codex quota/model-mix features remain available.
+- Costs are API-equivalent estimates or source-reported amounts, not invoices. Qoder Credits remain separate from USD. Regular ChatGPT conversations and other-device usage are not collected automatically.
+- The Windows installer preserves the application identity, settings and local usage history during in-place upgrades. The build is unsigned and does not auto-update.
 
-## What's new
+## 发布边界
 
-Standard local installations of six supported tools are now detected and connected in one click. The Codex overview adds a confidence-labelled model-mix recommendation based on 14-day habits, API-equivalent intensity and live quota pace. It targets the next reset but remains adaptive because exact per-model subscription quota weights are not published.
+- 多供应商总览默认合并已连接来源，完全相同的请求只计一次；疑似重叠记录保留来源提示。选择单个来源时仍按该来源单独统计。
+- 供应商和模型环形图使用区分度更高的配色，扇区与右侧图例支持悬停和键盘聚焦联动高亮。
+- 平均每百万 Tokens 成本、Tokens／费用切换、模型下钻、Qoder 本地记录以及 Codex 额度／模型组合功能继续可用。
+- 费用是 API 等价估算或来源报告值，不是账单；Qoder Credits 与美元分开。普通 ChatGPT 对话和其他设备用量不会自动采集。
+- Windows 安装器支持原位覆盖升级并保留程序身份、设置和本机用量历史。安装包未签名，也不自动更新。
 
-On Windows, Qoder Quest agent logs are imported from `%APPDATA%\\Qoder\\logs` when the Qoder source is connected. Cumulative context snapshots are retained once per session and labeled as token estimates; native Credits remain separate.
+See [release notes](../RELEASE-NOTES.md), [source setup](PROVIDER-MONITORING.md), [validation](VALIDATION.md) and [third-party notices](../THIRD-PARTY-NOTICES.md).
 
-## Nieuw
-
-Zes ondersteunde tools in standaardmappen worden nu automatisch gevonden en met één klik verbonden. Het Codex-overzicht adviseert een modelmix op basis van 14 dagen gebruik, API-equivalente intensiteit en het actuele quotatempo, met een zichtbare betrouwbaarheid. Het advies richt zich op de volgende reset en blijft adaptief omdat exacte quotagewichten per model niet zijn gepubliceerd.
-
-Op Windows worden Qoder Quest-agentlogs uit `%APPDATA%\\Qoder\\logs` gelezen zodra de Qoder-bron is verbonden. Cumulatieve contextsnapshots worden eenmaal per sessie bewaard en als token-schatting gemarkeerd; native Credits blijven afzonderlijk.
-
-## Scope
-
-- Local sources are optional and read-only. Automatic discovery checks known local paths only and never reads credentials. Select one source at a time in analytics to avoid double-counting overlapping CLI/proxy records.
-- Model-mix advice uses observed habits, API-equivalent intensity and quota pace. It is an experiment to calibrate over later windows, not an official quota conversion or guarantee.
-- CC Switch amounts are stored estimates. Source-reported amounts are not independently verified invoices. Direct billing APIs, provider balances, proxy routing and credential switching are not included.
-- The existing Codex collector still has incomplete support for modern request/compaction counters and fork histories. The vendored codex-usage engine remains experimental and inactive.
-- Unsigned Windows build. In-place installer upgrades are supported by the packaging configuration; a clean-VM upgrade has not been certified. No background automatic downloading is included.
-- Keep the latest verified stable and preview locally. Until a stable release exists, the previous preview is retained as the rollback copy.
-
-See [source setup](https://github.com/zh3nggg/subscription-lens/blob/main/docs/PROVIDER-MONITORING.md), [validation](https://github.com/zh3nggg/subscription-lens/blob/main/docs/VALIDATION.md) and [third-party notices](https://github.com/zh3nggg/subscription-lens/blob/main/THIRD-PARTY-NOTICES.md).
-
-Developed with assistance from **GPT-6 Astra**. CodexBar and CC Switch are references; MIT-licensed codex-usage source is retained with its notices.
+Developed with assistance from **GPT-6 Astra**.

@@ -1,3 +1,31 @@
+# Subscription Lens 1.5.1
+
+Windows x64 stable release · 中文 / English / Nederlands
+
+## 新增与修复
+
+- 多供应商总览默认合并已连接来源，完全相同的请求只计一次；疑似重叠记录继续保留来源提示，避免重复计费。
+- 供应商和模型环形图改用区分度更高的配色；悬停或键盘聚焦扇区时，右侧对应图例同步高亮。
+- 保留供应商、模型、Tokens／费用切换和平均每百万 Tokens 成本展示。
+- 修复多供应商入口因来源字段缺失导致的切换异常。
+
+## What's new
+
+- The provider overview now starts with all connected sources and exact duplicate suppression. Possible overlaps remain visible with provenance so billing reviews do not hide ambiguity.
+- Provider and model rings use a more distinct palette. Hovering or focusing a slice highlights its matching legend entry and vice versa.
+- Existing model, token/cost and average-cost views remain available without adding a separate dashboard.
+
+## Nieuw
+
+- Het aanbieder-overzicht combineert nu standaard alle verbonden bronnen en telt exact gelijke aanvragen één keer. Mogelijke overlap blijft zichtbaar met herkomstinformatie.
+- Aanbieder- en modelringen gebruiken duidelijker onderscheiden kleuren. Beweeg over een segment of focus het met het toetsenbord om de bijbehorende legenda te markeren.
+- De bestaande model-, tokens/kosten- en gemiddelde-kostenweergaven blijven beschikbaar in hetzelfde dashboard.
+
+## Upgrade
+
+Run `Subscription-Lens-1.5.1-x64.exe` over an existing installation. The installer keeps the existing application identity, settings and local usage history.
+
+Developed with assistance from **GPT-6 Astra**. See [third-party notices](THIRD-PARTY-NOTICES.md).
 # Subscription Lens 1.4.6
 
 Windows x64 · 中文 / English / Nederlands

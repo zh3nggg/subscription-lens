@@ -1,4 +1,4 @@
-# Provider monitoring · 1.5.0-beta.1 preview
+# Provider monitoring · 1.5.1 stable
 
 Open **Connections → Providers**. Tools installed in standard folders are detected locally; connect one or all in a click. Use **Add manually** only for custom locations, then open **Overview → Providers**.
 The app reads the selected local source every 15 seconds while running. No cloud account or API key is required for these connectors.
@@ -23,7 +23,7 @@ Automatic discovery checks only the standard paths listed above and the Qwen/Kim
 - The ring includes only known amounts. Unpriced records are listed separately; an entirely unpriced total is shown as unavailable.
 - Tokens include cache subsets only once. Reasoning tokens, where supplied, are included in output rather than added twice.
 - Overview tabs, responsive record pagination and paginated legends keep common screens within the window. Settings and deliberately expanded long details may scroll.
-- The selected source defines the ledger. Different sources are **not added together**, because CC Switch and local CLI logs can describe the same requests.
+- The all-source view combines connected sources into one ledger and suppresses exact duplicate requests. Possible overlaps remain visible with source provenance because CC Switch and local CLI logs can describe the same request. Selecting one source still limits the ledger to that source.
 - When the selected source has records matching another connected source, the activity view marks exact request-ID matches and possible overlaps (same provider/model/token shape within a short time bucket). These are warnings, not automatic deletions; inspect the source boundary before comparing totals.
 - CSV exports include anonymous source IDs, overlap type and overlapping source IDs so duplicate-billing reviews can be continued outside the app. Local paths, credentials and chat content are not exported.
 
@@ -39,7 +39,7 @@ The helper writes `~/.qoder/usage/subscription-lens.jsonl`. Add the discovered *
 
 ## Cost meanings
 
-**Estimated** means a local pricing calculation, including CC Switch's stored calculation and its multiplier. **Source-reported** means the importing client explicitly labeled the amount as reported. It does not establish that a provider has settled or invoiced it. This beta does not query provider billing dashboards or balances.
+**Estimated** means a local pricing calculation, including CC Switch's stored calculation and its multiplier. **Source-reported** means the importing client explicitly labeled the amount as reported. It does not establish that a provider has settled or invoiced it. This release does not query provider billing dashboards or balances.
 
 CLI records without prices remain unpriced until you add a provider/model rule under **Prices → Providers**. Rules are exact matches and USD per million tokens. Source-provided amounts are preserved. The bundled OpenAI catalog is used only for exact OpenAI model matches with complete counters; the existing pricing snapshot limitations still apply.
 
@@ -55,7 +55,7 @@ Each complete newline-terminated line contains one request. Reuse `id` to correc
 
 `input` includes cache reads and writes; `output` includes reasoning. Cache and reasoning categories are optional and default to zero. The `cost`, `status`, latency, `session` and `project` fields are optional. Use `basis: "reported"` only when the exporting source supplies that amount. Non-USD costs are rejected rather than silently converted. Counters must be nonnegative safe integers.
 
-Unknown or malformed records do not become zero usage. The source footer reports skipped records from the latest scan. A paused source keeps its imported history. This beta supports one-device ledgers and does not provide a proxy, route requests, switch client credentials, or guarantee complete CC Switch feature parity.
+Unknown or malformed records do not become zero usage. The source footer reports skipped records from the latest scan. A paused source keeps its imported history. This release supports one-device ledgers and does not provide a proxy, route requests, switch client credentials, or guarantee complete CC Switch feature parity.
 
 ## Local release retention
 
