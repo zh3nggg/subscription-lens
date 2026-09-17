@@ -27,10 +27,15 @@ class Store{
   recordQuota(identity,quota){
     const put=this.db.prepare('INSERT INTO quota_samples VALUES(?,?,?,?,?,?,?) ON CONFLICT(identity,limit_id,window_id,reset,bucket) DO UPDATE SET at=excluded.at,used=excluded.used WHERE excluded.at>=quota_samples.at');
     for(const w of quota.windows){const at=Date.parse(w.observedAt||quota.observedAt);if(!Number.isFinite(at)||!Number.isFinite(w.resetsAt))continue;put.run(identity,w.limit,w.window,w.resetsAt,Math.floor(at/60000),at,w.used);}
-    this.db.prepare('DELETE FROM quota_samples WHERE at<?').run(Date.now()-3*86400000);
+    // Keep observations for the complete active quota window. A fixed
+    // three-day retention window truncated weekly quotas before the forecast
+    // could learn their true average pace. Expire only windows that ended more
+    // than two days ago; the reset epoch keeps storage bounded without cutting
+    // off an active window early.
+    this.db.prepare('DELETE FROM quota_samples WHERE reset<?').run(Math.floor(Date.now()/1000)-2*86400);
     this.db.exec('DELETE FROM quota_samples WHERE rowid IN (SELECT rowid FROM quota_samples ORDER BY at DESC LIMIT -1 OFFSET 25000)');
   }
-  quotaSamples(identity){return identity?this.db.prepare('SELECT limit_id AS "limit",window_id AS "window",reset,at,used FROM quota_samples WHERE identity=? AND at>=? ORDER BY at').all(identity,Date.now()-7200000):[];}
+  quotaSamples(identity){return identity?this.db.prepare('SELECT limit_id AS "limit",window_id AS "window",reset,at,used FROM quota_samples WHERE identity=? ORDER BY at').all(identity):[];}
   close(){this.db.close();}
 }
 module.exports={Store};

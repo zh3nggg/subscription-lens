@@ -10,7 +10,7 @@ Een Windows-desktopapp voor **Codex-abonnees** die hun resterende limieten wille
 | --- | --- |
 | Resterende capaciteit bekijken | Accountlimieten, aftellen tot herstel en temposchattingen zodra voldoende metingen beschikbaar zijn. |
 | Tokengebruik begrijpen | Gebruik per project, model en sessie bekijken en doorklikken naar afzonderlijke records. |
-| Je modelmix plannen | Maak van het actuele quotatempo en 14 dagen modelgewoonten een aanbevolen mix voor de volgende reset, met betrouwbaarheid en bijsturing per model. |
+| Je modelmix plannen | Maak van de modelhistorie en het gemiddelde tempo in het actieve quotavenster een aanbevolen mix voor de volgende reset, met betrouwbaarheid en bijsturing per model. |
 | Gebruik met je betaling vergelijken | Geschatte equivalente API-kosten naast je werkelijke betaling per factuurperiode bekijken. |
 | Limieten tijdens het werk volgen | Een compact vastzetbaar venster, systeemvak en optionele limietmeldingen met stille uren. |
 | Apparaten privé vergelijken | Koppel lokale Codex-records aan een stabiel apparaat, filter per apparaat en wissel anonieme pakketten uit zonder chatinhoud of paden. |
@@ -22,7 +22,7 @@ Verbind Qwen Code, Kimi Code, CodeBuddy Code, Qoder, CC Switch, Claude Code, Gem
 
 De diagrammen per aanbieder en model tonen ook de gemiddelde kosten per 1M tokens voor de geselecteerde periode. Alleen tokens met een prijs vormen de noemer; ongeprijsd gebruik blijft zichtbaar maar telt niet mee in het gemiddelde.
 
-Geïnstalleerde tools in standaardmappen worden automatisch gevonden en kunnen samen worden verbonden; aangepaste locaties blijven beschikbaar. Het Codex-overzicht adviseert een modelmix op basis van 14 dagen gebruik, API-equivalente intensiteit en het actuele quotatempo. Omdat OpenAI geen exacte quotagewichten per model publiceert, toont het advies de betrouwbaarheid en blijft het zichzelf kalibreren.
+Geïnstalleerde tools in standaardmappen worden automatisch gevonden en kunnen samen worden verbonden; aangepaste locaties blijven beschikbaar. Het Codex-overzicht adviseert een modelmix op basis van de modelhistorie en het gemiddelde quotatempo in het actieve venster. Omdat OpenAI geen exacte quotagewichten per model publiceert, toont het advies de betrouwbaarheid en blijft het zichzelf kalibreren.
 
 ![Subscription Lens-overzicht in het Nederlands](images/providers.nl-NL.png)
 
@@ -48,7 +48,7 @@ Je hebt geen API-sleutel, Node.js, Python of Docker nodig. Voor accountgegevens 
 <details>
 <summary>Gebruiksdetails en sneltoetsen</summary>
 
-- **Vooraf capaciteit bekijken.** Het overzicht toont resterende limieten en de tijd tot herstel. Een temposchatting vereist minstens drie metingen, 15 minuten en een meetbare verandering binnen hetzelfde account, venster en herstelmoment. Maximaal twee uur wordt gebruikt. Gegevens ouder dan drie minuten, resets en tellercorrecties onderdrukken onbetrouwbare schattingen. Een schatting gaat uit van gelijkblijvend gebruik en is geen garantie. Lokale tokens worden nooit naar abonnementslimieten omgerekend.
+- **Vooraf capaciteit bekijken.** Het overzicht toont resterende limieten en de tijd tot herstel. Een quotaschatting vereist minstens drie metingen, 15 minuten en een meetbare verandering binnen hetzelfde account, venster en herstelmoment. Alle bewaarde metingen in het actieve quotavenster worden gebruikt, zodat het gemiddelde het volledige venster omvat in plaats van alleen de laatste twee uur. Gegevens ouder dan drie minuten, resets en tellercorrecties onderdrukken onbetrouwbare schattingen. Een schatting gaat uit van het gemiddelde tempo van dit venster en is geen garantie. Lokale tokens worden nooit naar abonnementslimieten omgerekend.
 - **Tijdens het werk compact blijven.** Ctrl+Shift+M opent het compacte venster, dat je optioneel kunt vastzetten. Escape herstelt het overzicht. Een klik op het systeemvakpictogram opent het compacte venster als systeemvakmodus actief is.
 - **Gerichte meldingen.** Schakel meldingen in bij 20% en 5% resterend en bij gemeten herstel. Meldingen worden per account en venster ontdubbeld. Stille uren zijn standaard 22:00–08:00 lokale tijd. Laat de app actief; Windows kan meldingen onderdrukken.
 - **Duur werk terugvinden.** Selecteer een project of grafiekdatum, sorteer sessies op kosten of recente activiteit en bekijk de exacte records. Ctrl+K opent zoeken. Subagents tonen alleen hun eigen gebruik; kosten worden niet dubbel in een oudersessie opgeteld.
@@ -56,7 +56,7 @@ Je hebt geen API-sleutel, Node.js, Python of Docker nodig. Voor accountgegevens 
 - **Gegevens controleren.** Bekijk ontbrekende tarieven, verwerkingsfouten en de tariefdatum met directe links naar records en bronnen. Tariefdekking bewijst niet dat de accountgeschiedenis volledig is. Vergelijkingen gebruiken het direct voorafgaande tijdvak van gelijke duur.
 - **Zonder projectgegevens delen.** Bekijk een voorbeeld en exporteer een zelfstandig HTML-overzicht met totalen, tariefdekking en datumbereik. Geen account, projectnamen, paden of sessie-ID’s; er wordt niets automatisch geüpload.
 
-Limietmetingen blijven maximaal drie dagen lokaal bewaard, met een grens van 25.000 records. Geen nieuwe runtime-afhankelijkheden, clouddienst of modelaanroepen.
+Limietmetingen blijven bewaard zolang het bijbehorende quotavenster actief is en nog twee dagen daarna, met een grens van 25.000 records. Geen nieuwe runtime-afhankelijkheden, clouddienst of modelaanroepen.
 
 </details>
 

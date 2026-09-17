@@ -71,7 +71,16 @@ class Service extends EventEmitter{
     const outlooks=(quota?.windows||[]).map(w=>{const outlook=quotaOutlook({...w,observedAt:w.observedAt||quota.observedAt},samples,{now:now.getTime(),live:this.settings.accountEnabled&&this.account.status.state==='connected'&&quota.source==='account'});return {...outlook,advice:quotaAdvice(outlook)};});
     const primaryOutlook=[...(outlooks.filter(w=>w.limit==='codex').length?outlooks.filter(w=>w.limit==='codex'):outlooks)].sort((a,b)=>b.used-a.used)[0];
     const recentFrom=new Date(now.getTime()-14*86400000).toISOString(),recent=aggregate(this.select(this.store.events(recentFrom,new Date(now.getTime()+1).toISOString(),this.device.id),filters),this.catalog);
-    const mixAdvice=modelMixAdvice(recent.models,primaryOutlook);
+    // Model recommendations should describe the same quota window as the
+    // remaining-time forecast. Fall back to the existing 14-day baseline only
+    // when the provider does not expose a window duration yet.
+    let modelHistory=recent,historyScope='recent_history';
+    if(primaryOutlook&&Number.isFinite(primaryOutlook.windowStartAt)){
+      const windowFrom=new Date(primaryOutlook.windowStartAt).toISOString();
+      const windowEvents=this.select(this.store.events(windowFrom,new Date(now.getTime()+1).toISOString(),this.device.id),filters);
+      modelHistory=aggregate(windowEvents,this.catalog);historyScope='quota_window';
+    }
+    const mixAdvice={...modelMixAdvice(modelHistory.models,primaryOutlook),historyScope};
     const c=cycleWindow(settings,now),cycleRaw=period==='cycle'&&!filters.day?raw:this.store.events(new Date(c.start+'T00:00:00').toISOString(),new Date(Math.min(new Date(c.end+'T00:00:00').getTime(),now.getTime()+1)).toISOString(),this.device.id);
     const ca=aggregate(this.select(cycleRaw,filters),this.catalog),paid=settings.paid===null?null:settings.paid+settings.extra;
     const duration=new Date(r.to)-new Date(r.from);let comparison=null;

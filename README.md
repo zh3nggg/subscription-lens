@@ -10,7 +10,7 @@ A Windows desktop app for **Codex subscription users** who want to see their rem
 | --- | --- |
 | Check remaining capacity | Account quota, reset countdowns and recent-pace estimates when enough observations are available. |
 | Understand your usage | Compare providers in a ring chart, select one to inspect its models, then drill down to requests or Codex sessions. |
-| Plan your model mix | Turn the current quota pace and 14-day model habits into a recommended mix for the next reset, with confidence and suggested changes per model. |
+| Plan your model mix | Turn the active quota window's model history and average pace into a recommended mix for the next reset, with confidence and suggested changes per model. |
 | Compare usage with your payment | View estimated API-equivalent costs alongside your actual payment for the billing period. |
 | Keep limits within reach | Use a compact pinnable window, the system tray and optional low-quota alerts with quiet hours. |
 | Compare devices privately | Assign local Codex records to a stable device, filter by device, and transfer anonymous device packages without chat content or paths. |
@@ -48,7 +48,7 @@ No API key, Node.js, Python or Docker is needed to run the app. Account queries 
 <details>
 <summary>Usage details and shortcuts</summary>
 
-- **Know when to slow down.** The overview prioritizes account capacity and reset time. Recent-pace estimates require at least three observations across 15 minutes in the same account/window/reset. A positive change estimates the current burn rate; a stable window is shown as no observed consumption. They use up to two hours of observations, never local token-to-quota guesses. Stale data (over three minutes), resets and counter corrections suppress unreliable estimates. Forecasts assume your recent pace continues; they are not guarantees.
+- **Know when to slow down.** The overview prioritizes account capacity and reset time. Quota estimates require at least three observations across 15 minutes in the same account/window/reset. They use every retained observation in the active quota window, so the average covers the full window rather than only the last two hours. A positive change estimates the average burn rate; a stable window is shown as no observed consumption. Stale data (over three minutes), resets and counter corrections suppress unreliable estimates. Forecasts assume the window's average pace continues; they are not guarantees.
 - **Stay in your work.** Open Compact view with Ctrl+Shift+M; optionally pin it above other windows. Escape restores the dashboard. A tray click opens this view when tray mode is enabled.
 - **Get quiet alerts.** Opt into alerts at 20% and 5% remaining and observed quota recovery. Alerts are deduplicated per window and account. Quiet hours default to 22:00–08:00 local time. The app must remain running; Windows notification settings can suppress delivery.
 - **Find expensive work.** Select a project or chart date, sort sessions by cost or recency, then inspect the exact records. Ctrl+K opens search. Session totals count each record once; subagent rows show their own usage, not an inclusive parent total.
@@ -56,7 +56,7 @@ No API key, Node.js, Python or Docker is needed to run the app. Account queries 
 - **Check the evidence.** Data health shows unpriced reasons, parsing issues and price snapshot date, with direct links to affected records and sources. Pricing coverage does not prove complete account history. Previous-period comparisons use the immediately preceding interval of equal elapsed length, not a calendar-month forecast.
 - **Share without revealing projects.** Preview and export a self-contained HTML summary. It includes totals, pricing coverage and date range, but no account identity, project names, paths or session IDs. Nothing is uploaded automatically.
 
-Quota observations are stored locally for up to three days, capped at 25,000 rows. No new runtime dependencies, cloud service or model calls were added for these features.
+Quota observations are stored locally while their quota window is active and for two days after reset, capped at 25,000 rows. No new runtime dependencies, cloud service or model calls were added for these features.
 
 </details>
 

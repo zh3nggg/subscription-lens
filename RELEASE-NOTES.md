@@ -1,4 +1,24 @@
-# Subscription Lens 1.4.5
+# Subscription Lens 1.4.6
+
+Windows x64 · 中文 / English / Nederlands
+
+- 额度预测改为使用当前 `limit + window + reset` 对应窗口内的全部历史观测，按窗口平均消耗速度推算，不再限制为最近 120 分钟。
+- 模型组合建议优先使用当前额度窗口内的模型历史，并在界面中标注窗口平均速度；未提供窗口时长的来源继续回退到既有历史基线。
+- 额度观测在活动窗口结束前持续保留，重置后再保留两天，以支持完整窗口统计。
+
+## What's new
+
+- Quota forecasts now use every retained observation for the active `limit + window + reset` window and calculate its average pace instead of limiting the sample to the last 120 minutes.
+- Model-mix advice prioritizes model history from the active quota window and labels the window-average pace; sources without a window duration keep the existing history fallback.
+- Quota observations remain available until the active window ends and for two days after reset, allowing full-window statistics.
+
+## Nieuw
+
+- Quotavoorspellingen gebruiken nu alle bewaarde metingen van het actieve venster (`limit + window + reset`) en berekenen het gemiddelde tempo in plaats van alleen de laatste 120 minuten.
+- Het modelmixadvies gebruikt bij voorkeur modelhistorie uit het actieve quotavenster en benoemt het gemiddelde tempo; bronnen zonder vensterduur gebruiken de bestaande historische terugval.
+- Quota-metingen blijven beschikbaar tot het actieve venster eindigt en nog twee dagen na de reset, zodat statistieken over het volledige venster mogelijk zijn.
+
+# Subscription Lens 1.4.5 (previous release)
 
 Windows x64 · 中文 / English / Nederlands
 

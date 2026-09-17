@@ -1007,6 +1007,10 @@
     "Based on the last {n} minutes",
     "Op basis van de afgelopen {n} minuten"
   ],
+  "按本额度窗口 {n} 分钟观测推算": [
+    "Based on {n} minutes observed in this quota window",
+    "Op basis van {n} minuten metingen in dit quotavenster"
+  ],
   "预计剩余": [
     "Estimated remaining time",
     "Geschatte resterende tijd"
@@ -1638,6 +1642,14 @@
   "依据近14天模型用量、": [
     "Based on 14-day model usage, ",
     "Gebaseerd op 14 dagen modelgebruik, "
+  ],
+  "依据本额度窗口的模型用量、": [
+    "Based on model usage in this quota window, ",
+    "Gebaseerd op modelgebruik in dit quotavenster, "
+  ],
+  "和本窗口平均额度速度；下个窗口会继续校准。": [
+    " and the average quota pace in this window; calibration continues next window.",
+    " en het gemiddelde quotatempo in dit venster; kalibratie gaat volgend venster door."
   ],
   "和近期额度速度；下个窗口会继续校准。": [
     " and recent quota pace; calibration continues next window.",
