@@ -1,3 +1,41 @@
+# Subscription Lens 1.7.0
+
+## Embedded CC Switch configuration core
+
+- The provider page now uses a bundled, headless CC Switch configuration core for direct Responses-compatible third-party providers.
+- Before switching, Subscription Lens saves the existing Codex `config.toml`; CC Switch then validates and atomically writes the provider-specific route.
+- The interface no longer presents an unverified local-proxy or instant-switch promise. After a direct switch, it tells the user to restart Codex.
+- API keys remain protected in the app vault; Codex also needs the active provider key in its own configuration when the provider is enabled.
+- The installer blocks itself unless the bundled runtime starts and answers an isolated status request.
+
+# Historical draft — Provider controls
+
+## 供应商操作区重排
+
+- 将“导入 Codex 配置”和“本机代理”拆成两个独立操作卡片，避免把读取配置与启动服务误认为同一步。
+- 为每个操作补充实际作用和使用时机；代理卡片会显示运行状态、监听地址及对应的启动或停止操作。
+- 将按钮名称简化为“导入配置”和“启动代理”，并保留英文、荷兰语翻译。
+- 修复高级设置展开状态在后台刷新时丢失的问题；供应商表单改用捕获阶段提交并关闭浏览器原生静默校验，保存失败会直接显示错误原因。
+- 路由页移除无关的“Codex 套餐 / 多供应商”切换，并将导航名称改为“路由”。
+- 本机代理已经接入 Codex 后，Responses 供应商支持“一键切换”，只更新本机路由目标，不重写 Codex 配置或要求重启前台；首次接入代理仍需按提示重启一次 Codex。
+
+Provider controls now separate importing the existing Codex configuration from starting the optional local proxy. Each card explains when it is needed, shows the current proxy state, and uses direct action labels.
+
+# Unreleased — Codex Provider Router
+
+## Codex 第三方供应商控制
+
+- 在 Subscription Lens 内新增“供应商”页面：保存供应商档案、模型、端点和环境变量引用。
+- 支持导入当前 Codex 配置，并在切换前创建本地备份；写入采用临时文件替换，保留无关配置。
+- 支持一键启用供应商、连接测试和模型列表探测；切换结果明确提示 Codex 需要重新启动。
+- 新增仅监听 `127.0.0.1` 的本机 Router，可转发 Responses 请求并记录用量 JSONL，自动接入现有监控去重与成本统计。
+- API Key 不写入 Subscription Lens 数据库，只使用用户指定的环境变量引用。
+- 供应商表单改为模板优先的渐进式配置：DeepSeek、Qwen、Moonshot/Kimi、OpenRouter 等会自动填充地址、模型和环境变量；高级协议设置按需展开，支持编辑、即时地址校验及保存并测试。
+- 供应商表单草稿会在后台扫描和代理状态刷新时保留，不再因页面重绘跳回“自定义”。模板目录扩展到 GLM/Zhipu、MiniMax、SiliconFlow、Volcengine/Doubao、Together AI、Groq、Mistral 和 Google Gemini。
+- 官方 Codex 使用登录态检测，不再把 `OPENAI_API_KEY` 当作必填项；第三方供应商仍通过其环境变量进行连接测试。
+- 支持在应用内填写 API Key；Windows 使用 Electron `safeStorage` 加密保存，启用时自动通过本机 Router 注入凭据，避免用户手动配置环境变量。
+- 本轮不发布 Release；完成 CLI/GUI 真实 Codex 兼容性测试后再决定版本号。
+
 # Subscription Lens 1.6.5
 
 ## 概览首屏布局修复
@@ -272,6 +310,7 @@ De Windows-taakbalk en venstermetadata gebruiken nu de Subscription Lens-identit
 See [source setup](https://github.com/zh3nggg/subscription-lens/blob/main/docs/PROVIDER-MONITORING.md), [validation](https://github.com/zh3nggg/subscription-lens/blob/main/docs/VALIDATION.md) and [third-party notices](https://github.com/zh3nggg/subscription-lens/blob/main/THIRD-PARTY-NOTICES.md).
 
 Developed with assistance from **GPT-6 Astra**. CodexBar and CC Switch are references; MIT-licensed codex-usage source is retained with its notices.
+
 
 
 

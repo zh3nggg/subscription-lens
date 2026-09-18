@@ -28,6 +28,26 @@ test('counter reset produces a distinct identity',()=>{const s=parser();const a=
 test('missing historical baseline uses last usage and marks partial',()=>{const e=parseRecord(msg(totals(500),totals(10)),parser()).event;assert.equal(e.input,10);assert.equal(e.quality,'partial_history');});
 test('unexplained cumulative gap is retained but not priced',()=>{const s=parser();parseRecord(msg(totals(10)),s);const e=parseRecord(msg(totals(100),totals(20)),s).event;assert.equal(e.total,90);assert.equal(price(e).reason,'counter');});
 test('quota parses snake and camel case without changing windows',()=>{const a=sanitizeQuota({primary:{used_percent:12,window_minutes:300,resets_at:123}},'now','record');assert.equal(a.windows[0].used,12);const b=sanitizeQuota({rateLimits:{primary:{usedPercent:13,windowDurationMins:10080,resetsAt:124}}},'now');assert.equal(b.windows[0].minutes,10080);});
+test('quota includes default and indexed limits and preserves map identities',()=>{
+  const primary={usedPercent:10,windowDurationMins:300,resetsAt:123};
+  const result=sanitizeQuota({rateLimits:{primary},rateLimitsByLimitId:{review:{primary:{...primary,windowDurationMins:10080}}}},'2026-09-18');
+  assert.deepEqual(result.windows.map(w=>[w.limit,w.minutes]),[['codex',300],['review',10080]]);
+  assert.equal(sanitizeQuota({rateLimits:{primary},rateLimitsByLimitId:{}},'now').windows.length,1);
+  const replaced=sanitizeQuota({rateLimits:{primary,secondary:primary},rateLimitsByLimitId:{codex:{primary:{...primary,windowDurationMins:10080}}}},'now');
+  assert.equal(replaced.windows.length,1);assert.equal(replaced.windows[0].minutes,10080);
+  assert.equal(sanitizeQuota({rate_limits_by_limit_id:{review:{primary:{used_percent:10,window_minutes:300,resets_at:123}}}},'now').windows[0].limit,'review');
+});
+test('single limit notifications retain other limits without refreshing their timestamps',()=>{
+  const a=new Account({home:'unused'}),oldAt='2026-09-01T00:00:00.000Z';
+  a.status.identity='fixture';a.status.quota=sanitizeQuota({rateLimitsByLimitId:{codex:{primary:{usedPercent:20,windowDurationMins:300,resetsAt:123}},review:{primary:{usedPercent:30,windowDurationMins:10080,resetsAt:124}}}},oldAt);
+  a.message({method:'account/rateLimits/updated',params:{rateLimits:{limitId:'codex',primary:{usedPercent:40,windowDurationMins:10080,resetsAt:125}}}});
+  assert.equal(a.status.quota.windows.length,2);
+  assert.equal(a.status.quota.windows.find(w=>w.limit==='review').observedAt,oldAt);
+  assert.equal(a.status.quota.windows.find(w=>w.limit==='codex').used,40);
+  a.status.identity=null;a.status.quota=null;
+  a.message({method:'account/rateLimits/updated',params:{rateLimits:{primary:{usedPercent:40}}}});
+  assert.equal(a.status.quota,null);
+});
 test('calendar dates reject normalized impossible dates',()=>{assert.equal(validDate('2026-02-31'),false);assert.equal(validDate('2026-02-28'),true);});
 test('cycle uses exclusive end and clamps future to current time',()=>{const now=new Date(2026,8,16,12);const r=range('cycle',{cycleStart:'2026-09-01',cycleEnd:'2026-10-01'},now);assert.equal(Date.parse(r.to),now.getTime()+1);const old=range('cycle',{cycleStart:'2026-08-01',cycleEnd:'2026-09-01'},now);assert.equal(new Date(old.to).getDate(),1);});
 async function temp(){const dir=path.resolve(__dirname,'../test-results');await fs.mkdir(dir,{recursive:true});return fs.mkdtemp(path.join(dir,'case-'));}

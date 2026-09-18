@@ -7,6 +7,8 @@ const {Store}=require('./store.cjs'),{Scanner}=require('./scanner.cjs'),{Account
 const {price,bundled,validateCatalog}=require('./pricing.cjs');
 const {dayKey,cycleWindow,aggregate,continuousDays,quotaOutlook,quotaAdvice,modelMixAdvice,alertCandidates,inQuietHours}=require('./insights.cjs');
 const {createDevice,normalizeDevice,safeLabel,packet,importPacket}=require('./devices.cjs');
+const {ProviderManager}=require('./providers.cjs');
+const {LocalRouter}=require('./router.cjs');
 function validDate(s){return typeof s==='string'&&/^\d{4}-\d{2}-\d{2}$/.test(s)&&Number.isFinite(Date.parse(s+'T00:00:00'))&&dayKey(new Date(s+'T00:00:00'))===s;}
 function range(period,settings,now=new Date()){
   let start=new Date(now.getFullYear(),now.getMonth(),now.getDate()),end=new Date(now.getTime()+1);
@@ -17,7 +19,7 @@ function range(period,settings,now=new Date()){
   return {from:start.toISOString(),to:end.toISOString()};
 }
 class Service extends EventEmitter{
-  constructor(dir,{home=os.homedir(),now=()=>new Date()}={}){
+  constructor(dir,{home=os.homedir(),now=()=>new Date(),credentialVault=null}={}){
     super();this.now=now;this.store=new Store(dir);this.scanner=new Scanner(this.store);this.monitor=new Monitor(this.store);this.catalog=this.store.get('catalog',bundled);
     const date=now(),start=dayKey(new Date(date.getFullYear(),date.getMonth(),1)),end=dayKey(new Date(date.getFullYear(),date.getMonth()+1,1));
     this.settings={roots:[],codexPath:null,accountHome:null,accountEnabled:false,cycleStart:start,cycleEnd:end,paid:null,extra:0,language:'system',theme:'system',fontScale:'normal',tray:false,startup:false,cycleMode:'manual',billingDay:1,notifications:false,quietStart:22,quietEnd:8,...this.store.get('settings',{})};
@@ -25,6 +27,9 @@ class Service extends EventEmitter{
     const freshDevice=createDevice(os.hostname());this.device=normalizeDevice(this.store.get('device'),freshDevice);this.store.set('device',this.device);
     this.devices=this.store.get('devices',{});this.devices[this.device.id]={...this.device,lastSeen:new Date().toISOString()};this.store.set('devices',this.devices);
     this.detectedRoot=process.env.CODEX_HOME||path.join(home,'.codex');this.home=home;
+    this.providers=new ProviderManager({store:this.store,getCodexHome:()=>this.settings.accountHome||this.settings.roots[0]||this.detectedRoot,dataDir:dir,credentialVault});
+    this.router=new LocalRouter({providerManager:this.providers,dataDir:dir});
+    this.router.on('changed',()=>this.emit('changed'));this.router.on('usage',()=>this.emit('changed'));
     this.sessionCatalogCache=new Map();
     this.account=new Account({home:this.settings.accountHome||this.settings.roots[0]||this.detectedRoot,onChange:status=>this.accountChanged(status)});
     this.timer=null;this.accountTimer=null;
@@ -59,6 +64,16 @@ class Service extends EventEmitter{
   async enableAccount(){this.settings.accountEnabled=true;this.store.set('settings',this.settings);return this.account.refresh(this.settings.codexPath);}
   disableAccount(){this.settings.accountEnabled=false;this.store.set('settings',this.settings);this.account.stop();this.emit('changed');}
   setCodexPath(exe){this.settings.codexPath=exe;this.store.set('settings',this.settings);this.account.stop();this.account.preferred=exe;this.emit('changed');}
+  providerList(){return this.providers.list();}
+  providerSave(input){const result=this.providers.save(input);this.emit('changed');return result;}
+  providerDelete(id){const result=this.providers.remove(id);this.emit('changed');return result;}
+  async providerImportCurrent(){const result=await this.providers.importCurrent();this.emit('changed');return result;}
+  async providerActivate(id){const result=await this.providers.activate(id);this.emit('changed');return result;}
+  async providerActivateProxy(id){return this.providers.activateViaProxy(id,0);}
+  async providerSwitch(id){void id;throw new Error('本地路由正在迁移到 CC Switch 运行时；当前版本已停用不安全的热切换。');}
+  async providerTest(id){return this.providers.test(id);}
+  async startRouter(port){const status=await this.router.start(port);const exists=this.monitor.sources.some(source=>source.kind==='usage-jsonl'&&source.path===this.router.logPath);if(!exists)try{await this.monitor.add('usage-jsonl',this.router.logPath);}catch{/* The router remains usable if its usage log cannot be registered. */}this.emit('changed');return status;}
+  async stopRouter(){const result=await this.router.stop();this.emit('changed');return result;}
   catalogImport(json){const c=validateCatalog(json);this.store.set('catalogBackup',this.catalog);this.catalog=c;this.store.set('catalog',c);this.emit('changed');}
   catalogReset(){this.store.set('catalogBackup',this.catalog);this.catalog=bundled;this.store.set('catalog',bundled);this.emit('changed');}
   select(events,filters,titles=null){const query=String(filters.query||'').slice(0,200).toLowerCase();return events.filter(e=>(!filters.device||e.device===filters.device)&&(!filters.model||e.model===filters.model)&&(!filters.project||e.project===filters.project)&&(!filters.session||e.session===filters.session)&&(!filters.unpriced||price(e,this.catalog).amount===null)&&(!query||(e.project+' '+e.model+' '+e.session+' '+(titles?.get(e.session)||'')).toLowerCase().includes(query)));}
@@ -111,15 +126,15 @@ class Service extends EventEmitter{
     const offset=Math.max(0,Math.min(1000000,Math.floor(Number(filters.offset)||0))),limit=Math.max(1,Math.min(200,Math.floor(Number(filters.limit)||50)));
     const sessionRows=(filters.sort==='recent'?[...a.sessions].sort((x,y)=>y.last.localeCompare(x.last)):a.sessions).map(row=>({...row,title:sessionTitles.get(row.key)||null}));
     const stats=this.store.stats(),fileStats=this.store.fileStats();
-    return {monitor:this.monitor.query(filters,r,this.catalog),period,range:r,summary:{...a.summary,diff:period==='cycle'&&paid!==null&&events.length?a.summary.usd-paid:null,ratio:period==='cycle'&&paid>0&&events.length?a.summary.usd/paid:null},models:a.models,projects:a.projects.slice(0,50),sessions:sessionRows.slice(offset,offset+limit),sessionTotal:a.sessions.length,days:continuousDays(a.days,period==='all'?(a.days[0]?.date?new Date(a.days[0].date+'T00:00:00').toISOString():r.to):r.from,r.to),trend:{days:trendAggregate.days,models:trendAggregate.models,modelsByDay:trendAggregate.modelsByDay},rows:(filters.sort==='cost'?[...a.rows].sort((x,y)=>(y.price.usd??-1)-(x.price.usd??-1)||y.at.localeCompare(x.at)):a.rows.reverse()).slice(offset,offset+limit),offset,limit,quota,outlooks,comparison,
+    return {monitor:this.monitor.query(filters,r,this.catalog),period,range:r,summary:{...a.summary,diff:period==='cycle'&&paid!==null&&events.length?a.summary.usd-paid:null,ratio:period==='cycle'&&paid>0?a.summary.usd/paid:null},models:a.models,modelProviders:a.modelProviders,projects:a.projects.slice(0,50),sessions:sessionRows.slice(offset,offset+limit),sessionTotal:a.sessions.length,days:continuousDays(a.days,period==='all'?(a.days[0]?.date?new Date(a.days[0].date+'T00:00:00').toISOString():r.to):r.from,r.to),trend:{days:trendAggregate.days,models:trendAggregate.models,modelsByDay:trendAggregate.modelsByDay},rows:(filters.sort==='cost'?[...a.rows].sort((x,y)=>(y.price.usd??-1)-(x.price.usd??-1)||y.at.localeCompare(x.at)):a.rows.reverse()).slice(offset,offset+limit),offset,limit,quota,outlooks,comparison,
       cycle:{...c,...ca.summary,paid,extra:settings.extra,diff:paid!==null&&ca.summary.events?ca.summary.usd-paid:null,progress:paid>0?ca.summary.usd/paid:null,remaining:paid!==null?Math.max(0,paid-ca.summary.usd):null,elapsedDays:Math.max(0,(Math.min(now,new Date(c.end+'T00:00:00'))-new Date(c.start+'T00:00:00'))/86400000),days:Math.round((Date.parse(c.end+'T12:00:00Z')-Date.parse(c.start+'T12:00:00Z'))/86400000)},
       health:{reasons:a.reasons,partial:events.filter(e=>['partial_history','ambiguous'].includes(e.quality)).length,readErrors:this.scanner.status.errors,parseErrors:fileStats.errors,priceAgeDays:Math.max(0,Math.floor((now-Date.parse(this.catalog.asOf+'T00:00:00Z'))/86400000))},
-      mixAdvice,account:this.account.status,settings,scanner:this.scanner.status,stats,fileStats,allModels:this.store.allModels(),catalog:this.catalog,detectedRoot:this.detectedRoot,devices:deviceRows,currentDevice:this.device,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone};
+      mixAdvice,account:this.account.status,settings,scanner:this.scanner.status,stats,fileStats,allModels:this.store.allModels(),catalog:this.catalog,detectedRoot:this.detectedRoot,devices:deviceRows,currentDevice:this.device,timezone:Intl.DateTimeFormat().resolvedOptions().timeZone,providers:this.providers.status(),router:this.router.status()};
   }
   renameDevice(id,label){label=safeLabel(label);if(!label)throw Error('设备名称无效');const device=this.devices[id];if(!device)throw Error('设备不存在');this.devices[id]={...device,label};if(id===this.device.id){this.device={...this.device,label};this.store.set('device',this.device);}this.store.set('devices',this.devices);this.emit('changed');return this.devices[id];}
   exportDeviceLedger(){const events=this.store.events('2000-01-01T00:00:00.000Z',new Date(this.now().getTime()+1).toISOString(),this.device.id).filter(event=>event.device===this.device.id).map(event=>({...event,ledgerCost:price(event,this.catalog).amount}));return packet(this.device,events);}
   importDeviceLedger(value){const imported=importPacket(value);if(imported.device.id===this.device.id)throw Error('不能导入当前设备的数据包');this.devices[imported.device.id]={...(this.devices[imported.device.id]||{}),...imported.device,lastSeen:new Date().toISOString()};this.store.set('devices',this.devices);const added=this.store.importEvents('device-ledger:'+imported.device.id,imported.records);this.emit('changed');return {device:this.devices[imported.device.id],added};}
   exportRows(filters){let r=range(filters.period||'month',this.effectiveSettings(),this.now());if(filters.day&&validDate(filters.day)){const start=new Date(filters.day+'T00:00:00'),end=new Date(start);end.setDate(end.getDate()+1);r={from:start.toISOString(),to:new Date(Math.min(end.getTime(),this.now().getTime()+1)).toISOString()};}let rows=this.store.events(r.from,r.to,this.device.id);if(filters.day&&validDate(filters.day))rows=rows.filter(e=>dayKey(e.at)===filters.day);return this.select(rows,filters).map(e=>({...e,price:price(e,this.catalog)}));}
-  async close(){clearInterval(this.timer);clearInterval(this.accountTimer);this.account.stop();while(this.scanner.running||this.monitor.running)await new Promise(r=>setTimeout(r,50));this.store.close();}
+  async close(){clearInterval(this.timer);clearInterval(this.accountTimer);this.account.stop();await this.router.stop();while(this.scanner.running||this.monitor.running)await new Promise(r=>setTimeout(r,50));this.store.close();}
 }
 module.exports={Service,range,dayKey,validDate};

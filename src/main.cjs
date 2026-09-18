@@ -1,5 +1,5 @@
 'use strict';
-const {app,BrowserWindow,ipcMain,dialog,shell,Menu,Tray,nativeImage,nativeTheme,Notification}=require('electron');
+const {app,BrowserWindow,ipcMain,dialog,shell,Menu,Tray,nativeImage,nativeTheme,Notification,safeStorage}=require('electron');
 const path=require('node:path');const fs=require('node:fs/promises');const {pathToFileURL}=require('node:url');
 const APP_USER_MODEL_ID='net.subscriptionlens.desktop';
 app.setName('Subscription Lens');
@@ -7,10 +7,18 @@ app.setAppUserModelId(APP_USER_MODEL_ID);
 const {resolveLanguage,translate}=require('./i18n.js');
 const {reportData,reportHtml}=require('./core/report.cjs');
 const {Service}=require('./core/service.cjs');const {dollars}=require('./core/pricing.cjs');
+const {CCSwitchSidecar,defaultSidecarPath}=require('./core/cc-switch-sidecar.cjs');
 const {monitorDefaults,discoverMonitors}=require('./core/discovery.cjs');
 if(process.env.LENS_DATA_DIR)app.setPath('userData',path.resolve(process.env.LENS_DATA_DIR));
 const lock=app.requestSingleInstanceLock();if(!lock){app.quit();}else{
-let win,service,tray,quitting=false,changeTimer,lastRefresh=0,compactMode=false,pinned=false,normalBounds=null;
+let win,service,tray,sidecar,quitting=false,changeTimer,lastRefresh=0,compactMode=false,pinned=false,normalBounds=null;async function restoreEmbeddedRoute(){
+  if(!service)return false;
+  const snapshot=service.store.get('ccSwitchRoutingRestoreBackup',null);
+  await sidecar?.stopAndRestore();
+  if(snapshot)await service.providers.restoreConfigBackup(snapshot);
+  service.store.set('ccSwitchRoutingRestoreBackup',null);
+  return true;
+}
 const t=(key,params)=>translate(key,resolveLanguage(service?.settings.language,app.getLocale()),params);
 const ui=pathToFileURL(path.join(__dirname,'ui','index.html')).href;
 // Windows shell identity is keyed from the executable and a real multi-size
@@ -19,10 +27,10 @@ const iconPng=path.join(__dirname,'../assets/icon.png');
 const icon=process.platform==='win32'?path.join(__dirname,'../assets/icon.ico'):iconPng;
 function changed(){clearTimeout(changeTimer);changeTimer=setTimeout(()=>{if(win&&!win.isDestroyed())win.webContents.send('lens:changed');updateTray();},250);}
 function show(){if(win){if(win.isMinimized())win.restore();win.show();win.focus();}}
-function configureDesktop(){nativeTheme.themeSource=service.settings.theme;if(win)win.setBackgroundColor(nativeTheme.shouldUseDarkColors?'#212121':'#ffffff');if(tray){tray.destroy();tray=null;}if(service.settings.tray&&!tray){tray=new Tray(nativeImage.createFromPath(icon));tray.setToolTip(t("余量"));tray.setContextMenu(Menu.buildFromTemplate([{label:t("打开余量"),click:show},{label:t("刷新用量"),click:()=>service.scan()},{type:'separator'},{label:t("退出"),click:()=>app.quit()}]));tray.on('double-click',show);tray.on('click',()=>{setCompact(true);show();});}if(!service.settings.tray&&tray){tray.destroy();tray=null;}}
+function configureDesktop(){nativeTheme.themeSource=service.settings.theme;if(win)win.setBackgroundColor(nativeTheme.shouldUseDarkColors?'#212121':'#ffffff');if(tray){tray.destroy();tray=null;}if(service.settings.tray&&!tray){tray=new Tray(nativeImage.createFromPath(icon));tray.setToolTip(t("余量"));tray.on('double-click',show);tray.on('click',()=>{setCompact(true);show();});updateTray();}if(!service.settings.tray&&tray){tray.destroy();tray=null;}}
 
 function setCompact(value){if(!win||compactMode===value)return;if(value){normalBounds=win.getBounds();win.setMinimumSize(360,400);win.setSize(420,560);}else{win.setMinimumSize(760,560);if(normalBounds)win.setBounds(normalBounds);if(pinned){pinned=false;win.setAlwaysOnTop(false);}}compactMode=value;changed();}
-function updateTray(){if(!tray||!service)return;const account=service.account.status;const fresh=account.state==='connected'&&account.quota&&Date.now()-Date.parse(account.quota.observedAt)<180000;const windows=fresh?account.quota.windows.filter(w=>w.resetsAt*1000>Date.now()):[];const primary=(windows.filter(w=>w.limit==='codex').length?windows.filter(w=>w.limit==='codex'):windows).sort((a,b)=>b.used-a.used)[0];const status=primary?Math.max(0,100-primary.used).toFixed(0)+t('% 剩余'):t('未连接');tray.setToolTip('Subscription Lens · '+status);tray.setContextMenu(Menu.buildFromTemplate([{label:status,enabled:false},{label:t('打开余量'),click:()=>{setCompact(false);show();}},{label:t('专注窗口'),click:()=>{setCompact(true);show();}},{label:t('刷新用量'),click:()=>{service.scan();if(service.settings.accountEnabled)service.account.refresh(service.settings.codexPath);}},{type:'separator'},{label:t('退出'),click:()=>app.quit()}]));}
+function updateTray(){if(!tray||!service)return;const account=service.account.status;const fresh=account.state==='connected'&&account.quota&&Date.now()-Date.parse(account.quota.observedAt)<180000;const windows=fresh?account.quota.windows.filter(w=>w.resetsAt*1000>Date.now()):[];const primary=(windows.filter(w=>w.limit==='codex').length?windows.filter(w=>w.limit==='codex'):windows).sort((a,b)=>b.used-a.used)[0];const status=primary?Math.max(0,100-primary.used).toFixed(0)+t('% 剩余'):t('未连接');const providers=service.providers?.list?.()||[];tray.setToolTip('Subscription Lens · '+status);tray.setContextMenu(Menu.buildFromTemplate([{label:status,enabled:false},{label:t('打开余量'),click:()=>{setCompact(false);show();}},{label:t('专注窗口'),click:()=>{setCompact(true);show();}},{label:t('刷新用量'),click:()=>{service.scan();if(service.settings.accountEnabled)service.account.refresh(service.settings.codexPath);}},{type:'separator'},{label:t('Codex 供应商'),submenu:providers.length?providers.map(p=>({label:p.name,type:'radio',checked:p.active,click:()=>{const switcher=service.router?.server&&!p.builtIn?service.providerSwitch(p.id):service.providerActivate(p.id);switcher.catch(error=>new Notification({title:t('切换失败'),body:t(error.message)}).show());}})):[{label:t('请先添加供应商'),enabled:false}]},{type:'separator'},{label:t('退出'),click:()=>app.quit()}]));}
 function notifyQuota(alerts){if(!Notification.isSupported())return;try{const body=alerts.map(a=>(a.window.label||a.window.limit)+' · '+(a.type==='reset'?t('额度已恢复'):Math.max(0,100-a.window.used).toFixed(0)+t('% 剩余'))).join('\n');const notice=new Notification({title:t('套餐额度'),body,silent:true,icon});notice.on('click',()=>{setCompact(true);show();});notice.show();}catch{/* Notification failures must not break account refresh. */}}
 
 function handler(name,fn){ipcMain.handle('lens:'+name,async(event,...args)=>{if(!win||event.sender!==win.webContents||event.senderFrame!==win.webContents.mainFrame||event.senderFrame.url!==ui)throw new Error('无效窗口');try{return {ok:true,value:await fn(...args)};}catch(e){return {ok:false,error:typeof e.message==='string'?t(e.message).slice(0,200):t("操作失败")};}});}
@@ -34,11 +42,40 @@ function register(){
   handler('configureMonitor',(id,input)=>{const result=service.monitor.configure(id,input||{});changed();return result;});
   handler('addDetectedMonitors',async kind=>{const candidates=detectedMonitors().filter(item=>!item.connected&&(!kind||item.kind===kind));const added=[],failed=[];for(const candidate of candidates)try{added.push(await service.monitor.add(candidate.kind,candidate.path));}catch(error){failed.push({kind:candidate.kind,error:error.message});}changed();if(!added.length&&failed.length)throw Error(failed[0].error);return {added:added.length,failed:failed.length};});
   handler('monitorRate',(provider,model,input)=>{const result=service.monitor.setRate(provider,model,input||{});changed();return result;});
+  handler('providerList',()=>service.providerList());
+  handler('providerSave',input=>service.providerSave(input||{}));
+  handler('providerDelete',id=>service.providerDelete(id));
+  handler('providerImportCurrent',()=>service.providerImportCurrent());
+
+  async function activateWithCCSwitchCore(id){
+    const provider=service.providers.get(id);
+    if(provider.builtIn){
+      await restoreEmbeddedRoute();
+      const result=service.providers.switchActive(id);changed();
+      return {...result,mode:'official-restored',needsRestart:false};
+    }
+    const key=service.providers.resolveCredential(provider);
+    if(!key)throw Error('请先在高级设置中保存 API Key');
+    let snapshot=service.store.get('ccSwitchRoutingRestoreBackup',null);
+    const wasRunning=sidecar.status().running;
+    if(!snapshot){snapshot=await service.providers.backupCurrentConfig();service.store.set('ccSwitchRoutingRestoreBackup',snapshot.backup);}
+    await sidecar.start();
+    await sidecar.request({command:'activateCodexProvider',providerId:provider.id,name:provider.name,baseUrl:provider.baseUrl,apiKey:key,upstreamModel:provider.model,modelMappings:provider.modelMappings||[],protocol:provider.protocol},60_000);
+    const result=service.providers.switchActive(id);changed();
+    return {...result,mode:wasRunning?'cc-switch-hot':'cc-switch-takeover',needsRestart:!wasRunning,...snapshot};
+  }
+  handler('providerActivate',activateWithCCSwitchCore);
+  handler('providerActivateProxy',activateWithCCSwitchCore);
+  handler('providerSwitch',activateWithCCSwitchCore);
+  handler('providerTest',id=>service.providerTest(id));
+  handler('providerDiscover',input=>service.providers.discover(input||{}));
+  handler('routerStart',async()=>{const result=await sidecar.start();changed();return result;});
+  handler('routerStop',async()=>{await restoreEmbeddedRoute();changed();return true;});
   handler('exportMonitor',async filters=>{const selected=service.query(filters||{});const data=service.monitor.query({...filters,export:true},selected.range,service.catalog);const result=await dialog.showSaveDialog(win,{title:t('导出用量'),defaultPath:'provider-usage.csv',filters:[{name:'CSV',extensions:['csv']}]});if(result.canceled)return null;const rows=[['time_utc','provider','model','input_including_cache','cached','cache_write','output_including_reasoning','reasoning','total_tokens','cost_usd','cost_basis','source_amount','source_unit','status','latency_ms','ttft_ms','source_id','overlap_kind','overlap_sources','origin'],...data.rows.map(e=>[e.at,e.provider,e.model,e.input,e.cached,e.write,e.output,e.reasoning,e.total,e.usd??'',e.amount===null?'unpriced':e.basis,e.sourceAmount===null?'':Number(e.sourceAmount)/1e15,e.sourceUnit||'',e.status,e.latencyMs,e.ttftMs,e.sourceId||data.source||'',e.overlap?.kind||'',(e.overlap?.sources||[]).join('|'),e.origin||''])];await fs.writeFile(result.filePath,'\uFEFF'+rows.map(row=>row.map(csvCell).join(',')).join('\r\n'));return data.rows.length;});
   handler('exportDeviceLedger',async()=>{const result=await dialog.showSaveDialog(win,{title:t('导出设备数据'),defaultPath:'subscription-lens-device.json',filters:[{name:'JSON',extensions:['json']}]});if(result.canceled)return null;const data=service.exportDeviceLedger();await fs.writeFile(result.filePath,JSON.stringify(data,null,2));return data.records.length;});
   handler('importDeviceLedger',async()=>{const result=await dialog.showOpenDialog(win,{title:t('导入设备数据'),filters:[{name:'JSON',extensions:['json']}],properties:['openFile']});if(result.canceled)return null;const stat=await fs.stat(result.filePaths[0]);if(stat.size>25*1024*1024)throw Error('设备数据包过大');return service.importDeviceLedger(JSON.parse(await fs.readFile(result.filePaths[0],'utf8')));});
   handler('renameDevice',(id,label)=>service.renameDevice(id,label));
-  handler('query',f=>({...service.query(f||{}),desktop:{compact:compactMode,pinned,version:app.getVersion(),notificationsAvailable:Notification.isSupported(),detectedMonitors:detectedMonitors()}}));
+  handler('query',f=>({...service.query(f||{}),router:sidecar?.status()||{embedded:true,running:false},desktop:{compact:compactMode,pinned,version:app.getVersion(),notificationsAvailable:Notification.isSupported(),detectedMonitors:detectedMonitors()}}));
   handler('setCompact',value=>{setCompact(value===true);return true;});
   handler('setPinned',value=>{pinned=value===true;win.setAlwaysOnTop(pinned);changed();return pinned;});
   handler('removeRoot',root=>service.removeRoot(root));
@@ -62,7 +99,9 @@ function register(){
   handler('diagnostics',async()=>{const r=await dialog.showSaveDialog(win,{title:t("导出诊断"),defaultPath:'subscription-lens-diagnostics.json',filters:[{name:'JSON',extensions:['json']}]});if(r.canceled)return null;const summary={version:app.getVersion(),platform:process.platform,arch:process.arch,scanner:service.scanner.status,counts:service.store.stats(),fileCounts:service.store.fileStats(),accountState:service.account.status.state,accountError:service.account.status.lastError,priceVersion:service.catalog.version};await fs.writeFile(r.filePath,JSON.stringify(summary,null,2));return true;});
 }
 async function create(){
-  service=new Service(app.getPath('userData'));service.on('changed',changed);service.on('alert',notifyQuota);
+  const credentialVault={isAvailable:()=>safeStorage.isEncryptionAvailable(),encrypt:value=>safeStorage.encryptString(value).toString('base64'),decrypt:value=>safeStorage.decryptString(Buffer.from(value,'base64'))};
+  service=new Service(app.getPath('userData'),{credentialVault});service.on('changed',changed);service.on('alert',notifyQuota);
+  sidecar=new CCSwitchSidecar(defaultSidecarPath(path.resolve(__dirname,'..'),app.isPackaged),{codexHome:service.providers.getCodexHome(),runtimeHome:path.join(app.getPath('userData'),'cc-switch-router-runtime')});sidecar.on('changed',changed);
   win=new BrowserWindow({width:1100,height:720,minWidth:760,minHeight:560,show:false,title:t("余量"),icon,backgroundColor:'#ffffff',autoHideMenuBar:true,webPreferences:{preload:path.join(__dirname,'preload.cjs'),contextIsolation:true,nodeIntegration:false,sandbox:true,webSecurity:true,backgroundThrottling:!process.env.LENS_TEST_HIDDEN}});
   if(process.platform==='win32'){
     // Set the icon on the window object as well as the shell metadata. This
@@ -77,5 +116,5 @@ async function create(){
 }
 app.on('second-instance',show);app.whenReady().then(create).catch(()=>{dialog.showErrorBox(t("无法启动"),t("应用数据无法打开。请检查数据目录权限。"));app.exit(1);});
 app.on('window-all-closed',()=>{if(!service?.settings.tray)app.quit();});
-app.on('before-quit',e=>{if(!quitting&&service){e.preventDefault();quitting=true;clearTimeout(changeTimer);service.close().finally(()=>app.quit());}});
+app.on('before-quit',e=>{if(!quitting&&service){e.preventDefault();quitting=true;clearTimeout(changeTimer);Promise.resolve(restoreEmbeddedRoute()).catch(()=>{}).finally(()=>service.close().finally(()=>app.quit()));}});
 }

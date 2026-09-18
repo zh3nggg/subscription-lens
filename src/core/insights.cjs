@@ -9,15 +9,25 @@ function cycleWindow(settings,now=new Date()){
   return {start:dayKey(at(month)),end:dayKey(at(month+1))};
 }
 function aggregate(events,catalog){
-  let amount=0n,tokens=0,cached=0,output=0,pricedTokens=0,unpriced=0;const models=new Map(),projects=new Map(),sessions=new Map(),days=new Map(),modelsByDay=new Map(),reasons=new Map();
+  let amount=0n,tokens=0,cached=0,output=0,pricedTokens=0,unpriced=0;const models=new Map(),modelProviders=new Map(),projects=new Map(),sessions=new Map(),days=new Map(),modelsByDay=new Map(),reasons=new Map();
+  // Codex session records do not persist the selected upstream provider. Keep
+  // an explicit provider when one is available; otherwise only classify model
+  // families whose provider is unambiguous. This prevents a routed model from
+  // being presented as OpenAI merely because it came through the Codex client.
+  const providerFor=event=>{
+    if(typeof event.provider==='string'&&event.provider.trim())return event.provider.trim();
+    const model=String(event.model||'').trim().toLowerCase();
+    const rules=[[/^deepseek(?:[./:_-]|$)/,'DeepSeek'],[/^(?:qwen|qwq)(?:[./:_-]|$)/,'Alibaba Cloud'],[/^(?:kimi|moonshot)(?:[./:_-]|$)/,'Moonshot AI'],[/^(?:glm|zhipu|zai)(?:[./:_-]|$)/,'Zhipu AI'],[/^minimax(?:[./:_-]|$)/,'MiniMax'],[/^claude(?:[./:_-]|$)/,'Anthropic'],[/^gemini(?:[./:_-]|$)/,'Google'],[/^(?:gpt|o[134])(?:[./:_-]|$)/,'OpenAI']];
+    return rules.find(([pattern])=>pattern.test(model))?.[1]||'Unknown';
+  };
   const put=(map,key,event,p)=>{let group=map.get(key);if(!group){group={key,tokens:0,amount:0n,events:0,unpriced:0,first:event.at,last:event.at,models:new Set(),sessions:new Set()};map.set(key,group);}group.tokens+=event.total??0;group.amount+=BigInt(p.amount??0);group.events++;group.unpriced+=p.amount===null?1:0;group.first=group.first<event.at?group.first:event.at;group.last=group.last>event.at?group.last:event.at;group.models.add(event.model);group.sessions.add(event.session);return group;};
   const rows=events.map(e=>{const p=price(e,catalog);const total=e.total??0;tokens+=total;cached+=e.cached??0;output+=e.output??0;if(p.amount===null){unpriced++;reasons.set(p.reason,(reasons.get(p.reason)||0)+1);}else{amount+=BigInt(p.amount);pricedTokens+=total;}
-    put(models,e.model,e,p);put(projects,e.project,e,p);const session=put(sessions,e.session,e,p);session.project=e.project;session.parent=e.parent||null;const day=dayKey(e.at);put(days,day,e,p);if(!modelsByDay.has(day))modelsByDay.set(day,new Map());put(modelsByDay.get(day),e.model,e,p);return {...e,price:{...p,usd:dollars(p.amount)}};});
+    put(models,e.model,e,p);const provider=providerFor(e),providerModel=put(modelProviders,JSON.stringify([provider,e.model]),e,p);providerModel.provider=provider;providerModel.model=e.model;put(projects,e.project,e,p);const session=put(sessions,e.session,e,p);session.project=e.project;session.parent=e.parent||null;const day=dayKey(e.at);put(days,day,e,p);if(!modelsByDay.has(day))modelsByDay.set(day,new Map());put(modelsByDay.get(day),e.model,e,p);return {...e,price:{...p,usd:dollars(p.amount)}};});
   const finish=map=>[...map.values()].map(g=>({...g,amount:g.amount.toString(),usd:dollars(g.amount.toString()),models:[...g.models],sessions:g.sessions.size}));
   const modelDays=[...modelsByDay].map(([date,map])=>({date,models:finish(map).map(g=>({...g,model:g.key}))})).sort((a,b)=>a.date.localeCompare(b.date));
   const rank=list=>list.sort((a,b)=>b.usd-a.usd||b.tokens-a.tokens||a.key.localeCompare(b.key));
   return {summary:{tokens,cached,output,pricedTokens,unpriced,events:events.length,sessions:sessions.size,amount:amount.toString(),usd:dollars(amount.toString())},rows,
-    models:rank(finish(models)).map(g=>({...g,model:g.key})),projects:rank(finish(projects)),sessions:rank(finish(sessions)),days:finish(days).map(g=>({...g,date:g.key})).sort((a,b)=>a.date.localeCompare(b.date)),modelsByDay:modelDays,reasons:[...reasons].map(([reason,count])=>({reason,count}))};
+    models:rank(finish(models)).map(g=>({...g,model:g.key})),modelProviders:rank(finish(modelProviders)).map(g=>({...g,provider:g.provider,model:g.model})),projects:rank(finish(projects)),sessions:rank(finish(sessions)),days:finish(days).map(g=>({...g,date:g.key})).sort((a,b)=>a.date.localeCompare(b.date)),modelsByDay:modelDays,reasons:[...reasons].map(([reason,count])=>({reason,count}))};
 }
 function continuousDays(days,from,to){
   const byDate=new Map(days.map(d=>[d.date,d]));const start=new Date(from),end=new Date(new Date(to).getTime()-1);start.setHours(0,0,0,0);const count=Math.round((Date.UTC(end.getFullYear(),end.getMonth(),end.getDate())-Date.UTC(start.getFullYear(),start.getMonth(),start.getDate()))/86400000)+1;

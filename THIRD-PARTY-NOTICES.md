@@ -21,9 +21,10 @@ This source is included for the next accounting-engine integration. Version 1.4.
 
 Electron and Chromium license notices are included in the Windows binary distribution as `LICENSE.electron.txt` and `LICENSES.chromium.html`. Development dependencies and versions are recorded in package-lock.json. The application itself is licensed under MIT; upstream code retains its own notices.
 
-## CC Switch — compatibility reference
+## CC Switch — native routing runtime
 
 - Project: https://github.com/farion1231/cc-switch
 - Reference commit: `06082e189d65e6d6dbadc35dacdac1ce6c79d89a`
 - License: MIT
-- The read-only connector implements compatibility with the public request-log schema and documented token semantics. No CC Switch source files or assets are bundled. This is not an endorsement or affiliation.
+- The complete upstream source is included as the `native/cc-switch-runtime` Git submodule, pinned to the revision above. Its MIT copyright and license must be retained in every source or binary distribution that includes the runtime.
+- Subscription Lens compiles the upstream provider, proxy, takeover, recovery and protocol-conversion components into a windowless `subscription-lens-router.exe` sidecar. It excludes only CC Switch's Tauri/WebView window layer; the Electron app provides its own UI. The sidecar is packaged only after isolated startup verification. This is not an endorsement or affiliation.

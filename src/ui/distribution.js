@@ -3,13 +3,14 @@
 const distributionState={metric:'tokens',provider:null};
 const distributionColors=['#0f766e','#2563eb','#d97706','#c026d3','#7c3aed','#16a34a','#dc2626','#b45309','#0891b2','#4f46e5','#db2777','#65a30d'];
 const overviewBeforeDistribution=overview;
-overview=function(){const html=overviewBeforeDistribution();if(state.multi||(!state.data.settings.roots.length&&!state.data.stats.records))return html;const d=state.data,s=d.summary;
- const modelGroups=d.models.map(g=>({key:g.model,provider:'OpenAI',model:g.model,tokens:g.tokens,requests:g.events,unpriced:g.unpriced,estimated:g.usd,reported:0}));
- const m={groups:[{key:'OpenAI',provider:'OpenAI',tokens:s.tokens,requests:s.events,unpriced:s.unpriced,estimated:s.usd,reported:0}],modelGroups};
+overview=function(){const html=overviewBeforeDistribution();if(state.multi||(!state.data.settings.roots.length&&!state.data.stats.records))return html;const d=state.data;
+ const modelGroups=(d.modelProviders||[]).map(g=>({key:g.key,provider:g.provider,model:g.model,tokens:g.tokens,requests:g.events,unpriced:g.unpriced,estimated:g.usd,reported:0}));
+ const byProvider=new Map();for(const model of modelGroups){const group=byProvider.get(model.provider)||{key:model.provider,provider:model.provider,tokens:0,requests:0,unpriced:0,estimated:0,reported:0};group.tokens+=Number(model.tokens||0);group.requests+=Number(model.requests||0);group.unpriced+=Number(model.unpriced||0);group.estimated+=Number(model.estimated||0);group.reported+=Number(model.reported||0);byProvider.set(model.provider,group);}
+ const m={groups:[...byProvider.values()],modelGroups};
  return html.replace('<div class="overview-footer">',monitorDistribution(m)+'<div class="overview-footer">');
 };
 function monitorDistribution(m){
- const view=distributionState,scope=view.provider,mode=view.metric;
+ const view=distributionState;if(view.provider&&!m.groups.some(g=>g.key===view.provider))view.provider=null;const scope=view.provider,mode=view.metric;
  const groups=scope?m.modelGroups.filter(g=>g.provider===scope):m.groups;
  const costOf=g=>Number(g.estimated||0)+Number(g.reported||0),value=g=>mode==='tokens'?Number(g.tokens):costOf(g);
  const sorted=[...groups].sort((a,b)=>value(b)-value(a));

@@ -1,20 +1,16 @@
 {
   "stable": {
-    "version": "1.6.5",
-    "path": "subscription-lens-1.6.5-stable",
+    "version": "1.7.0",
+    "path": "subscription-lens-1.7.0-stable",
     "checksums": "SHA256SUMS.txt"
   },
   "preview": {
-    "version": "1.5.0-beta.1",
-    "path": "subscription-lens-1.5.0-beta.1-preview",
+    "version": "2.0.0-beta.1",
+    "path": "subscription-lens-2.0.0-beta.1-preview",
     "checksums": "SHA256SUMS.txt"
   },
-  "fallback": {
-    "version": "1.6.4",
-    "path": "subscription-lens-1.6.4-stable",
-    "checksums": "SHA256SUMS.txt"
-  },
-  "policy": "Latest verified stable and preview; previous stable remains as fallback when no preview is retained.",
-  "updatedAt": "2026-09-17T14:13:39.012Z",
-  "note": "Stable and fallback slots retained."
+  "fallback": null,
+  "policy": "Keep exactly the latest verified stable and preview; retain a fallback only while no preview exists.",
+  "updatedAt": "2026-09-18T10:43:29.253Z",
+  "note": "Stable and preview slots retained."
 }

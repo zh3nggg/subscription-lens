@@ -4,6 +4,7 @@ const path=require('node:path');
 const os=require('node:os');
 const {spawn}=require('node:child_process');
 const {sanitizeQuota,hash}=require('./parser.cjs');
+const {mergeQuota}=require('./quota.cjs');
 async function exists(p){try{return (await fs.stat(p)).isFile();}catch{return false;}}
 async function discoverCodex(preferred){
   if(preferred&&await exists(preferred))return preferred;
@@ -37,7 +38,7 @@ class Account{
     if(msg.id!==undefined&&this.pending.has(msg.id)){const p=this.pending.get(msg.id);clearTimeout(p.timer);this.pending.delete(msg.id);if(msg.error){const e=new Error('账户接口暂不可用');e.code=msg.error.code===-32601?'unsupported':'upstream';p.reject(e);}else p.resolve(msg.result);return;}
     if(msg.method==='account/login/completed'){this.loginId=null;if(msg.params?.success)this.refresh().catch(()=>{});else{this.status.state='disconnected';this.status.lastError='login_failed';this.emit();}}
     if(msg.method==='account/updated'){this.status.quota=null;this.status.usage=null;this.status.identity=null;this.refresh().catch(()=>{});}
-    if(msg.method==='account/rateLimits/updated'){const q=sanitizeQuota(msg.params,new Date().toISOString());if(q&&this.status.identity){this.status.quota=q;this.emit();}}
+    if(msg.method==='account/rateLimits/updated'){const q=sanitizeQuota(msg.params,new Date().toISOString());if(q&&this.status.identity){this.status.quota=mergeQuota(this.status.quota,q);this.emit();}}
   }
   async refresh(preferred){
     if(this.refreshing)return this.status;this.refreshing=true;const generation=this.generation;

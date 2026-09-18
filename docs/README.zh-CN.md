@@ -22,6 +22,10 @@
 
 供应商和模型饼图还会显示所选时间段的平均每百万 Tokens 成本。分母只包含已计价 Tokens；未计价用量仍会显示，但不会被纳入平均值。
 
+### 未发布：Codex 供应商路由
+
+开发版新增“路由”页面：可导入当前 Codex 配置并识别登录态，也可通过 DeepSeek、Qwen、Moonshot／Kimi、OpenRouter 模板自动填充地址、模型和环境变量。API Key 可以直接在应用内填写，并由 Windows 安全存储加密；高级协议设置按需展开，支持编辑、地址即时校验和保存并测试。内嵌的 CC Switch 运行时负责本机代理接管、恢复、供应商热切换，以及 Responses／Chat 协议转换。首次接入本机 Router 需要重启一次 Codex，之后可在应用内一键切换供应商，不再重启 Codex GUI／CLI。停止路由、切回 OpenAI Official 或退出程序时，Subscription Lens 会恢复接管前快照。已有 ChatGPT 登录态的旧会话继续使用官方模型标识，代理在转发时映射到选定的兼容上游模型。
+
 Codex 总览会结合当前额度窗口内的模型历史与平均额度速度，推荐下个重置前的模型使用比例，并标注可信度。由于 OpenAI 未公布各模型对应套餐额度的精确权重，该建议使用 API 等价强度持续校准，不承诺精确耗尽额度。
 
 ![Subscription Lens 中文多供应商总览](images/providers.zh-CN.png)
@@ -115,9 +119,3 @@ npm run dist
 [CodexBar](https://github.com/steipete/CodexBar) 为额度和桌面交互设计提供参考；项目已引入采用 MIT 许可的 [codex-usage](https://github.com/zJay26/codex-usage) 源码，用于下一步统计引擎整合，保留其许可与致谢，后续用于统计引擎整合。
 
 本项目采用 MIT 许可，相关来源和版权见[开源说明](../THIRD-PARTY-NOTICES.md)。这是独立项目，与 OpenAI 无隶属关系，也未获得上述项目的背书。
-
-
-
-
-
-

@@ -1,0 +1,3 @@
+[submodule "native/cc-switch-runtime"]
+	path = native/cc-switch-runtime
+	url = https://github.com/farion1231/cc-switch.git

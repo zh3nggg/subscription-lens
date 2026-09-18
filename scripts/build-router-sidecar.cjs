@@ -1,0 +1,14 @@
+'use strict';
+const { execSync } = require('node:child_process');
+const fs = require('node:fs');
+const path = require('node:path');
+const root = path.resolve(__dirname, '..');
+const router = path.join(root, 'native', 'subscription-lens-router');
+const output = path.join(root, 'assets', 'router', 'subscription-lens-router.exe');
+const vcvars = 'C:\\Program Files (x86)\\Microsoft Visual Studio\\2022\\BuildTools\\VC\\Auxiliary\\Build\\vcvars64.bat';
+execSync(`call "${vcvars}" >nul && set "PATH=%USERPROFILE%\\.cargo\\bin;%PATH%" && cargo build --release`, { cwd: router, stdio: 'inherit', shell: 'cmd.exe' });
+const binary = path.join(router, 'target', 'release', 'subscription-lens-router.exe');
+if (!fs.existsSync(binary)) throw new Error('Embedded CC Switch router build completed without an executable.');
+fs.mkdirSync(path.dirname(output), { recursive: true });
+fs.copyFileSync(binary, output);
+process.stdout.write(`Embedded CC Switch router staged: ${output}\n`);

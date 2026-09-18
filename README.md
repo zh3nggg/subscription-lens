@@ -22,6 +22,10 @@ Connect Qwen Code, Kimi Code, CodeBuddy Code, Qoder, CC Switch, Claude Code, Gem
 
 The provider and model charts also show average cost per 1M tokens for the selected period. The denominator includes only priced tokens; unpriced usage remains visible and is excluded from the average. Multi-provider views combine connected sources with exact duplicate suppression and flag possible overlaps instead of silently adding ambiguous records.
 
+### Unreleased: Codex provider routing
+
+The local development build adds a **Providers** page for Codex routing. It imports the current `config.toml`, recognizes the official Codex login session without an API key, and offers templates for common OpenAI-compatible providers. Endpoint, model and credential fields are filled automatically; API keys can be entered in the app and are encrypted with Windows secure storage. The embedded CC Switch runtime owns the loopback takeover, recovery, provider hot switching and Responses/Chat protocol conversion. Subscription Lens keeps a pre-routing snapshot and restores it when routing stops or the app exits. Codex GUI and CLI remain the task interface; an existing ChatGPT-authenticated task keeps its official model slug while the router maps it to the chosen compatible upstream model.
+
 The Codex overview can recommend a model mix from the last 14 days of model usage and the current quota pace. It targets the next reset and shows its confidence. Because OpenAI does not publish an exact subscription-quota weight for each model, this is an adaptive recommendation based on API-equivalent intensity, not a guarantee.
 
 ![Subscription Lens provider overview in English](docs/images/providers.en-US.png)
@@ -98,9 +102,3 @@ Developed with assistance from **GPT-6 Astra**.
 [CodexBar](https://github.com/steipete/CodexBar) informs the quota and desktop interaction requirements. MIT-licensed [codex-usage](https://github.com/zJay26/codex-usage) source is retained with its notices for future accounting-engine integration.
 
 MIT. See [third-party notices](THIRD-PARTY-NOTICES.md) for attribution and licenses. This is an independent project, not affiliated with OpenAI or endorsed by the referenced projects.
-
-
-
-
-
-

@@ -2,7 +2,7 @@
 Object.assign(state,{multi:false,connection:'',provider:'',failed:false,overlap:''});
 const beforeMonitorFilters=filters,beforeMonitorOverview=overview,beforeMonitorActivity=activity,beforeMonitorSources=sources,beforeMonitorModels=models,beforeMonitorHead=head;
 filters=()=>({...beforeMonitorFilters(),connection:state.connection,provider:state.provider,failed:state.failed,overlap:state.overlap});
-head=function(...args){const html=beforeMonitorHead(...args);return html+`<div class="monitor-switch segments"><button data-monitor-view="codex" class="${state.multi?'':'active'}">${t('Codex 套餐')}</button><button data-monitor-view="multi" class="${state.multi?'active':''}">${t('多供应商')}</button></div>`;};
+head=function(...args){const html=beforeMonitorHead(...args);if(!['overview','activity','sources','models'].includes(state.page))return html;return html+`<div class="monitor-switch segments"><button data-monitor-view="codex" class="${state.multi?'':'active'}">${t('Codex 套餐')}</button><button data-monitor-view="multi" class="${state.multi?'active':''}">${t('多供应商')}</button></div>`;};
 const sourceName=s=>({'cc-switch':'CC Switch',claude:'Claude Code',gemini:'Gemini CLI',qwen:'Qwen Code',kimi:'Kimi Code',codebuddy:'CodeBuddy Code',qoder:'Qoder','usage-jsonl':t('API 用量文件')})[s.kind]||s.kind;
 const headerBeforeMonitor=updateHeader;
 updateHeader=function(){if(!state.multi)return headerBeforeMonitor();const m=state.data?.monitor,s=m?.sources.find(s=>s.id===m.source);$('#update-state').textContent=!s?t('未添加来源'):!s.enabled?t('已暂停'):s.state==='error'?t('读取来源失败'):s.state==='reading'?t('正在读取'):s.at?t('更新于 ')+clock(s.at):t('已添加');};

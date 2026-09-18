@@ -28,7 +28,7 @@ function fitOverview(main){
  if(project&&!project.hidden)pageItems(project.querySelector('.project-list'),[...project.querySelectorAll('.project-item')],'projects',70);
  if(!distribution.hidden)pageItems(distribution.querySelector('.distribution-legend'),[...distribution.querySelectorAll('.distribution-row')],'legend',100);
 }
-render=function(){renderBeforeLayout();if(!state.data)return;document.body.dataset.page=state.page;document.body.dataset.multi=String(state.multi);if(state.data.desktop?.compact)return;const main=$('#main');const mode=main.querySelector('.monitor-switch');if(mode){document.querySelector('header .monitor-switch')?.remove();document.querySelector('header').insertBefore(mode,document.querySelector('.header-actions'));}
+render=function(){renderBeforeLayout();if(!state.data)return;document.body.dataset.page=state.page;document.body.dataset.multi=String(state.multi);if(state.data.desktop?.compact)return;const main=$('#main');const mode=main.querySelector('.monitor-switch');document.querySelector('header .monitor-switch')?.remove();if(mode)document.querySelector('header').insertBefore(mode,document.querySelector('.header-actions'));
  if(state.page==='overview')fitOverview(main);
  if(state.page==='activity'){
   const table=main.querySelector('table'),rows=[...main.querySelectorAll('tbody tr')];if(table&&rows.length){const first=rows[0].getBoundingClientRect(),height=Math.max(52,...rows.map(n=>n.getBoundingClientRect().height));const reserve=state.multi?110:76;const limit=Math.max(1,Math.min(50,Math.floor((innerHeight-first.top-reserve)/height)));if(limit!==layoutState.limit){layoutState.limit=limit;state.offset=0;queueMicrotask(load);}}
@@ -46,3 +46,4 @@ document.addEventListener('click',event=>{const button=event.target.closest('but
  if(['prev','next'].includes(d.action)){event.stopImmediatePropagation();state.offset=Math.max(0,state.offset+(d.action==='next'?layoutState.limit:-layoutState.limit));load();}
 },true);
 let layoutResize;window.addEventListener('resize',()=>{clearTimeout(layoutResize);layoutResize=setTimeout(()=>{layoutState.pages={};render();},120);});
+

@@ -1,6 +1,6 @@
 {
   "name": "subscription-lens",
-  "version": "1.6.5",
+  "version": "2.0.0-beta.1",
   "description": "Local Codex subscription usage monitor",
   "main": "src/main.cjs",
   "author": "Subscription Lens contributors",
@@ -8,11 +8,14 @@
   "private": true,
   "scripts": {
     "start": "electron .",
+    "verify:cc-switch-runtime": "node scripts/verify-cc-switch-runtime.cjs",
+    "build:router": "node scripts/build-router-sidecar.cjs",
     "test": "node --test test/*.test.cjs",
     "dist": "electron-builder --win nsis zip --x64",
     "prestart": "node scripts/build-locales.cjs",
     "pretest": "node scripts/build-locales.cjs",
-    "predist": "node scripts/build-locales.cjs"
+    "verify:router-sidecar": "node scripts/verify-router-sidecar.cjs",
+    "predist": "npm run verify:cc-switch-runtime && npm run build:router && npm run verify:router-sidecar && node scripts/build-locales.cjs"
   },
   "devDependencies": {
     "electron": "44.4.0",
@@ -23,6 +26,9 @@
     "appId": "net.subscriptionlens.desktop",
     "productName": "Subscription Lens",
     "asar": true,
+    "asarUnpack": [
+      "assets/router/subscription-lens-router.exe"
+    ],
     "files": [
       "src/**/*",
       "assets/**/*",

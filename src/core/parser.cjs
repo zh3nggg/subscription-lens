@@ -52,7 +52,17 @@ function parseRecord(record,state){
 }
 function sanitizeQuota(raw,observedAt,source='account'){
   const windows=[];
-  const buckets=raw.rateLimitsByLimitId?Object.values(raw.rateLimitsByLimitId):[raw.rateLimits||raw];
+  if(!raw||typeof raw!=='object')return null;
+  const byLimit=new Map();
+  const fallback=raw.rateLimits||raw.rate_limits;
+  if(fallback)byLimit.set(clean(fallback.limitId??fallback.limit_id)||'codex',fallback);
+  const indexed=raw.rateLimitsByLimitId||raw.rate_limits_by_limit_id;
+  if(indexed&&typeof indexed==='object')for(const [id,bucket] of Object.entries(indexed)){
+    if(!bucket||typeof bucket!=='object')continue;
+    const limit=clean(bucket.limitId??bucket.limit_id)||clean(id)||'codex';
+    byLimit.set(limit,{...bucket,limitId:limit});
+  }
+  const buckets=byLimit.size?[...byLimit.values()]:[raw];
   for(const bucket of buckets){if(!bucket)continue;for(const key of ['primary','secondary']){const v=bucket[key];if(!v)continue;const used=v.usedPercent??v.used_percent,mins=v.windowDurationMins??v.window_minutes,resets=v.resetsAt??v.resets_at;
     if(typeof used!=='number'||!Number.isFinite(used))continue;
     windows.push({limit:clean(bucket.limitId??bucket.limit_id)||'codex',label:clean(bucket.limitName??bucket.limit_name),window:key,used:Math.max(0,used),minutes:number(mins),resetsAt:number(resets),plan:clean(bucket.planType??bucket.plan_type),observedAt});

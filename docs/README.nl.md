@@ -22,6 +22,10 @@ Verbind Qwen Code, Kimi Code, CodeBuddy Code, Qoder, CC Switch, Claude Code, Gem
 
 De diagrammen per aanbieder en model tonen ook de gemiddelde kosten per 1M tokens voor de geselecteerde periode. Alleen tokens met een prijs vormen de noemer; ongeprijsd gebruik blijft zichtbaar maar telt niet mee in het gemiddelde.
 
+### Nog niet uitgebracht: Codex-providerroutering
+
+De ontwikkelbuild voegt een pagina **Leveranciers** toe: importeer de huidige Codex-configuratie en herken de inlogsessie, of kies een DeepSeek-, Qwen-, Moonshot/Kimi- of OpenRouter-sjabloon om endpoint, model en omgevingsvariabele automatisch in te vullen. API-sleutels kunnen direct in de app worden ingevoerd en worden versleuteld opgeslagen met Windows-beveiligde opslag. Geavanceerde protocolinstellingen verschijnen alleen wanneer nodig; bewerken, directe endpointvalidatie en opslaan en testen zijn beschikbaar. Voor het wisselen wordt automatisch een back-up gemaakt en Codex kan via een lokale router worden gestuurd. Taken en antwoorden blijven in Codex GUI/CLI; Subscription Lens beheert de route en gebruiksregistratie. Providers met Responses API kunnen rechtstreeks worden gebruikt; alleen Chat Completions vereist nog een protocoladapter.
+
 Geïnstalleerde tools in standaardmappen worden automatisch gevonden en kunnen samen worden verbonden; aangepaste locaties blijven beschikbaar. Het Codex-overzicht adviseert een modelmix op basis van de modelhistorie en het gemiddelde quotatempo in het actieve venster. Omdat OpenAI geen exacte quotagewichten per model publiceert, toont het advies de betrouwbaarheid en blijft het zichzelf kalibreren.
 
 ![Subscription Lens-overzicht in het Nederlands](images/providers.nl-NL.png)

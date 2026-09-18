@@ -1,0 +1,4 @@
+# Generated only after the embedded CC Switch runtime passes its isolated
+# launch check. Never commit a machine-specific native build.
+*.exe
+*.dll

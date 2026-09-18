@@ -1976,6 +1976,22 @@ window.LensLocales = {
     "Daily trend",
     "Dagelijkse trend"
   ],
+  "活动热力图": [
+    "Activity heatmap",
+    "Activiteitskaart"
+  ],
+  "点击有颜色的日期查看当天明细": [
+    "Select a colored day to inspect that day",
+    "Selecteer een gekleurde dag voor die dag"
+  ],
+  "低": [
+    "Low",
+    "Laag"
+  ],
+  "高": [
+    "High",
+    "Hoog"
+  ],
   "累计趋势": [
     "Cumulative trend",
     "Cumulatieve trend"
@@ -2015,5 +2031,541 @@ window.LensLocales = {
   "记录": [
     "Records",
     "Records"
+  ],
+  "导入当前 Codex 配置": [
+    "Import current Codex config",
+    "Huidige Codex-config importeren"
+  ],
+  "导入 Codex 配置": [
+    "Import Codex config",
+    "Codex-config importeren"
+  ],
+  "导入配置": [
+    "Import config",
+    "Configuratie importeren"
+  ],
+  "读取当前 Codex 的模型、地址和协议，不会启动代理。": [
+    "Reads the current Codex models, endpoint, and protocol. It does not start the proxy.",
+    "Leest de huidige Codex-modellen, endpoint en protocol. Start de proxy niet."
+  ],
+  "本机代理": [
+    "Local proxy",
+    "Lokale proxy"
+  ],
+  "代理正在运行，Codex 请求可经本机转发。": [
+    "The proxy is running. Codex requests can be routed through this computer.",
+    "De proxy is actief. Codex-verzoeken kunnen via deze computer worden doorgestuurd."
+  ],
+  "仅在使用第三方供应商、应用内密钥或需要请求记录时启动。": [
+    "Start it only when using a third-party provider, an app-managed key, or request logging.",
+    "Start dit alleen voor een externe provider, een door de app beheerde sleutel of verzoekregistratie."
+  ],
+  "启动代理": [
+    "Start proxy",
+    "Proxy starten"
+  ],
+  "管理 Codex 的模型路由": [
+    "Manage Codex model routing",
+    "Codex-modelroutering beheren"
+  ],
+  "路由": [
+    "Routing",
+    "Routering"
+  ],
+  "一键切换": [
+    "Switch instantly",
+    "Direct wisselen"
+  ],
+  "接入代理": [
+    "Connect proxy",
+    "Proxy koppelen"
+  ],
+  "首次接入代理需要重启 Codex，之后可直接切换。": [
+    "The first proxy connection requires restarting Codex; later switches are instant.",
+    "De eerste proxykoppeling vereist een herstart van Codex; daarna wissel je direct."
+  ],
+  "已切换供应商，无需重启 Codex。": [
+    "Provider switched without restarting Codex.",
+    "Provider gewisseld zonder Codex opnieuw te starten."
+  ],
+  "请先启动本机代理": [
+    "Start the local proxy first.",
+    "Start eerst de lokale proxy."
+  ],
+  "本机代理运行中": [
+    "Local proxy running",
+    "Lokale proxy actief"
+  ],
+  "本机代理未运行": [
+    "Local proxy stopped",
+    "Lokale proxy gestopt"
+  ],
+  "停止代理": [
+    "Stop proxy",
+    "Proxy stoppen"
+  ],
+  "启动本机代理": [
+    "Start local proxy",
+    "Lokale proxy starten"
+  ],
+  "代理仅监听本机，可记录路由请求并支持热切换。": [
+    "The proxy listens on this computer only, records routed requests, and supports hot switching.",
+    "De proxy luistert alleen lokaal, registreert gerouteerde verzoeken en ondersteunt snel wisselen."
+  ],
+  "当前": [
+    "Current",
+    "Actief"
+  ],
+  "凭据已配置": [
+    "Credential configured",
+    "Inloggegeven geconfigureerd"
+  ],
+  "等待环境变量": [
+    "Waiting for environment variable",
+    "Wachten op omgevingsvariabele"
+  ],
+  "启用": [
+    "Enable",
+    "Inschakelen"
+  ],
+  "测试连接": [
+    "Test connection",
+    "Verbinding testen"
+  ],
+  "连接成功 · {n} 个模型": [
+    "Connected · {n} models",
+    "Verbonden · {n} modellen"
+  ],
+  "使用 Codex 登录态，无需 OPENAI_API_KEY": [
+    "Using your Codex login session; OPENAI_API_KEY is not required",
+    "Codex-inlogsessie gebruikt; OPENAI_API_KEY is niet vereist"
+  ],
+  "Codex 登录态": [
+    "Codex login session",
+    "Codex-inlogsessie"
+  ],
+  "连接失败": [
+    "Connection failed",
+    "Verbinding mislukt"
+  ],
+  "已保存并连接成功 · {n} 个模型": [
+    "Saved and connected · {n} models",
+    "Opgeslagen en verbonden · {n} modellen"
+  ],
+  "已保存，连接测试失败": [
+    "Saved, but the connection test failed",
+    "Opgeslagen, maar de verbindingstest is mislukt"
+  ],
+  "编辑": [
+    "Edit",
+    "Bewerken"
+  ],
+  "保存并测试": [
+    "Save and test",
+    "Opslaan en testen"
+  ],
+  "清空": [
+    "Clear",
+    "Wissen"
+  ],
+  "供应商模板": [
+    "Provider template",
+    "Leverancierssjabloon"
+  ],
+  "OpenAI Codex": [
+    "OpenAI Codex",
+    "OpenAI Codex"
+  ],
+  "自定义": [
+    "Custom",
+    "Aangepast"
+  ],
+  "选择模板后自动填充，必要时再修改。": [
+    "Choose a template to fill the form, then adjust only what you need.",
+    "Kies een sjabloon om het formulier in te vullen en pas alleen aan wat nodig is."
+  ],
+  "推荐使用模板，地址和协议会自动匹配。": [
+    "Templates are recommended because the endpoint and protocol are matched automatically.",
+    "Sjablonen worden aanbevolen omdat endpoint en protocol automatisch worden afgestemd."
+  ],
+  "模板已填充，可直接保存或按需修改。": [
+    "The template is ready. Save it as-is or adjust the fields.",
+    "Het sjabloon is ingevuld. Sla het direct op of pas de velden aan."
+  ],
+  "填写供应商文档提供的地址、模型和环境变量。": [
+    "Enter the endpoint, model and environment variable from the provider documentation.",
+    "Vul endpoint, model en omgevingsvariabele uit de leveranciersdocumentatie in."
+  ],
+  "高级设置": [
+    "Advanced settings",
+    "Geavanceerde instellingen"
+  ],
+  "上游协议": [
+    "Upstream protocol",
+    "Upstream-protocol"
+  ],
+  "只填写变量名，API Key 保留在系统环境变量中。": [
+    "Enter only the variable name; the API key stays in your system environment.",
+    "Vul alleen de variabelenaam in; de API-sleutel blijft in de systeemomgeving."
+  ],
+  "API Key": [
+    "API key",
+    "API-sleutel"
+  ],
+  "留空则保留已保存密钥": [
+    "Leave blank to keep the saved key",
+    "Laat leeg om de opgeslagen sleutel te behouden"
+  ],
+  "密钥使用 Windows 加密存储，不会写入明文配置。": [
+    "The key is encrypted with Windows secure storage and is never written to plain-text configuration.",
+    "De sleutel wordt versleuteld opgeslagen met Windows-beveiliging en nooit als leesbare configuratie opgeslagen."
+  ],
+  "应用内密钥已保存": [
+    "App key saved",
+    "App-sleutel opgeslagen"
+  ],
+  "系统加密存储不可用": [
+    "Windows secure storage is unavailable",
+    "Windows-beveiligde opslag is niet beschikbaar"
+  ],
+  "Responses API 可直接由 Codex 使用。": [
+    "Responses API can be used directly by Codex.",
+    "De Responses API kan rechtstreeks door Codex worden gebruikt."
+  ],
+  "Chat Completions 需要兼容层，当前版本不能直接启用。": [
+    "Chat Completions requires a compatibility layer and cannot be enabled directly in this version.",
+    "Chat Completions vereist een compatibiliteitslaag en kan in deze versie niet rechtstreeks worden ingeschakeld."
+  ],
+  "地址格式正确": [
+    "Endpoint format looks valid",
+    "Endpointindeling ziet er geldig uit"
+  ],
+  "请输入有效的 HTTPS 地址": [
+    "Enter a valid HTTPS endpoint",
+    "Voer een geldig HTTPS-endpoint in"
+  ],
+  "已切换 Codex 供应商": [
+    "Codex provider switched",
+    "Codex-leverancier gewisseld"
+  ],
+  "已导入当前配置": [
+    "Current config imported",
+    "Huidige configuratie geïmporteerd"
+  ],
+  "本机代理已启动": [
+    "Local proxy started",
+    "Lokale proxy gestart"
+  ],
+  "本机代理已停止": [
+    "Local proxy stopped",
+    "Lokale proxy gestopt"
+  ],
+  "供应商已删除": [
+    "Provider deleted",
+    "Leverancier verwijderd"
+  ],
+  "添加自定义供应商": [
+    "Add custom provider",
+    "Aangepaste leverancier toevoegen"
+  ],
+  "仅保存配置，不保存 API Key": [
+    "Configuration only; API keys are not stored.",
+    "Alleen configuratie; API-sleutels worden niet opgeslagen."
+  ],
+  "名称": [
+    "Name",
+    "Naam"
+  ],
+  "API 地址": [
+    "API endpoint",
+    "API-eindpunt"
+  ],
+  "环境变量": [
+    "Environment variable",
+    "Omgevingsvariabele"
+  ],
+  "Chat Completions（需代理或兼容层）": [
+    "Chat Completions (proxy or compatibility layer required)",
+    "Chat Completions (proxy of compatibiliteitslaag vereist)"
+  ],
+  "保存供应商": [
+    "Save provider",
+    "Leverancier opslaan"
+  ],
+  "Responses API": [
+    "Responses API",
+    "Responses API"
+  ],
+  "Codex 的模型路由": [
+    "Codex model routing",
+    "Codex-modelroutering"
+  ],
+  "Codex Router": [
+    "Codex Router",
+    "Codex Router"
+  ],
+  "供应商地址无效": [
+    "Provider endpoint is invalid",
+    "Leverancier-eindpunt is ongeldig"
+  ],
+  "模型名称无效": [
+    "Model name is invalid",
+    "Modelnaam is ongeldig"
+  ],
+  "供应商名称无效": [
+    "Provider name is invalid",
+    "Leveranciersnaam is ongeldig"
+  ],
+  "供应商标识无效": [
+    "Provider ID is invalid",
+    "Leveranciers-ID is ongeldig"
+  ],
+  "环境变量名称无效": [
+    "Environment variable name is invalid",
+    "Naam van omgevingsvariabele is ongeldig"
+  ],
+  "供应商不存在": [
+    "Provider not found",
+    "Leverancier niet gevonden"
+  ],
+  "不能删除内置供应商": [
+    "Built-in provider cannot be deleted",
+    "Ingebouwde leverancier kan niet worden verwijderd"
+  ],
+  "不能删除当前供应商": [
+    "The active provider cannot be deleted",
+    "De actieve leverancier kan niet worden verwijderd"
+  ],
+  "不能导入当前配置": [
+    "Cannot import current config",
+    "Huidige configuratie kan niet worden geïmporteerd"
+  ],
+  "切换前自动备份 Codex 配置": [
+    "Back up Codex config before switching",
+    "Maak een back-up van de Codex-configuratie vóór het wisselen"
+  ],
+  "删除": [
+    "Delete",
+    "Verwijderen"
+  ],
+  "供应商已保存": [
+    "Provider saved",
+    "Leverancier opgeslagen"
+  ],
+  "请求过大": [
+    "Request is too large",
+    "Verzoek is te groot"
+  ],
+  "Chat Completions 供应商需要兼容适配，当前版本不能直接启用": [
+    "Chat Completions providers need a compatibility adapter and cannot be enabled directly yet.",
+    "Chat Completions-leveranciers vereisen een compatibiliteitsadapter en kunnen nog niet rechtstreeks worden ingeschakeld."
+  ],
+  "经代理启用": [
+    "Enable via proxy",
+    "Via proxy inschakelen"
+  ],
+  "Codex 供应商": [
+    "Codex providers",
+    "Codex-leveranciers"
+  ],
+  "切换失败": [
+    "Switch failed",
+    "Wisselen mislukt"
+  ],
+  "请先添加供应商": [
+    "Add a provider first",
+    "Voeg eerst een leverancier toe"
+  ],
+  "已切换供应商；请重启 Codex 以载入新配置。": [
+    "Provider switched. Restart Codex to load the new configuration.",
+    "Leverancier gewisseld. Start Codex opnieuw om de nieuwe configuratie te laden."
+  ],
+  "密钥会在启用时写入 Codex 的供应商配置；应用内保存仍使用 Windows 加密。": [
+    "The key is written to Codex's provider configuration when enabled; the app copy remains protected by Windows encryption.",
+    "De sleutel wordt bij inschakelen in de providerconfiguratie van Codex geschreven; de kopie in de app blijft met Windows-versleuteling beschermd."
+  ],
+  "添加供应商": [
+    "Add provider",
+    "Leverancier toevoegen"
+  ],
+  "返回路由": [
+    "Back to routing",
+    "Terug naar routering"
+  ],
+  "编辑供应商": [
+    "Edit provider",
+    "Leverancier bewerken"
+  ],
+  "为 Codex 添加一个 Responses API 供应商。": [
+    "Add a Responses API provider for Codex.",
+    "Voeg een Responses API-leverancier toe voor Codex."
+  ],
+  "填写兼容 OpenAI Responses 格式的服务端地址。": [
+    "Enter an endpoint compatible with the OpenAI Responses format.",
+    "Vul een endpoint in dat compatibel is met de OpenAI Responses-indeling."
+  ],
+  "默认模型": [
+    "Default model",
+    "Standaardmodel"
+  ],
+  "获取模型列表": [
+    "Fetch models",
+    "Modellen ophalen"
+  ],
+  "Codex 会以此模型发起默认请求；可随时改动。": [
+    "Codex uses this model for its default request; you can change it any time.",
+    "Codex gebruikt dit model voor standaardverzoeken; je kunt het altijd wijzigen."
+  ],
+  "可用模型": [
+    "Available models",
+    "Beschikbare modellen"
+  ],
+  "从服务端读取的模型；选择后会填入默认模型。": [
+    "Models read from the endpoint; selecting one fills the default model.",
+    "Modellen die van het endpoint zijn gelezen; kies er een om het standaardmodel in te vullen."
+  ],
+  "取消": [
+    "Cancel",
+    "Annuleren"
+  ],
+  "已获取 {n} 个模型": [
+    "Fetched {n} models",
+    "{n} modellen opgehaald"
+  ],
+  "模型映射": [
+    "Model mapping",
+    "Modeltoewijzing"
+  ],
+  "Codex 前台模型": [
+    "Codex UI model",
+    "Codex-interfacemodel"
+  ],
+  "供应商上游模型": [
+    "Provider upstream model",
+    "Upstreammodel van provider"
+  ],
+  "添加映射": [
+    "Add mapping",
+    "Toewijzing toevoegen"
+  ],
+  "移除映射": [
+    "Remove mapping",
+    "Toewijzing verwijderen"
+  ],
+  "Codex 前台只显示兼容模型名；每一行会在本机路由中转成对应的供应商模型。": [
+    "The Codex UI only shows compatible model names; each row is routed locally to its provider model.",
+    "De Codex-interface toont alleen compatibele modelnamen; elke rij wordt lokaal naar het providermodel geleid."
+  ],
+  "旧会话保持或切换到左侧的兼容模型名；无需选择 deepseek、qwen 等第三方 slug。": [
+    "Keep or switch an existing chat to the compatible model name on the left; never select a third-party slug such as deepseek or qwen.",
+    "Behoud of kies in een bestaand gesprek de compatibele modelnaam links; kies geen externe slug zoals deepseek of qwen."
+  ],
+  "启用后写入 Codex 模型菜单；重启 Codex 后可选择。": [
+    "Written to the Codex model menu when enabled; restart Codex to select them.",
+    "Wordt bij inschakelen naar het Codex-modelmenu geschreven; herstart Codex om ze te kiezen."
+  ],
+  "已恢复 OpenAI Official；重启 Codex 后，旧对话请选择官方模型或新建对话。": [
+    "OpenAI Official restored. Restart Codex, then choose an official model in existing conversations or start a new one.",
+    "OpenAI Official is hersteld. Herstart Codex en kies daarna een officieel model in bestaande gesprekken, of start een nieuw gesprek."
+  ],
+  "连接凭据": [
+    "Connection credential",
+    "Verbindingsreferentie"
+  ],
+  "先保存 API Key，再获取模型或测试连接。": [
+    "Save an API key before fetching models or testing the connection.",
+    "Sla eerst een API-sleutel op voordat je modellen ophaalt of de verbinding test."
+  ],
+  "已加密保存": [
+    "Encrypted and saved",
+    "Versleuteld opgeslagen"
+  ],
+  "环境变量可用": [
+    "Environment variable available",
+    "Omgevingsvariabele beschikbaar"
+  ],
+  "需要 API Key": [
+    "API key required",
+    "API-sleutel vereist"
+  ],
+  "输入新密钥以替换已保存密钥": [
+    "Enter a new key to replace the saved key",
+    "Voer een nieuwe sleutel in om de opgeslagen sleutel te vervangen"
+  ],
+  "输入 API Key": [
+    "Enter API key",
+    "Voer API-sleutel in"
+  ],
+  "已保存密钥会直接用于获取模型和测试；输入新密钥后保存即可替换。": [
+    "The saved key is used directly for fetching and testing; save a new key to replace it.",
+    "De opgeslagen sleutel wordt direct gebruikt voor ophalen en testen; sla een nieuwe sleutel op om hem te vervangen."
+  ],
+  "密钥在保存后使用 Windows 加密存储，之后不会回填到输入框。": [
+    "After saving, the key is encrypted with Windows protection and is never filled back into this field.",
+    "Na opslaan wordt de sleutel met Windows-beveiliging versleuteld en nooit terug in dit veld ingevuld."
+  ],
+  "使用 Codex 登录态": [
+    "Use Codex sign-in",
+    "Gebruik Codex-aanmelding"
+  ],
+  "官方供应商不需要单独的 API Key。": [
+    "The official provider does not need a separate API key.",
+    "De officiële provider heeft geen aparte API-sleutel nodig."
+  ],
+  "为 Codex 添加一个模型路由供应商。": [
+    "Add a model-routing provider for Codex.",
+    "Voeg een modelrouteringsprovider toe voor Codex."
+  ],
+  "上游模型": [
+    "Upstream model",
+    "Upstreammodel"
+  ],
+  "路由会将兼容的 Codex 模型别名映射到此模型。": [
+    "The route maps a compatible Codex model alias to this model.",
+    "De route vertaalt een compatibel Codex-modelalias naar dit model."
+  ],
+  "请先输入或保存 API Key。": [
+    "Enter or save an API key first.",
+    "Voer eerst een API-sleutel in of sla deze op."
+  ],
+  "从服务端读取的模型会显示在下方，选择后会填入此字段。": [
+    "Models read from the endpoint appear below; selecting one fills this field.",
+    "Modellen van het endpoint verschijnen hieronder; kies er een om dit veld in te vullen."
+  ],
+  "连接设置": [
+    "Connection settings",
+    "Verbindingsinstellingen"
+  ],
+  "通常不需要修改；模板会提供推荐值。": [
+    "Usually no changes are needed; the template provides recommended values.",
+    "Meestal zijn geen wijzigingen nodig; het sjabloon geeft aanbevolen waarden."
+  ],
+  "Chat Completions（由嵌入式路由转换）": [
+    "Chat Completions (converted by the embedded router)",
+    "Chat Completions (omgezet door de ingebedde router)"
+  ],
+  "环境变量名称": [
+    "Environment variable name",
+    "Naam van omgevingsvariabele"
+  ],
+  "仅在未保存应用内密钥时作为备用凭据。": [
+    "Used as a fallback credential only when no in-app key is saved.",
+    "Alleen gebruikt als reserve-referentie wanneer geen sleutel in de app is opgeslagen."
+  ],
+  "路由已启用；请重新打开 Codex 后发送下一条消息。": [
+    "Routing is enabled. Reopen Codex, then send the next message.",
+    "Routing is ingeschakeld. Open Codex opnieuw en stuur daarna het volgende bericht."
+  ],
+  "路由已切换；下一条消息会使用所选上游模型。": [
+    "Routing switched. The next message uses the selected upstream model.",
+    "Routing is gewisseld. Het volgende bericht gebruikt het gekozen upstreammodel."
+  ],
+  "旧会话如何使用路由": [
+    "How existing chats use routing",
+    "Hoe bestaande chats routing gebruiken"
+  ],
+  "保留 Codex 前台的兼容 GPT 模型；路由会在请求发送前替换为所选上游模型。": [
+    "Keep a compatible GPT model in the Codex UI; routing replaces it with the selected upstream model before the request is sent.",
+    "Behoud een compatibel GPT-model in de Codex-interface; routing vervangt dit vóór verzending door het gekozen upstreammodel."
   ]
 };
