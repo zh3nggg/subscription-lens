@@ -46,6 +46,7 @@ enum Command {
         protocol: Option<String>,
     },
     SwitchCodexProvider { #[serde(rename = "providerId")] provider_id: String },
+    ActivateCodexOfficial,
     StopAndRestore,
     Shutdown,
 }
@@ -130,6 +131,20 @@ async fn activate(state: &AppState, provider: Provider) -> Result<Value, String>
     Ok(json!({ "providerId": id, "takeover": true, "status": status }))
 }
 
+async fn activate_official(state: &AppState) -> Result<Value, String> {
+    // Follow CC Switch's own provider transition semantics: switch the active
+    // target to its built-in official seed while takeover is still active so
+    // the backup is rebuilt from the official provider, then release takeover.
+    state
+        .db
+        .ensure_official_seed_by_id("codex-official", AppType::Codex)
+        .map_err(|error| error.to_string())?;
+    ProviderService::switch(state, AppType::Codex, "codex-official")
+        .map_err(|error| error.to_string())?;
+    state.proxy_service.set_takeover_for_app("codex", false).await?;
+    Ok(json!({ "providerId": "codex-official", "takeover": false }))
+}
+
 #[tokio::main]
 async fn main() {
     let database = match Database::init() {
@@ -155,6 +170,7 @@ async fn main() {
                     .and_then(|id| ProviderService::switch(&state, AppType::Codex, &id).map_err(|error| error.to_string()))
                     .map(|result| ok(json!(result))).unwrap_or_else(fail)
             }
+            Ok(Command::ActivateCodexOfficial) => activate_official(&state).await.map(ok).unwrap_or_else(fail),
             Ok(Command::StopAndRestore) => state.proxy_service.stop_with_restore().await.map(|_| ok(json!({ "restored": true }))).unwrap_or_else(fail),
             Ok(Command::Shutdown) => { let _ = state.proxy_service.stop_with_restore().await; ok(json!({ "stopped": true })) }
             Err(error) => fail(format!("Invalid router command: {error}")),

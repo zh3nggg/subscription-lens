@@ -39,10 +39,51 @@ test('provider config patch preserves unrelated Codex settings', () => {
   assert.match(text, /\[model_providers\.demo\]/);
 });
 
+test('all non-official provider families retain their own provider identity', () => {
+  for (const name of ['DeepSeek', 'Qwen', 'Kimi', 'OpenRouter', 'Custom gateway']) {
+    const text = writeProviderConfig('', {
+      id: name.toLowerCase().replace(/\\s+/g, '-'), name,
+      baseUrl: 'https://example.com/v1', model: 'upstream-model',
+      protocol: 'responses', envKey: 'PROVIDER_API_KEY', builtIn: false, kind: 'custom'
+    });
+    assert.match(text, /requires_openai_auth = false/);
+    assert.match(text, new RegExp(`name = "${name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}"`));
+    assert.doesNotMatch(text, /name = "OpenAI"/);
+  }
+});
+
+test('third-party providers cannot accidentally enable CCS remote compaction', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sublens-provider-name-'));
+  try {
+    const store = new Store(dir);
+    const manager = new ProviderManager({ store, getCodexHome: () => path.join(dir, '.codex'), dataDir: dir });
+    assert.throws(() => manager.save({ name: 'OpenAI', baseUrl: 'https://example.com/v1', model: 'gateway-model' }), /不能为 OpenAI/);
+    store.close();
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});
+
 test('official restore keeps a user-managed model catalog', () => {
   const text = writeProviderConfig('model_catalog_json = "my-catalog.json"\nmodel_provider = "subscription_lens"\n\n[model_providers.subscription_lens]\nexperimental_bearer_token = "test-only"\n', { ...require('../src/core/providers.cjs').builtin });
   assert.match(text, /model_catalog_json = "my-catalog.json"/);
   assert.doesNotMatch(text, /subscription_lens|experimental_bearer_token/);
+});
+
+test('official activation removes a stale embedded route without touching auth', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sublens-provider-restore-'));
+  try {
+    const store = new Store(dir); const home = path.join(dir, '.codex');
+    fs.mkdirSync(home, { recursive: true });
+    fs.writeFileSync(path.join(home, 'config.toml'), 'model_provider = "subscription-lens-deepseek"\nmodel = "gpt-5.6-sol"\nmodel_catalog_json = "cc-switch-model-catalog.json"\n\n[model_providers.subscription-lens-deepseek]\nname = "DeepSeek"\nbase_url = "http://127.0.0.1:15721/v1"\n', 'utf8');
+    const auth = '{"auth_mode":"chatgpt","tokens":{"marker":"preserve-me"}}\n';
+    fs.writeFileSync(path.join(home, 'auth.json'), auth, 'utf8');
+    const manager = new ProviderManager({ store, getCodexHome: () => home, dataDir: dir });
+    await manager.activate('openai-official');
+    const config = fs.readFileSync(path.join(home, 'config.toml'), 'utf8');
+    assert.match(config, /model_provider = "openai"/);
+    assert.doesNotMatch(config, /model_catalog_json/);
+    assert.equal(fs.readFileSync(path.join(home, 'auth.json'), 'utf8'), auth);
+    store.close();
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });
 
 test('official Codex login is not probed as an API-key models endpoint', async () => {

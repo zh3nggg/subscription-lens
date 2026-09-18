@@ -11,11 +11,32 @@ const {CCSwitchSidecar,defaultSidecarPath}=require('./core/cc-switch-sidecar.cjs
 const {monitorDefaults,discoverMonitors}=require('./core/discovery.cjs');
 if(process.env.LENS_DATA_DIR)app.setPath('userData',path.resolve(process.env.LENS_DATA_DIR));
 const lock=app.requestSingleInstanceLock();if(!lock){app.quit();}else{
-let win,service,tray,sidecar,quitting=false,changeTimer,lastRefresh=0,compactMode=false,pinned=false,normalBounds=null;async function restoreEmbeddedRoute(){
+let win,service,tray,sidecar,quitting=false,changeTimer,lastRefresh=0,compactMode=false,pinned=false,normalBounds=null;
+async function hasEmbeddedRouteConfig(){
   if(!service)return false;
-  const snapshot=service.store.get('ccSwitchRoutingRestoreBackup',null);
-  await sidecar?.stopAndRestore();
-  if(snapshot)await service.providers.restoreConfigBackup(snapshot);
+  try{
+    const configPath=path.join(service.providers.getCodexHome(),'config.toml');
+    const text=await fs.readFile(configPath,'utf8');
+    return /^\s*model_provider\s*=\s*["']subscription-lens-/m.test(text)
+      || /^\s*model_catalog_json\s*=\s*["']cc-switch-model-catalog\.json["']/m.test(text)
+      || /base_url\s*=\s*["']http:\/\/127\.0\.0\.1:\d+\/v1["']/m.test(text);
+  }catch{return false;}
+}
+async function restoreEmbeddedRoute(){
+  if(!service)return false;
+  const routePresent=await hasEmbeddedRouteConfig();
+  if(!service.store.get('ccSwitchRoutingActive',false)&&!routePresent)return false;
+  // The embedded CCS runtime owns the full takeover transaction, including
+  // its live-config and auth-preserving restore snapshot. A second Lens-level
+  // config backup can overwrite that transaction with stale state.
+  await sidecar.start();
+  await sidecar.request({command:'activateCodexOfficial'},60_000);
+  await sidecar.stopAndRestore();
+  // Upgrades from pre-beta.4 can lack the Lens activity flag or CCS backup.
+  // If the owned route remains after native restore, repair config.toml only.
+  // ProviderManager.activate never reads or rewrites auth.json.
+  if(await hasEmbeddedRouteConfig())await service.providers.activate('openai-official');
+  service.store.set('ccSwitchRoutingActive',false);
   service.store.set('ccSwitchRoutingRestoreBackup',null);
   return true;
 }
@@ -52,17 +73,16 @@ function register(){
     if(provider.builtIn){
       await restoreEmbeddedRoute();
       const result=service.providers.switchActive(id);changed();
-      return {...result,mode:'official-restored',needsRestart:false};
+      return {...result,mode:'official-restored',needsRestart:true};
     }
     const key=service.providers.resolveCredential(provider);
     if(!key)throw Error('请先在高级设置中保存 API Key');
-    let snapshot=service.store.get('ccSwitchRoutingRestoreBackup',null);
     const wasRunning=sidecar.status().running;
-    if(!snapshot){snapshot=await service.providers.backupCurrentConfig();service.store.set('ccSwitchRoutingRestoreBackup',snapshot.backup);}
     await sidecar.start();
     await sidecar.request({command:'activateCodexProvider',providerId:provider.id,name:provider.name,baseUrl:provider.baseUrl,apiKey:key,upstreamModel:provider.model,modelMappings:provider.modelMappings||[],protocol:provider.protocol},60_000);
+    service.store.set('ccSwitchRoutingActive',true);
     const result=service.providers.switchActive(id);changed();
-    return {...result,mode:wasRunning?'cc-switch-hot':'cc-switch-takeover',needsRestart:!wasRunning,...snapshot};
+    return {...result,mode:wasRunning?'cc-switch-hot':'cc-switch-takeover',needsRestart:!wasRunning};
   }
   handler('providerActivate',activateWithCCSwitchCore);
   handler('providerActivateProxy',activateWithCCSwitchCore);

@@ -1,0 +1,88 @@
+diff --git a/src-tauri/src/proxy/forwarder.rs b/src-tauri/src/proxy/forwarder.rs
+index 23b82602..98cb25a4 100644
+--- a/src-tauri/src/proxy/forwarder.rs
++++ b/src-tauri/src/proxy/forwarder.rs
+@@ -1260,7 +1260,17 @@ impl RequestForwarder {
+         // Grok Build exposes a stable client-side model profile in config.toml.
+         // Route requests to the provider's real upstream model before applying
+         // the optional Responses -> Chat/Anthropic bridge.
+-        if matches!(app_type, AppType::GrokBuild) {
++        if matches!(app_type, AppType::GrokBuild)
++            // Codex's native Responses path otherwise preserves the visible
++            // ChatGPT-safe slug all the way to a third-party upstream.  The
++            // embedded router deliberately keeps that slug in config.toml so
++            // existing ChatGPT-authenticated conversations remain valid; map
++            // it to the provider's real model immediately before forwarding.
++            || (matches!(app_type, AppType::Codex)
++                && !codex_official_auth_passthrough
++                && !codex_responses_to_chat
++                && !codex_responses_to_anthropic)
++        {
+             super::providers::apply_codex_upstream_model(provider, &mut mapped_body);
+         }
+ 
+diff --git a/src-tauri/src/proxy/providers/codex.rs b/src-tauri/src/proxy/providers/codex.rs
+index 5b8f4364..3ef62221 100644
+--- a/src-tauri/src/proxy/providers/codex.rs
++++ b/src-tauri/src/proxy/providers/codex.rs
+@@ -481,6 +481,23 @@ fn codex_provider_catalog_model_ids(provider: &Provider) -> HashSet<String> {
+         .unwrap_or_default()
+ }
+ 
++/// Subscription Lens embeds the CC Switch proxy but must keep ChatGPT-login
++/// clients on official Codex model IDs.  Resolve those client-safe aliases to
++/// their provider models before the catalog guard preserves an alias verbatim.
++/// The field is optional, scoped to this embedding, and leaves CC Switch's
++/// existing provider catalog behavior unchanged for every other caller.
++fn codex_alias_mapping(provider: &Provider, request_model: &str) -> Option<String> {
++    provider
++        .settings_config
++        .get("codexAliasMappings")
++        .and_then(|mappings| mappings.as_array())
++        .and_then(|mappings| mappings.iter().find_map(|mapping| {
++            let alias = mapping.get("alias").and_then(|value| value.as_str())?.trim();
++            let upstream = mapping.get("upstream").and_then(|value| value.as_str())?.trim();
++            (alias == request_model && !upstream.is_empty()).then(|| upstream.to_string())
++        }))
++}
++
+ /// For Codex Chat providers, ensure the request uses the configured upstream
+ /// model before converting the request to Chat Completions.
+ pub fn apply_codex_chat_upstream_model(
+@@ -504,6 +521,10 @@ pub fn apply_codex_upstream_model(provider: &Provider, body: &mut JsonValue) ->
+         .map(str::trim)
+         .filter(|model| !model.is_empty())
+     {
++        if let Some(upstream_model) = codex_alias_mapping(provider, request_model) {
++            body["model"] = JsonValue::String(upstream_model.clone());
++            return Some(upstream_model);
++        }
+         if catalog_model_ids.contains(request_model) {
+             return Some(request_model.to_string());
+         }
+@@ -1669,6 +1690,25 @@ wire_api = "anthropic"
+         );
+     }
+ 
++    #[test]
++    fn test_apply_codex_upstream_model_resolves_embedded_alias_mapping() {
++        let provider = create_provider(json!({
++            "model": "deepseek-flash",
++            "codexAliasMappings": [
++                { "alias": "gpt-5.6-sol", "upstream": "deepseek-flash" },
++                { "alias": "gpt-5.6-terra", "upstream": "deepseek-v4-pro" }
++            ],
++            "modelCatalog": { "models": [
++                { "model": "gpt-5.6-sol" },
++                { "model": "gpt-5.6-terra" }
++            ] }
++        }));
++        let mut body = json!({ "model": "gpt-5.6-terra", "input": "hi" });
++        let result = apply_codex_upstream_model(&provider, &mut body);
++        assert_eq!(result.as_deref(), Some("deepseek-v4-pro"));
++        assert_eq!(body.get("model").and_then(|value| value.as_str()), Some("deepseek-v4-pro"));
++    }
++
+     #[test]
+     fn test_anthropic_auth_defaults_to_bearer() {
+         // No meta.apiKeyField (defaults to ANTHROPIC_AUTH_TOKEN) → Authorization: Bearer only

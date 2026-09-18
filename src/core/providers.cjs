@@ -132,6 +132,9 @@ class ProviderManager {
   save(input = {}) {
     const name = String(input.name || '').trim().slice(0, 100); if (!name) throw new Error('供应商名称无效');
     const id = safeId(input.id || name); if (!ID_RE.test(id)) throw new Error('供应商标识无效');
+    // CC Switch uses this exact display name as the opt-in switch for Codex
+    // remote compaction. Third-party routes must retain their real identity.
+    if (id !== builtin.id && name === 'OpenAI') throw new Error('第三方供应商名称不能为 OpenAI');
     const baseUrl = String(input.baseUrl || '').trim().replace(/\/$/, ''); if (!validUrl(baseUrl)) throw new Error('供应商地址无效');
     const model = String(input.model || '').trim().slice(0, 180); if (!model) throw new Error('模型名称无效');
     const modelCatalog = [...new Set([model, ...(Array.isArray(input.modelCatalog) ? input.modelCatalog : [])].map(value => String(value || '').trim().slice(0, 180)).filter(value => value && !/[\r\n\0]/.test(value)))].slice(0, 100);

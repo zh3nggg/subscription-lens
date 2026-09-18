@@ -25,16 +25,22 @@ try {
   await call({ command: 'activateCodexProvider', providerId: 'deepseek-a', name: 'DeepSeek A', baseUrl: 'https://api.deepseek.example/v1', apiKey: 'test-key', upstreamModel: 'deepseek-flash', modelMappings: [{ alias: 'gpt-5.6-sol', upstream: 'deepseek-flash' }, { alias: 'gpt-5.6-terra', upstream: 'deepseek-v4-pro' }], protocol: 'responses' });
   const taken = await fs.readFile(path.join(codex, 'config.toml'), 'utf8');
   if (!taken.includes('127.0.0.1')) throw Error('takeover config missing local proxy: ' + taken);
+  if (!taken.includes('model_provider = "subscription-lens-deepseek-a"') || !taken.includes('[model_providers.subscription-lens-deepseek-a]')) throw Error('takeover config is missing its active provider table: ' + taken);
+  if (/\[model_providers\.subscription-lens-deepseek-a\][\s\S]*?name\s*=\s*"OpenAI"/.test(taken)) throw Error('third-party takeover unexpectedly enables remote compaction: ' + taken);
   const catalog = JSON.parse(await fs.readFile(path.join(codex, 'cc-switch-model-catalog.json'), 'utf8'));
   const modelIds = new Set((catalog.models || []).map(model => model.slug || model.model).filter(Boolean));
   if (!modelIds.has('gpt-5.6-sol') || !modelIds.has('gpt-5.6-terra') || modelIds.has('deepseek-flash')) throw Error('ChatGPT-safe model catalog missing: ' + JSON.stringify([...modelIds]));
   await call({ command: 'activateCodexProvider', providerId: 'deepseek-b', name: 'DeepSeek B', baseUrl: 'https://api.deepseek.example/v1', apiKey: 'test-key', upstreamModel: 'deepseek-v4-pro', protocol: 'responses' });
   const hot = await fs.readFile(path.join(codex, 'config.toml'), 'utf8');
   if (!hot.includes('127.0.0.1')) throw Error('hot switch removed local takeover');
-  await call({ command: 'stopAndRestore' });
+  if (!hot.includes('model_provider = "subscription-lens-deepseek-b"') || !hot.includes('[model_providers.subscription-lens-deepseek-b]')) throw Error('hot switch is missing its active provider table: ' + hot);
+  if (/\[model_providers\.subscription-lens-deepseek-b\][\s\S]*?name\s*=\s*"OpenAI"/.test(hot)) throw Error('hot switch unexpectedly enables remote compaction: ' + hot);
+  await call({ command: 'activateCodexOfficial' });
   const restored = await fs.readFile(path.join(codex, 'config.toml'), 'utf8');
-  if (restored.includes('127.0.0.1')) throw Error('stop did not restore non-proxy config');
-  console.log('embedded CC Switch takeover / hot switch / restore: passed');
+  if (restored.includes('127.0.0.1')) throw Error('official switch left the local proxy active');
+  if (restored.includes('model_catalog_json') || restored.includes('subscription-lens-')) throw Error('official switch did not restore the official model catalog: ' + restored);
+  if (/model_provider\s*=/.test(restored) && !/model_provider\s*=\s*"openai"/.test(restored)) throw Error('official switch did not select OpenAI: ' + restored);
+  console.log('embedded CC Switch takeover / hot switch / official restore: passed');
   child.stdin.end(JSON.stringify({ command: 'shutdown' }) + '\n');
 } catch (error) {
   console.error(error.stack); console.error(stderr); child.kill(); process.exitCode = 1;
