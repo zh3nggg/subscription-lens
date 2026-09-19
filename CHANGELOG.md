@@ -1,3 +1,13 @@
+# 2.1.0-beta.1
+
+- 供应商新增/编辑流程改用 CC Switch 的 Codex 预设体系：构建时从固定版本的 `codexProviderPresets.ts` 自动同步 85 个预设，并采用相同的可搜索、可排序预设网格、模板自动填充和模型目录初始化逻辑。DeepSeek 会直接带出当前 CC Switch 预设中的 V4 Flash / V4 Pro。
+- API Key、模板选择和模型映射现在在界面重新渲染后保持草稿状态；新增隔离 Electron 烟测覆盖模板搜索、DeepSeek 自动填充、两条模型映射和密钥输入持久性。
+- 切回 OpenAI 后始终清理 Subscription Lens 管理的模型目录指令，避免前台继续只显示第三方映射模型，同时保留登录状态和其他 Codex 设置。
+- The provider editor now uses CC Switch's Codex preset system: 85 presets are generated from the pinned `codexProviderPresets.ts` at build time, with the same searchable and sortable preset grid, template filling, and catalog initialization behavior.
+
+- 修复切回 OpenAI 后仍残留 `cc-switch-model-catalog.json`、导致前台只显示第三方映射别名的问题。官方恢复现在始终执行一次范围严格的路由配置清理，保留登录状态和其他 Codex 设置。
+- Fixed a stranded `cc-switch-model-catalog.json` after switching back to OpenAI, which left the frontend showing only third-party mapped aliases. Official restore now always performs a narrowly scoped route cleanup while preserving authentication and all unrelated Codex settings.
+
 # 2.0.0
 
 - 正式集成嵌入式 CC Switch 路由，可在 Subscription Lens 内配置第三方 OpenAI 兼容供应商、API Key、模型目录和 Codex 兼容模型映射。

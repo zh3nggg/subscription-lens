@@ -59,6 +59,14 @@ function removeOwnedModelCatalog(text) {
   const owned = /^\s*model_catalog_json\s*=\s*["'](?:[^"']*\/)?cc-switch-model-catalog\.json["']\s*$/i;
   return lines.filter((line, index) => index >= firstTable || !owned.test(line)).join('\n');
 }
+function removeOwnedRouteConfig(text) {
+  let result = removeOwnedModelCatalog(text);
+  const ownedProvider = /^\s*model_provider\s*=\s*["'](?:subscription-lens-[^"']+|subscription_lens)["']\s*$/i;
+  const { lines, firstTable } = rootConfigLines(result);
+  result = lines.filter((line, index) => index >= firstTable || !ownedProvider.test(line)).join('\n');
+  result = result.replace(/(?:^|\n)\[model_providers\.(?:subscription-lens-[^\]\r\n]+|subscription_lens)\][\s\S]*?(?=\n\[|$)/gi, '');
+  return result.replace(/\n{3,}/g, '\n\n').trimEnd() + '\n';
+}
 
 function writeProviderConfig(text, provider) {
   const configId = provider.builtIn ? 'openai' : provider.id;
@@ -165,6 +173,20 @@ class ProviderManager {
     const imported = this.save({ id: isOfficial ? 'openai-official' : providerId || 'openai-official', name: isOfficial ? 'OpenAI Official' : providerId || 'Imported Codex', baseUrl: baseUrl || builtin.baseUrl, model, envKey: 'OPENAI_API_KEY', protocol: 'responses' });
     this.activeId = imported.id; this.store.set('activeProviderId', this.activeId);
     return imported;
+  }
+  async cleanupOfficialRoute() {
+    const home = this.getCodexHome(); await fsp.mkdir(home, { recursive: true });
+    const configPath = path.join(home, 'config.toml'); let current = '';
+    try { current = await fsp.readFile(configPath, 'utf8'); } catch { return { configPath, changed: false, backup: null }; }
+    const next = removeOwnedRouteConfig(current);
+    if (next === current) return { configPath, changed: false, backup: null };
+    await fsp.mkdir(this.backupDir, { recursive: true });
+    const backup = path.join(this.backupDir, `${new Date().toISOString().replace(/[:.]/g, '-')}-${crypto.randomBytes(3).toString('hex')}.toml`);
+    await fsp.writeFile(backup, current, 'utf8');
+    const tmp = `${configPath}.${process.pid}.tmp`;
+    await fsp.writeFile(tmp, next, 'utf8'); await fsp.rename(tmp, configPath);
+    this.activeId = 'openai-official'; this.store.set('activeProviderId', this.activeId); await this.rotateBackups();
+    return { configPath, changed: true, backup };
   }
   async activate(id) {
     const provider = this.get(id); if (provider.protocol === 'chat') throw new Error('Chat Completions 供应商需要兼容适配，当前版本不能直接启用'); const home = this.getCodexHome(); await fsp.mkdir(home, { recursive: true });

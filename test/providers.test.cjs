@@ -86,6 +86,24 @@ test('official activation removes a stale embedded route without touching auth',
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });
 
+test('official route cleanup removes a stranded Lens catalog without changing user config', async () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sublens-official-cleanup-'));
+  try {
+    const store = new Store(dir); const home = path.join(dir, '.codex'); fs.mkdirSync(home);
+    const original = 'notify = ["turn-ended"]\nmodel_catalog_json = "cc-switch-model-catalog.json"\n\n[desktop]\nfollowUpQueueMode = "queue"\n';
+    fs.writeFileSync(path.join(home, 'config.toml'), original, 'utf8');
+    const manager = new ProviderManager({ store, getCodexHome: () => home, dataDir: dir });
+    const result = await manager.cleanupOfficialRoute();
+    const config = fs.readFileSync(path.join(home, 'config.toml'), 'utf8');
+    assert.equal(result.changed, true);
+    assert.doesNotMatch(config, /cc-switch-model-catalog/);
+    assert.match(config, /notify = \["turn-ended"\]/);
+    assert.match(config, /followUpQueueMode = "queue"/);
+    assert.ok(result.backup && fs.existsSync(result.backup));
+    store.close();
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});
+
 test('official Codex login is not probed as an API-key models endpoint', async () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sublens-provider-official-'));
   try {

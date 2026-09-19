@@ -2567,5 +2567,41 @@ window.LensLocales = {
   "保留 Codex 前台的兼容 GPT 模型；路由会在请求发送前替换为所选上游模型。": [
     "Keep a compatible GPT model in the Codex UI; routing replaces it with the selected upstream model before the request is sent.",
     "Behoud een compatibel GPT-model in de Codex-interface; routing vervangt dit vóór verzending door het gekozen upstreammodel."
+  ],
+  "官方": [
+    "Official",
+    "Officieel"
+  ],
+  "国内官方": [
+    "Domestic official",
+    "Binnenlands officieel"
+  ],
+  "聚合服务": [
+    "Aggregator",
+    "Aggregator"
+  ],
+  "第三方服务": [
+    "Third-party service",
+    "Externe dienst"
+  ],
+  "其他": [
+    "Other",
+    "Overig"
+  ],
+  "搜索供应商模板": [
+    "Search provider presets",
+    "Zoek providerpresets"
+  ],
+  "按名称排序": [
+    "Sort by name",
+    "Sorteren op naam"
+  ],
+  "没有匹配的供应商模板": [
+    "No matching provider presets",
+    "Geen overeenkomende providerpresets"
+  ],
+  "选择预设后可继续调整下方字段。": [
+    "Choose a preset, then adjust the fields below if needed.",
+    "Kies een preset en pas daarna zo nodig de velden hieronder aan."
   ]
 };

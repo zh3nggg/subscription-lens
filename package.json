@@ -1,6 +1,6 @@
 {
   "name": "subscription-lens",
-  "version": "2.0.0",
+  "version": "2.1.0-beta.1",
   "description": "Local Codex subscription usage monitor",
   "main": "src/main.cjs",
   "author": "Subscription Lens contributors",
@@ -12,10 +12,12 @@
     "build:router": "node scripts/build-router-sidecar.cjs",
     "test": "node --test test/*.test.cjs",
     "dist": "electron-builder --win nsis zip --x64",
-    "prestart": "node scripts/build-locales.cjs",
-    "pretest": "node scripts/build-locales.cjs",
+    "prestart": "node scripts/sync-cc-switch-codex-presets.cjs && node scripts/build-locales.cjs",
+    "pretest": "node scripts/sync-cc-switch-codex-presets.cjs && node scripts/build-locales.cjs",
     "verify:router-sidecar": "node scripts/verify-router-sidecar.cjs",
-    "predist": "npm run verify:cc-switch-runtime && npm run build:router && npm run verify:router-sidecar && node scripts/build-locales.cjs"
+    "smoke:providers": "node scripts/smoke-provider-editor.cjs",
+    "predist": "npm run verify:cc-switch-runtime && npm run sync:cc-switch-ui && npm run build:router && npm run verify:router-sidecar && node scripts/build-locales.cjs",
+    "sync:cc-switch-ui": "node scripts/sync-cc-switch-codex-presets.cjs"
   },
   "devDependencies": {
     "electron": "44.4.0",

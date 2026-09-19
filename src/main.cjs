@@ -32,10 +32,11 @@ async function restoreEmbeddedRoute(){
   await sidecar.start();
   await sidecar.request({command:'activateCodexOfficial'},60_000);
   await sidecar.stopAndRestore();
-  // Upgrades from pre-beta.4 can lack the Lens activity flag or CCS backup.
-  // If the owned route remains after native restore, repair config.toml only.
-  // ProviderManager.activate never reads or rewrites auth.json.
-  if(await hasEmbeddedRouteConfig())await service.providers.activate('openai-official');
+  // CCS restores the provider transaction. Always remove Lens-owned catalog
+  // directives afterwards because an older or incomplete CCS snapshot can leave
+  // cc-switch-model-catalog.json active even after the provider is official.
+  // This cleanup is scoped to Lens-owned keys/blocks and never touches auth.json.
+  await service.providers.cleanupOfficialRoute();
   service.store.set('ccSwitchRoutingActive',false);
   service.store.set('ccSwitchRoutingRestoreBackup',null);
   return true;
