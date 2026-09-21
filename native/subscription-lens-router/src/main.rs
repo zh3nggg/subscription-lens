@@ -8,6 +8,7 @@ use cc_switch_router_core::{
     app_config::AppType,
     database::Database,
     provider::Provider,
+    settings,
     services::ProviderService,
     store::AppState,
 };
@@ -147,6 +148,18 @@ async fn activate_official(state: &AppState) -> Result<Value, String> {
 
 #[tokio::main]
 async fn main() {
+    // Keep Codex's native ChatGPT login while a third-party route is active.
+    // Upstream CC Switch defaults this compatibility flag to false, which
+    // deletes auth.json during the normal switch that precedes takeover and
+    // forces an unnecessary browser login when returning to OpenAI Official.
+    let mut router_settings = settings::get_settings();
+    if !router_settings.preserve_codex_official_auth_on_switch {
+        router_settings.preserve_codex_official_auth_on_switch = true;
+        if let Err(error) = settings::update_settings(router_settings) {
+            println!("{}", serde_json::to_string(&fail(error)).unwrap());
+            return;
+        }
+    }
     let database = match Database::init() {
         Ok(database) => Arc::new(database),
         Err(error) => { println!("{}", serde_json::to_string(&fail(error)).unwrap()); return; }

@@ -1,0 +1,11 @@
+[package]
+name = "subscription-lens-tauri"
+version = "3.0.0-beta.1"
+edition = "2021"
+publish = false
+
+[dependencies]
+cc-switch = { package = "cc-switch", path = "../cc-switch-runtime/src-tauri", features = ["sublens-host"] }
+
+[build-dependencies]
+tauri-build = "2.4.0"

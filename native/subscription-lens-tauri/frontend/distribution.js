@@ -1,0 +1,51 @@
+'use strict';
+// Drill-down is local presentation state: it never changes the overview's totals.
+const distributionState={metric:'tokens',provider:null};
+const distributionColors=['#0f766e','#2563eb','#d97706','#c026d3','#7c3aed','#16a34a','#dc2626','#b45309','#0891b2','#4f46e5','#db2777','#65a30d'];
+const overviewBeforeDistribution=overview;
+overview=function(){const html=overviewBeforeDistribution();if(state.multi||(!state.data.settings.roots.length&&!state.data.stats.records))return html;const d=state.data;
+ const modelGroups=(d.modelProviders||[]).map(g=>({key:g.key,provider:g.provider,model:g.model,tokens:g.tokens,requests:g.events,unpriced:g.unpriced,estimated:g.usd,reported:0}));
+ const byProvider=new Map();for(const model of modelGroups){const group=byProvider.get(model.provider)||{key:model.provider,provider:model.provider,tokens:0,requests:0,unpriced:0,estimated:0,reported:0};group.tokens+=Number(model.tokens||0);group.requests+=Number(model.requests||0);group.unpriced+=Number(model.unpriced||0);group.estimated+=Number(model.estimated||0);group.reported+=Number(model.reported||0);byProvider.set(model.provider,group);}
+ const m={groups:[...byProvider.values()],modelGroups};
+ return html.replace('<div class="overview-footer">',monitorDistribution(m)+'<div class="overview-footer">');
+};
+function monitorDistribution(m){
+ const view=distributionState;if(view.provider&&!m.groups.some(g=>g.key===view.provider))view.provider=null;const scope=view.provider,mode=view.metric;
+ const groups=scope?m.modelGroups.filter(g=>g.provider===scope):m.groups;
+ const costOf=g=>Number(g.estimated||0)+Number(g.reported||0),value=g=>mode==='tokens'?Number(g.tokens):costOf(g);
+ const sorted=[...groups].sort((a,b)=>value(b)-value(a));
+ const total=sorted.reduce((n,g)=>n+value(g),0),unpriced=groups.reduce((n,g)=>n+g.unpriced,0);
+ const requests=groups.reduce((n,g)=>n+Number(g.requests||0),0),modelCount=scope?groups.length:m.modelGroups.length,providerCount=m.groups.length;
+ const known=groups.reduce((n,g)=>n+g.requests-g.unpriced,0);
+ const pricedTokensOf=g=>Number(g.pricedTokens??(g.unpriced?0:g.tokens)),pricedTokens=groups.reduce((n,g)=>n+pricedTokensOf(g),0),averageCost=pricedTokens?groups.reduce((n,g)=>n+costOf(g),0)*1000000/pricedTokens:null;
+ const perMillion=g=>{const n=pricedTokensOf(g);return n?costOf(g)*1000000/n:null;};
+ const colorMap=new Map(sorted.map((g,i)=>[(scope?g.model:g.key),distributionColors[i%distributionColors.length]])),color=g=>colorMap.get(scope?g.model:g.key)||distributionColors[0];
+ const format=n=>mode==='tokens'?fmt.format(n):money(n);
+ let angle=-Math.PI/2;
+ const point=a=>[100+78*Math.cos(a),100+78*Math.sin(a)];
+ const segments=sorted.map((g,i)=>{
+  const n=value(g);if(n<=0||total<=0)return '';
+  const start=angle,delta=n/total*Math.PI*2;angle+=delta;const a=point(start),b=point(angle);
+  // A complete circle needs two arcs; a single SVG arc would have equal endpoints.
+  const shape=delta>=Math.PI*2-1e-10?'M100 22 A78 78 0 1 1 100 178 A78 78 0 1 1 100 22 Z':`M100 100 L${a.join(' ')} A78 78 0 ${delta>Math.PI?1:0} 1 ${b.join(' ')} Z`;
+  const name=scope?g.model:g.key,label=`${name}: ${format(n)} (${decimal(n/total*100,1)}%)`;
+  return `<path d="${shape}" fill="${color(g)}" tabindex="0" role="button" data-distribution-item="${i}" data-distribution-highlight="${i}" aria-label="${esc(label)}"><title>${esc(label)}</title></path>`;
+ }).join('');
+ // Names are kept in a render-local list, never put into executable attributes.
+ distributionState.items=sorted.map(g=>({provider:g.provider,model:g.model,key:g.key}));
+ return `<section class="panel padded distribution-panel"><div class="row between"><h2>${t(scope?'模型用量':'供应商用量')}</h2><div class="segments" aria-label="${t('统计指标')}"><button data-distribution-metric="tokens" aria-pressed="${mode==='tokens'}" class="${mode==='tokens'?'active':''}">Tokens</button><button data-distribution-metric="cost" aria-pressed="${mode==='cost'}" class="${mode==='cost'?'active':''}">${t('费用')}</button></div></div>
+ <div class="distribution-breadcrumb"><button class="text-button" data-distribution-back ${scope?'':'disabled'}>${t('全部供应商')}</button>${scope?`<span> / ${esc(scope)}</span>`:''}</div>
+ <div class="distribution-body"><div class="distribution-visual"><svg viewBox="0 0 200 200" aria-label="${t(scope?'模型用量':'供应商用量')}">${total?segments:'<circle cx="100" cy="100" r="78" fill="var(--line)"/>'}<circle cx="100" cy="100" r="53" fill="var(--card)" pointer-events="none"/></svg><div class="distribution-center"><strong>${mode==='tokens'?compact(total):money(known?total:null)}</strong><span>${mode==='tokens'?'Tokens':t('已计价费用')}</span></div></div>
+ <div class="distribution-legend">${sorted.length?sorted.map((g,i)=>`<button class="distribution-row" data-distribution-item="${i}" data-distribution-highlight="${i}"><span class="distribution-dot" style="background:${color(g)}"></span><span class="distribution-name">${esc(scope?g.model:g.key)}</span><span class="distribution-values"><strong>${mode==='cost'&&g.unpriced===g.requests?'—':format(value(g))}</strong><small>${total&&!(mode==='cost'&&g.unpriced===g.requests)?decimal(value(g)/total*100,1)+'%':'—'}${perMillion(g)!==null?' · '+money(perMillion(g))+'/1M':''}</small></span></button>`).join(''):`<p class="caption">${t('暂无记录')}</p>`}</div></div>
+ <div class="distribution-insights" aria-label="${t('分布摘要')}"><div><span>${t(scope?'模型':'供应商')}</span><strong>${fmt.format(scope?modelCount:providerCount)}</strong></div><div><span>${t('请求数')}</span><strong>${fmt.format(requests)}</strong></div><div><span>${t('已计价 Tokens')}</span><strong>${pricedTokens?compact(pricedTokens):'—'}</strong></div></div><p class="distribution-guidance">${t(scope?'点击模型查看记录':'点击供应商查看模型用量')}</p><div class="caption distribution-cost-summary"><span>${t('平均成本 / 1M Tokens')}：<strong>${averageCost===null?'—':money(averageCost)}</strong></span><span>${mode==='cost'?t('估算与来源报告费用合计')+' · ':''}${t('已计价 Tokens')} ${pricedTokens?fmt.format(pricedTokens):'—'}${mode==='cost'?` · ${t('未计价')} ${fmt.format(unpriced)}`:''}</span></div></section>`;
+}
+function distributionAction(target){
+ if(target.dataset.distributionMetric){distributionState.metric=target.dataset.distributionMetric;render();}
+ else if(target.dataset.distributionBack!==undefined){distributionState.provider=null;render();}
+ else if(target.dataset.distributionItem!==undefined){const item=distributionState.items[Number(target.dataset.distributionItem)];if(!item)return;if(distributionState.provider){state.provider=state.multi?item.provider:'';state.model=item.model;state.view='records';state.page='activity';state.offset=0;load();}else{distributionState.provider=item.key;render();}}
+}
+document.addEventListener('click',event=>{const target=event.target.closest('[data-distribution-item],[data-distribution-metric],[data-distribution-back]');if(!target)return;event.preventDefault();event.stopImmediatePropagation();distributionAction(target);},true);
+document.addEventListener('keydown',event=>{if(!['Enter',' '].includes(event.key)||event.target.tagName.toLowerCase()!=='path'||event.target.dataset.distributionItem===undefined)return;event.preventDefault();distributionAction(event.target);});
+document.addEventListener('change',event=>{if(['monitor-source','monitor-provider'].includes(event.target.id))distributionState.provider=null;},true);
+for(const type of ['pointerover','focusin'])document.addEventListener(type,event=>{const target=event.target.closest('[data-distribution-highlight]');if(!target)return;const index=target.dataset.distributionHighlight;document.querySelectorAll('[data-distribution-highlight]').forEach(node=>node.classList.toggle('is-highlighted',node.dataset.distributionHighlight===index));},true);
+for(const type of ['pointerout','focusout'])document.addEventListener(type,event=>{const target=event.target.closest('[data-distribution-highlight]');if(!target||event.relatedTarget?.closest?.('[data-distribution-highlight]')?.dataset.distributionHighlight===target.dataset.distributionHighlight)return;document.querySelectorAll('[data-distribution-highlight]').forEach(node=>node.classList.remove('is-highlighted'));},true);

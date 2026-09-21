@@ -1,0 +1,338 @@
+const $ = (id) => document.getElementById(id);
+
+const escapeHtml = (value) => String(value ?? "")
+  .replaceAll("&", "&amp;")
+  .replaceAll("<", "&lt;")
+  .replaceAll(">", "&gt;")
+  .replaceAll('"', "&quot;")
+  .replaceAll("'", "&#039;");
+
+// The static renderer intentionally uses Tauri's built-in bridge so this
+// migration shell has no npm/runtime dependency. The production renderer will
+// replace this tiny adapter with the typed CCS API modules.
+const invoke = (command, args) => {
+  const bridge = window.__TAURI_INTERNALS__;
+  if (!bridge?.invoke) throw new Error("Tauri bridge unavailable");
+  return bridge.invoke(command, args);
+};
+let providerCache = {};
+let editingProviderId = null;
+
+async function call(command, args) {
+  return invoke(command, args);
+}
+
+function renderProviders(providers, current) {
+  providerCache = providers || {};
+  const entries = Object.entries(providers || {});
+  $("provider-count").textContent = String(entries.length);
+  $("providers").innerHTML = entries.length
+    ? entries.map(([id, provider]) => {
+        const name = provider.name || id;
+        const active = id === current;
+        return `<div class="provider ${active ? "active" : ""}"><div><div class="provider-name">${escapeHtml(name)}</div><div class="provider-meta">${escapeHtml(provider.model || "未设置模型")}</div></div><div class="provider-actions"><button class="button secondary test-provider" data-provider-id="${escapeHtml(id)}">测试地址</button><button class="button secondary edit-provider" data-provider-id="${escapeHtml(id)}">编辑</button><button class="button secondary inspect-provider" data-provider-id="${escapeHtml(id)}">查看配置</button>${active ? '<span class="pill">当前</span>' : `<button class="button secondary switch-provider" data-provider-id="${escapeHtml(id)}">切换</button>`}${provider.is_builtin || provider.builtIn ? "" : `<button class="button secondary delete-provider" data-provider-id="${escapeHtml(id)}">删除</button>`}</div></div>`;
+      }).join("")
+    : '<div class="empty">尚未配置供应商</div>';
+}
+
+function inspectProvider(id) {
+  const provider = providerCache[id];
+  const inspector = $("provider-inspector");
+  if (!provider) return;
+  const safeConfig = structuredClone(provider.settingsConfig || {});
+  if (safeConfig.auth && typeof safeConfig.auth === "object") {
+    safeConfig.auth = Object.fromEntries(Object.keys(safeConfig.auth).map((key) => [key, "[已隐藏]"]));
+  }
+  $("provider-config").textContent = JSON.stringify(safeConfig, null, 2);
+  inspector.hidden = false;
+  inspector.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+function quoteToml(value) {
+  return JSON.stringify(String(value).trim());
+}
+
+function parseTomlString(config, key) {
+  const match = String(config || "").match(new RegExp(`^${key}\\s*=\\s*"([^"]*)"`, "m"));
+  return match?.[1] || "";
+}
+
+function openProviderEditor(id = null) {
+  editingProviderId = id;
+  const editor = $("provider-editor");
+  const title = $("provider-editor-title");
+  const form = $("provider-form");
+  form.reset();
+  const provider = id ? providerCache[id] : null;
+  const settings = provider?.settingsConfig || {};
+  const config = settings.config || "";
+  form.elements.name.value = provider?.name || "";
+  form.elements.baseUrl.value = parseTomlString(config, "base_url");
+  form.elements.model.value = parseTomlString(config, "model");
+  form.elements.apiKey.value = "";
+  form.elements.apiKey.placeholder = provider ? "输入新 API Key 以替换" : "输入 API Key";
+  form.elements.modelCatalog.value = settings.modelCatalog?.models?.length
+    ? JSON.stringify(settings.modelCatalog.models, null, 2)
+    : "";
+  title.textContent = provider ? `编辑 ${provider.name}` : "新增 OpenAI 兼容供应商";
+  $("provider-submit").textContent = provider ? "保存修改" : "保存供应商";
+  editor.hidden = false;
+  editor.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+async function saveProvider(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const data = new FormData(form);
+  const name = String(data.get("name") || "").trim();
+  const baseUrl = String(data.get("baseUrl") || "").trim().replace(/\/$/, "");
+  const model = String(data.get("model") || "").trim();
+  const apiKey = String(data.get("apiKey") || "").trim();
+  const existing = editingProviderId ? providerCache[editingProviderId] : null;
+  if (!name || !baseUrl || !model || !apiKey) {
+    $("runtime-status").textContent = "请填写 API Key；编辑时也必须重新输入替换密钥";
+    return;
+  }
+  const config = `model_provider = "custom"\nmodel = ${quoteToml(model)}\nmodel_reasoning_effort = "high"\ndisable_response_storage = true\n\n[model_providers.custom]\nname = ${quoteToml(name)}\nbase_url = ${quoteToml(baseUrl)}\nwire_api = "responses"\nrequires_openai_auth = true`;
+  let modelCatalog;
+  const catalogText = String(data.get("modelCatalog") || "").trim();
+  if (catalogText) {
+    try {
+      const parsed = JSON.parse(catalogText);
+      if (!Array.isArray(parsed)) throw new Error("模型目录必须是数组");
+      modelCatalog = { models: parsed.map((item) => ({
+        model: String(item.model || "").trim(),
+        ...(item.displayName ? { displayName: String(item.displayName).trim() } : {}),
+        ...(item.contextWindow ? { contextWindow: Number(item.contextWindow) } : {}),
+        ...(Array.isArray(item.reasoningLevels) ? { reasoningLevels: item.reasoningLevels.map(String) } : {}),
+      })).filter((item) => item.model) };
+    } catch (error) {
+      $("runtime-status").textContent = `模型目录 JSON 无效：${String(error)}`;
+      return;
+    }
+  }
+  const provider = {
+    id: editingProviderId || `sublens-${crypto.randomUUID()}`,
+    name,
+    settingsConfig: { auth: { OPENAI_API_KEY: apiKey }, config, ...(modelCatalog ? { modelCatalog } : existing?.settingsConfig?.modelCatalog ? { modelCatalog: existing.settingsConfig.modelCatalog } : {}) },
+    category: "third_party",
+    icon: "router",
+    iconColor: "#596eea",
+  };
+  const submit = form.querySelector("button[type=submit]");
+  submit.disabled = true;
+  submit.textContent = "保存中…";
+  try {
+    if (editingProviderId) {
+      await call("update_provider", { app: "codex", provider, originalId: editingProviderId });
+    } else {
+      await call("add_provider", { app: "codex", provider, addToLive: false });
+    }
+    form.reset();
+    $("provider-editor").hidden = true;
+    $("runtime-status").textContent = editingProviderId ? "供应商已更新" : "供应商已保存到 CCS 数据库";
+    editingProviderId = null;
+    await load();
+  } catch (error) {
+    $("runtime-status").textContent = `保存供应商失败：${String(error)}`;
+  } finally {
+    submit.disabled = false;
+    submit.textContent = "保存供应商";
+  }
+}
+
+function renderAccounts(accounts) {
+  const entries = Array.isArray(accounts) ? accounts : [];
+  $("auth-accounts").innerHTML = entries.length
+    ? entries.map((account) => `<div class="account"><div><div class="provider-name">${escapeHtml(account.login || account.email || account.account_id || account.id || "Codex 账号")}</div><div class="provider-meta">${account.is_default ? "默认账号" : "已托管账号"}</div></div><div class="account-actions">${account.is_default ? '<span class="pill">默认</span>' : `<button class="button secondary account-default" data-account-id="${escapeHtml(account.id)}">设为默认</button>`}<button class="button secondary account-remove" data-account-id="${escapeHtml(account.id)}">移除</button></div></div>`).join("")
+    : '<div class="empty">尚未托管 Codex 账号</div>';
+}
+
+async function load() {
+  $("runtime-status").textContent = "正在读取 CCS 原生运行时…";
+  try {
+    const [providers, current, auth, accounts] = await Promise.all([
+      call("get_providers", { app: "codex" }),
+      call("get_current_provider", { app: "codex" }),
+      call("auth_get_status", { authProvider: "codex_oauth" }),
+      call("auth_list_accounts", { authProvider: "codex_oauth" }),
+    ]);
+    $("current-provider").textContent = current || "未选择";
+    $("auth-status").textContent = auth?.authenticated ? "已认证" : "未认证";
+    renderAccounts(accounts);
+    renderProviders(providers, current);
+    $("runtime-status").textContent = "CCS 原生运行时已连接";
+  } catch (error) {
+    $("runtime-status").textContent = "原生运行时连接失败";
+    $("providers").innerHTML = `<div class="empty">${String(error)}</div>`;
+  }
+}
+
+async function refreshAuth() {
+  try {
+    const [status, accounts] = await Promise.all([
+      call("auth_get_status", { authProvider: "codex_oauth" }),
+      call("auth_list_accounts", { authProvider: "codex_oauth" }),
+    ]);
+    $("auth-status").textContent = status?.authenticated ? "已认证" : "未认证";
+    renderAccounts(accounts);
+    $("runtime-status").textContent = "账号状态已刷新";
+  } catch (error) {
+    $("runtime-status").textContent = `读取账号失败：${String(error)}`;
+  }
+}
+
+async function setDefaultAccount(id) {
+  try {
+    await call("auth_set_default_account", { authProvider: "codex_oauth", accountId: id });
+    await refreshAuth();
+    $("runtime-status").textContent = "默认 Codex 账号已更新";
+  } catch (error) {
+    $("runtime-status").textContent = `设置默认账号失败：${String(error)}`;
+  }
+}
+
+async function removeAccount(id) {
+  if (!window.confirm("移除这个托管账号？这不会删除 Codex 项目或用量数据。")) return;
+  try {
+    await call("auth_remove_account", { authProvider: "codex_oauth", accountId: id });
+    await refreshAuth();
+    $("runtime-status").textContent = "托管账号已移除";
+  } catch (error) {
+    $("runtime-status").textContent = `移除账号失败：${String(error)}`;
+  }
+}
+
+async function loginAuth() {
+  const button = $("login-auth");
+  const panel = $("auth-login");
+  button.disabled = true;
+  button.textContent = "准备登录…";
+  try {
+    const device = await call("auth_start_login", {
+      authProvider: "codex_oauth",
+      githubDomain: null,
+      targetAccountId: null,
+    });
+    panel.hidden = false;
+    panel.innerHTML = `请打开 <a href="${escapeHtml(device.verification_uri)}" target="_blank" rel="noreferrer">${escapeHtml(device.verification_uri)}</a> 并完成授权；验证码：<strong>${escapeHtml(device.user_code)}</strong>`;
+    button.textContent = "等待授权…";
+    const interval = Math.max(Number(device.interval || 5), 2) * 1000;
+    const deadline = Date.now() + Number(device.expires_in || 600) * 1000;
+    while (Date.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, interval));
+      const account = await call("auth_poll_for_account", {
+        authProvider: "codex_oauth",
+        deviceCode: device.device_code,
+        githubDomain: null,
+      });
+      if (account) {
+        panel.textContent = `已完成授权：${account.login || account.id}`;
+        await refreshAuth();
+        await load();
+        return;
+      }
+    }
+    throw new Error("授权已超时，请重新开始");
+  } catch (error) {
+    panel.hidden = false;
+    panel.textContent = `登录失败：${String(error)}`;
+  } finally {
+    button.disabled = false;
+    button.textContent = "登录 Codex 账号";
+  }
+}
+
+async function logoutAuth() {
+  if (!window.confirm("退出托管登录后，OpenAI Official 需要重新授权。确定继续吗？")) return;
+  try {
+    await call("auth_logout", { authProvider: "codex_oauth" });
+    await refreshAuth();
+    $("runtime-status").textContent = "已退出 CCS 托管登录";
+  } catch (error) {
+    $("runtime-status").textContent = `退出失败：${String(error)}`;
+  }
+}
+
+async function switchProvider(id, button) {
+  button.disabled = true;
+  button.textContent = "切换中…";
+  try {
+    const result = await call("switch_provider", { id, app: "codex" });
+    const warnings = result?.warnings || [];
+    $("runtime-status").textContent = warnings.length
+      ? `已切换，${warnings[0]}`
+      : "供应商已切换，下一条 Codex 请求将使用新路由";
+    await load();
+  } catch (error) {
+    $("runtime-status").textContent = `切换失败：${String(error)}`;
+    button.disabled = false;
+    button.textContent = "切换";
+  }
+}
+
+async function deleteProvider(id, button) {
+  const provider = providerCache[id];
+  if (!provider || !window.confirm(`删除供应商“${provider.name || id}”？`)) return;
+  button.disabled = true;
+  try {
+    await call("delete_provider", { app: "codex", id });
+    $("runtime-status").textContent = "供应商已从 CCS 数据库删除";
+    await load();
+  } catch (error) {
+    $("runtime-status").textContent = `删除失败：${String(error)}`;
+    button.disabled = false;
+  }
+}
+
+async function testProvider(id, button) {
+  const provider = providerCache[id];
+  const baseUrl = parseTomlString(provider?.settingsConfig?.config, "base_url");
+  if (!baseUrl) {
+    $("runtime-status").textContent = "该供应商没有可测试的 base_url";
+    return;
+  }
+  button.disabled = true;
+  button.textContent = "测试中…";
+  try {
+    const result = await call("test_api_endpoints", { urls: [baseUrl], timeoutSecs: 10 });
+    const latency = result?.[0]?.latencyMs ?? result?.[0]?.latency_ms;
+    $("runtime-status").textContent = latency == null
+      ? "地址测试完成"
+      : `地址可达，延迟 ${latency} ms`;
+  } catch (error) {
+    $("runtime-status").textContent = `地址测试失败：${String(error)}`;
+  } finally {
+    button.disabled = false;
+    button.textContent = "测试地址";
+  }
+}
+
+$("refresh").addEventListener("click", load);
+$("load-providers").addEventListener("click", load);
+$("refresh-auth").addEventListener("click", refreshAuth);
+$("logout-auth").addEventListener("click", logoutAuth);
+$("login-auth").addEventListener("click", loginAuth);
+$("auth-accounts").addEventListener("click", (event) => {
+  const defaultButton = event.target.closest(".account-default");
+  if (defaultButton) return setDefaultAccount(defaultButton.dataset.accountId);
+  const removeButton = event.target.closest(".account-remove");
+  if (removeButton) return removeAccount(removeButton.dataset.accountId);
+});
+$("close-inspector").addEventListener("click", () => { $("provider-inspector").hidden = true; });
+$("new-provider").addEventListener("click", () => openProviderEditor());
+$("close-provider-editor").addEventListener("click", () => { $("provider-editor").hidden = true; });
+$("provider-form").addEventListener("submit", saveProvider);
+$("providers").addEventListener("click", (event) => {
+  const button = event.target.closest(".switch-provider");
+  if (button) switchProvider(button.dataset.providerId, button);
+  const inspect = event.target.closest(".inspect-provider");
+  if (inspect) inspectProvider(inspect.dataset.providerId);
+  const edit = event.target.closest(".edit-provider");
+  if (edit) openProviderEditor(edit.dataset.providerId);
+  const remove = event.target.closest(".delete-provider");
+  if (remove) deleteProvider(remove.dataset.providerId, remove);
+  const test = event.target.closest(".test-provider");
+  if (test) testProvider(test.dataset.providerId, test);
+});
+load();

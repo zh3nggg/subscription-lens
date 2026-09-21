@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Subscription Lens</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>.provider-actions,.auth-actions{display:flex;align-items:center;gap:10px}.switch-provider{padding:7px 12px}.auth-card{padding:24px;margin-bottom:18px}.auth-accounts{display:grid;gap:10px}.account{border:1px solid #edf0f5;border-radius:12px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center}</style>
+    <style>.provider-actions,.auth-actions,.account-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.switch-provider,.account-actions .button{padding:7px 12px}.auth-card{padding:24px;margin-bottom:18px}.auth-accounts{display:grid;gap:10px}.account{border:1px solid #edf0f5;border-radius:12px;padding:14px 16px;display:flex;justify-content:space-between;align-items:center}.auth-login{margin:0 0 16px;padding:14px 16px;border:1px solid #dce4ff;border-radius:12px;background:#f7f9ff;color:#4d5f9e}.auth-login a{color:#5069d8;font-weight:600}</style>
+    <style>.inspector-head,.editor-head{display:flex;align-items:center;justify-content:space-between}.provider-inspector{margin-top:18px;padding-top:18px;border-top:1px solid #edf0f5}.provider-inspector pre{margin:12px 0 0;padding:16px;overflow:auto;border-radius:10px;background:#111827;color:#d7e0f5;font:12px/1.6 ui-monospace,SFMono-Regular,Consolas,monospace;max-height:280px}.provider-editor{margin-bottom:18px;padding:18px;border:1px solid #dce4ff;border-radius:12px;background:#f8f9ff}.provider-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.provider-form label{display:grid;gap:7px;color:#687386;font-size:12px}.provider-form input,.provider-form textarea{border:1px solid #dce1eb;border-radius:9px;padding:11px 12px;font:inherit;color:#172033;background:#fff}.provider-form textarea{resize:vertical;min-height:120px;font:12px/1.5 ui-monospace,SFMono-Regular,Consolas,monospace}.provider-form button{justify-self:start}.catalog-label{grid-column:1/-1}.model-field{display:flex;gap:8px}.model-field input{flex:1}.model-field button{white-space:nowrap}.discovered-models{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px}.model-chip{border:1px solid #dce1eb;border-radius:999px;padding:7px 10px;background:#fff;color:#4c5d8d;cursor:pointer;font-size:12px}</style>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="brand"><span class="brand-mark">◒</span><span>Subscription Lens</span></div>
+      <nav>
+        <button class="nav-item active">总览</button>
+        <button class="nav-item">路由</button>
+        <button class="nav-item">用量</button>
+        <button class="nav-item">价格</button>
+        <button class="nav-item">设置</button>
+      </nav>
+      <div class="runtime-badge"><span class="dot"></span><span>CCS 原生运行时</span></div>
+    </aside>
+    <main class="content">
+      <header class="topbar"><span>总览</span><span id="runtime-status">正在连接原生运行时…</span></header>
+      <section class="hero"><div><p class="eyebrow">SUBSCRIPTION LENS</p><h1>你的模型使用，一目了然。</h1><p class="muted">供应商认证、模型路由和用量统计由同一个本地运行时管理。</p></div><button id="refresh" class="button">刷新</button></section>
+      <section class="grid">
+        <article class="card stat"><span class="label">当前供应商</span><strong id="current-provider">读取中…</strong><span class="muted">来自 CCS ProviderService</span></article>
+        <article class="card stat"><span class="label">已配置供应商</span><strong id="provider-count">—</strong><span class="muted">切换与凭据由 CCS 管理</span></article>
+        <article class="card stat"><span class="label">认证状态</span><strong id="auth-status">读取中…</strong><span class="muted">支持托管 Codex OAuth</span></article>
+      </section>
+      <section class="card auth-card"><div class="section-head"><div><h2>Codex 账号</h2><p class="muted">账号由 CCS 原生运行时独立托管，切回 OpenAI Official 时复用这里的认证。</p></div><div class="auth-actions"><button id="login-auth" class="button">登录 Codex 账号</button><button id="refresh-auth" class="button secondary">刷新账号</button><button id="logout-auth" class="button secondary">退出托管登录</button></div></div><div id="auth-login" class="auth-login" hidden></div><div id="auth-accounts" class="auth-accounts"><div class="empty">正在读取账号…</div></div></section>
+      <section class="card provider-card"><div class="section-head"><div><h2>模型路由</h2><p class="muted">这是迁移阶段的原生运行时验证页。下一步接入完整 Sublens 统计视图。</p></div><div class="auth-actions"><button id="new-provider" class="button">新增供应商</button><button id="load-providers" class="button secondary">重新读取</button></div></div><div id="provider-editor" class="provider-editor" hidden><div class="editor-head"><div><h3 id="provider-editor-title">新增 OpenAI 兼容供应商</h3><p class="muted">保存结构与 CCS Codex 编辑器一致：auth + config + modelCatalog。</p></div><button id="close-provider-editor" class="button secondary">取消</button></div><form id="provider-form" class="provider-form"><label>供应商名称<input name="name" required placeholder="DeepSeek" /></label><label>API 地址<input name="baseUrl" required placeholder="https://api.example.com/v1" /></label><label>默认模型<input name="model" required placeholder="deepseek-v4-flash" /></label><label>API Key<input name="apiKey" type="password" required autocomplete="off" placeholder="输入 API Key" /></label><label class="catalog-label">模型目录 JSON（可选）<textarea name="modelCatalog" rows="6" placeholder='[{"model":"deepseek-v4-flash","displayName":"DeepSeek V4 Flash","contextWindow":1048576,"reasoningLevels":["low","high","max"]}]'></textarea><small>这里的 model 是 Codex 可识别的模型名；留空则保留原目录。</small></label><button id="provider-submit" class="button" type="submit">保存供应商</button></form></div><div id="providers" class="providers"><div class="empty">正在读取供应商…</div></div><div id="provider-inspector" class="provider-inspector" hidden><div class="inspector-head"><strong>CCS 保存的 settingsConfig（凭据已隐藏）</strong><button id="close-inspector" class="button secondary">关闭</button></div><pre id="provider-config"></pre></div></section>
+    </main>
+    <script type="module" src="app.js"></script>
+  </body>
+</html>

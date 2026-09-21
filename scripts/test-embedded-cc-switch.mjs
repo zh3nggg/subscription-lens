@@ -7,6 +7,16 @@ const root = await fs.mkdtemp(path.join(os.tmpdir(), 'sublens-ccs-integration-')
 const codex = path.join(root, 'codex');
 await fs.mkdir(codex, { recursive: true });
 await fs.writeFile(path.join(codex, 'config.toml'), 'model = "gpt-5.6-sol"\nmodel_provider = "openai"\n');
+const officialAuth = JSON.stringify({
+  auth_mode: 'chatgpt',
+  tokens: {
+    access_token: 'official-access-token',
+    refresh_token: 'official-refresh-token',
+    id_token: 'official-id-token',
+    account_id: 'official-account',
+  },
+});
+await fs.writeFile(path.join(codex, 'auth.json'), officialAuth);
 await fs.mkdir(path.join(root, '.cc-switch'), { recursive: true });
 await fs.writeFile(path.join(root, '.cc-switch', 'settings.json'), JSON.stringify({ codexConfigDir: codex }));
 
@@ -23,6 +33,8 @@ function call(command) { return new Promise((resolve, reject) => { pending.push(
 try {
   await call({ command: 'status' });
   await call({ command: 'activateCodexProvider', providerId: 'deepseek-a', name: 'DeepSeek A', baseUrl: 'https://api.deepseek.example/v1', apiKey: 'test-key', upstreamModel: 'deepseek-flash', modelMappings: [{ alias: 'gpt-5.6-sol', upstream: 'deepseek-flash' }, { alias: 'gpt-5.6-terra', upstream: 'deepseek-v4-pro' }], protocol: 'responses' });
+  const preservedDuringThirdParty = await fs.readFile(path.join(codex, 'auth.json'), 'utf8');
+  if (preservedDuringThirdParty !== officialAuth) throw Error('third-party activation changed or removed the native OpenAI login');
   const taken = await fs.readFile(path.join(codex, 'config.toml'), 'utf8');
   if (!taken.includes('127.0.0.1')) throw Error('takeover config missing local proxy: ' + taken);
   if (!taken.includes('model_provider = "subscription-lens-deepseek-a"') || !taken.includes('[model_providers.subscription-lens-deepseek-a]')) throw Error('takeover config is missing its active provider table: ' + taken);
@@ -36,6 +48,8 @@ try {
   if (!hot.includes('model_provider = "subscription-lens-deepseek-b"') || !hot.includes('[model_providers.subscription-lens-deepseek-b]')) throw Error('hot switch is missing its active provider table: ' + hot);
   if (/\[model_providers\.subscription-lens-deepseek-b\][\s\S]*?name\s*=\s*"OpenAI"/.test(hot)) throw Error('hot switch unexpectedly enables remote compaction: ' + hot);
   await call({ command: 'activateCodexOfficial' });
+  const preservedAfterOfficialRestore = await fs.readFile(path.join(codex, 'auth.json'), 'utf8');
+  if (preservedAfterOfficialRestore !== officialAuth) throw Error('official restore changed or removed the native OpenAI login');
   const restored = await fs.readFile(path.join(codex, 'config.toml'), 'utf8');
   if (restored.includes('127.0.0.1')) throw Error('official switch left the local proxy active');
   if (restored.includes('model_catalog_json') || restored.includes('subscription-lens-')) throw Error('official switch did not restore the official model catalog: ' + restored);
