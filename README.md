@@ -30,6 +30,10 @@ The 3.0 preview adds a **Providers** page for Codex routing. It imports the curr
 
 The Codex overview can recommend a model mix from the last 14 days of model usage and the current quota pace. It targets the next reset and shows its confidence. Because OpenAI does not publish an exact subscription-quota weight for each model, this is an adaptive recommendation based on API-equivalent intensity, not a guarantee.
 
+### CC Switch attribution
+
+The 3.0 routing feature embeds selected components from [CC Switch](https://github.com/farion1231/cc-switch), pinned to commit `06082e189d65e6d6dbadc35dacdac1ce6c79d89a`. The embedded provider, proxy, takeover, recovery and protocol-conversion runtime, together with the Codex provider preset catalog and preset-picker interaction, are derived from CC Switch and remain covered by its MIT license. Copyright © 2025 Jason Young. See [third-party notices](THIRD-PARTY-NOTICES.md) for the full attribution and license boundary.
+
 ![Subscription Lens provider overview in English](docs/images/providers.en-US.png)
 
 *Overview with synthetic data; no real account or conversation data is shown.*

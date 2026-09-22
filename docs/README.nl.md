@@ -30,6 +30,10 @@ De 3.0-preview voegt een pagina **Leveranciers** toe: importeer de huidige Codex
 
 Geïnstalleerde tools in standaardmappen worden automatisch gevonden en kunnen samen worden verbonden; aangepaste locaties blijven beschikbaar. Het Codex-overzicht adviseert een modelmix op basis van de modelhistorie en het gemiddelde quotatempo in het actieve venster. Omdat OpenAI geen exacte quotagewichten per model publiceert, toont het advies de betrouwbaarheid en blijft het zichzelf kalibreren.
 
+### CC Switch: bron en copyright
+
+De routeringsfunctie van versie 3.0 bundelt geselecteerde componenten uit [CC Switch](https://github.com/farion1231/cc-switch), vastgezet op commit `06082e189d65e6d6dbadc35dacdac1ce6c79d89a`. De provider-, proxy-, takeover-, herstel- en protocolconversieruntime, plus de Codex-providerpresets en presetkiezer, zijn hiervan afgeleid en blijven onder de MIT-licentie vallen. Copyright © 2025 Jason Young. Zie de [meldingen van derden](../THIRD-PARTY-NOTICES.md) voor de volledige bron- en licentiegrenzen.
+
 ![Subscription Lens-overzicht in het Nederlands](images/providers.nl-NL.png)
 
 *Het overzicht toont synthetische gegevens, geen echte account- of gespreksgegevens.*

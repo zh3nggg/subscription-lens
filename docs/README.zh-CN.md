@@ -30,6 +30,10 @@
 
 Codex 总览会结合当前额度窗口内的模型历史与平均额度速度，推荐下个重置前的模型使用比例，并标注可信度。由于 OpenAI 未公布各模型对应套餐额度的精确权重，该建议使用 API 等价强度持续校准，不承诺精确耗尽额度。
 
+### CC Switch 版权与来源
+
+3.0 路由功能嵌入了 [CC Switch](https://github.com/farion1231/cc-switch) 的部分组件，固定使用提交 `06082e189d65e6d6dbadc35dacdac1ce6c79d89a`。供应商、代理接管、恢复、协议转换运行时，以及 Codex 供应商预设目录和预设选择交互，均源自 CC Switch，并继续遵循其 MIT 许可。版权所有 © 2025 Jason Young。完整来源和许可边界见[第三方开源说明](../THIRD-PARTY-NOTICES.md)。
+
 ![Subscription Lens 中文多供应商总览](images/providers.zh-CN.png)
 
 *界面截图使用合成数据，不含真实账户或对话信息。*
