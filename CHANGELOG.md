@@ -45,6 +45,9 @@
 
 # Unreleased
 
+- 修复供应商子窗口不属于 Tauri 默认权限窗口列表的问题，并允许原版 CCS 所需的 CSP 内联主题脚本和 HTTPS 资源；之前窗口创建成功但无法完整初始化。
+- Fixed the provider child window missing from Tauri's default capability window list, and allowed the inline theme script and HTTPS assets used by the original CCS renderer.
+
 - 修复“在 CC Switch 中管理”打开空白窗口的问题：供应商窗口现在直接加载已嵌入的 CC Switch 页面，并在其 React 初始化前选择 Codex / 供应商视图，不再经过 Tauri 资源协议下不可靠的页面重定向。
 - Fixed the blank “Manage in CC Switch” window: the provider window now directly loads the embedded CC Switch page and selects the Codex/provider view before React initializes, without an unreliable redirect under Tauri's asset protocol.
 
