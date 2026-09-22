@@ -45,6 +45,9 @@
 
 # Unreleased
 
+- 修复“在 CC Switch 中管理”打开空白窗口的问题：供应商窗口现在直接加载已嵌入的 CC Switch 页面，并在其 React 初始化前选择 Codex / 供应商视图，不再经过 Tauri 资源协议下不可靠的页面重定向。
+- Fixed the blank “Manage in CC Switch” window: the provider window now directly loads the embedded CC Switch page and selects the Codex/provider view before React initializes, without an unreliable redirect under Tauri's asset protocol.
+
 - 路由页不再自行拼装或保存供应商配置。新增、编辑、测试、切换和 OpenAI Official 授权现在一律打开同一可执行文件中打包的原版 CC Switch 供应商管理器；OpenAI Official 使用 CC Switch 单独保存的 Codex OAuth 账号，不依赖或覆盖 Codex GUI 当前登录态。该界面包含 CC Switch 的完整高级选项、模型目录和映射、请求覆盖及账户管理流程。
 - The Route page no longer constructs or stores provider configuration itself. Creation, editing, testing, switching and OpenAI Official authorization now open the original CC Switch provider manager bundled in the same executable. OpenAI Official uses the separately stored CCS Codex OAuth account rather than the current Codex GUI login; its full advanced options, model catalog/mappings, request overrides and account management flow are available there.
 
