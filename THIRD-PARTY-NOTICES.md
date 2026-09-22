@@ -21,11 +21,11 @@ This source is included for the next accounting-engine integration. Version 1.4.
 
 Electron and Chromium license notices are included in the Windows binary distribution as `LICENSE.electron.txt` and `LICENSES.chromium.html`. Development dependencies and versions are recorded in package-lock.json. The application itself is licensed under MIT; upstream code retains its own notices.
 
-## CC Switch — native routing runtime
+## CC Switch — provider manager and routing runtime
 
 - Project: https://github.com/farion1231/cc-switch
 - Reference commit: `06082e189d65e6d6dbadc35dacdac1ce6c79d89a`
 - License: MIT
 - Copyright: © 2025 Jason Young. The complete upstream notice is retained in `native/cc-switch-runtime/LICENSE`.
 - The complete upstream source is included as the `native/cc-switch-runtime` Git submodule, pinned to the revision above. Its MIT copyright and license must be retained in every source or binary distribution that includes the runtime.
-- Subscription Lens compiles the upstream provider, proxy, takeover, recovery and protocol-conversion components into a windowless `subscription-lens-router.exe` sidecar. The Electron provider editor also derives its Codex preset catalog at build time from CC Switch's pinned `codexProviderPresets.ts`, and adapts the MIT-licensed `ProviderPresetSelector` interaction and styling. The sidecar is packaged only after isolated startup verification. This is not an endorsement or affiliation.
+- The Tauri edition compiles the upstream provider, proxy, takeover, recovery and protocol-conversion components into the Subscription Lens executable. It also bundles the original CC Switch React provider-manager renderer for all Codex provider creation, editing, OAuth authorization, model mapping, testing and switching. Subscription Lens retains its own monitoring shell, while provider configuration is rendered and persisted by CC Switch. The resulting binary distribution must retain this notice and the upstream MIT license. This is not an endorsement or affiliation.

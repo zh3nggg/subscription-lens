@@ -45,6 +45,9 @@
 
 # Unreleased
 
+- 路由页不再自行拼装或保存供应商配置。新增、编辑、测试、切换和 OpenAI Official 授权现在一律打开同一可执行文件中打包的原版 CC Switch 供应商管理器；OpenAI Official 使用 CC Switch 单独保存的 Codex OAuth 账号，不依赖或覆盖 Codex GUI 当前登录态。该界面包含 CC Switch 的完整高级选项、模型目录和映射、请求覆盖及账户管理流程。
+- The Route page no longer constructs or stores provider configuration itself. Creation, editing, testing, switching and OpenAI Official authorization now open the original CC Switch provider manager bundled in the same executable. OpenAI Official uses the separately stored CCS Codex OAuth account rather than the current Codex GUI login; its full advanced options, model catalog/mappings, request overrides and account management flow are available there.
+
 - 修复 Tauri 连接页把每条 CCS 请求日志误报成一个 Codex 会话、在 10,000 条读取上限处显示假性累计值且始终显示 0 个源文件的问题；现在会话和文件数来自 CCS 原生会话扫描器。项目页只根据可关联的 Codex 会话分组，模型摘要会在单元格内截断，不再撑出横向滚动。
 - Fixed Tauri connection statistics that treated every CCS request log as a Codex conversation, surfaced the 10,000-row read limit as a false count, and always showed zero source files. Session and file counts now come from CCS's native session scanner. Projects aggregate only linkable Codex sessions and model summaries truncate within their cells.
 - Tauri 主界面恢复为 Subscription Lens 的原有 Electron 视觉体系：侧栏、总览、套餐额度、分布饼图、活动页的项目 / 会话 / 记录 tab 和统计卡片保持原布局；供应商持久化、OAuth、保存、切换、回滚和本地代理继续由同一套 CCS 原生命令和数据库处理。

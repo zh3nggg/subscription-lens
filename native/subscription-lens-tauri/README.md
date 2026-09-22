@@ -1,8 +1,9 @@
 # Subscription Lens Tauri host
 
 This is the Subscription Lens Tauri host. It compiles the pinned CC Switch
-Tauri library and React application into the same executable, so provider and
-authentication state has one owner from the first startup.
+Tauri library and bundles the original CC Switch React provider manager into
+the same executable, so provider and authentication state has one owner from
+the first startup.
 
 The `sublens-host` feature makes the runtime load this crate's
 `tauri.conf.json`. It keeps the Subscription Lens renderer as the app shell:
@@ -12,14 +13,17 @@ OAuth account management, switch transactions, rollback logic, local proxy and
 usage importers still come from the CC Switch runtime and database.
 
 The checked-in `frontend/` and `tauri-bridge.js` are the active Tauri renderer.
-They preserve the established Subscription Lens visual language and translate
-their calls to native CCS commands. The Electron application remains a fallback
-build during the transition; it is not part of the Tauri provider path.
+They preserve the established Subscription Lens visual language for monitoring.
+The Route page opens the bundled, original CC Switch provider manager for every
+provider operation. The manager is generated into `frontend/ccswitch/` during
+the build and is deliberately not checked in. The Electron application remains
+a fallback build during the transition; it is not part of the Tauri provider path.
 
 OpenAI Official account login, account selection, logout, provider creation,
 model catalogs, API-key storage, connectivity checks and deletion use the
-upstream CCS command boundary and database. Subscription Lens does not keep a
-parallel provider store.
+original CCS UI, command boundary and database. In particular, OpenAI Official
+uses the CCS-managed Codex OAuth account, not the Codex GUI's current login.
+Subscription Lens does not keep a parallel provider store.
 
 On Windows the host embeds the Common Controls v6 manifest required by the CCS
 dialog runtime. Its WebView2 profile is isolated under the app's local data

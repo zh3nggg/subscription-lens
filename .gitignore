@@ -1,6 +1,7 @@
 node_modules/
 dist/
 .cache/
+native/subscription-lens-tauri/frontend/ccswitch/
 test-results/
 *.sqlite*
 *.log

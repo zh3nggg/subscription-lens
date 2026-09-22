@@ -26,13 +26,13 @@ The provider and model charts also show average cost per 1M tokens for the selec
 
 ### Codex provider routing in the 3.0 generation
 
-The published beta.1 adds a **Providers** page for Codex routing. The next Tauri build keeps the Subscription Lens route page visually, while OpenAI Official login, provider credentials, model catalogs, takeover, recovery, hot switching, rollback and Responses/Chat conversion use the CCS command boundary and database. Subscription Lens does not keep a second provider store or overwrite CCS switch state. Codex GUI and CLI remain the task interface.
+The published beta.1 adds a **Providers** page for Codex routing. The next Tauri build keeps the Subscription Lens route page visually, while every provider operation opens the original CC Switch provider manager bundled in the same executable. OpenAI Official login uses the separately saved CCS Codex OAuth account; provider credentials, model catalogs, advanced settings, takeover, recovery, hot switching, rollback and Responses/Chat conversion all use the original CCS UI, command boundary and database. Subscription Lens does not keep a second provider store or overwrite CCS switch state. Codex GUI and CLI remain the task interface.
 
 The Codex overview can recommend a model mix from the last 14 days of model usage and the current quota pace. It targets the next reset and shows its confidence. Because OpenAI does not publish an exact subscription-quota weight for each model, this is an adaptive recommendation based on API-equivalent intensity, not a guarantee.
 
 ### CC Switch attribution
 
-The 3.0 routing feature embeds selected components from [CC Switch](https://github.com/farion1231/cc-switch), pinned to commit `06082e189d65e6d6dbadc35dacdac1ce6c79d89a`. The embedded provider, proxy, takeover, recovery and protocol-conversion runtime, together with the Codex provider preset catalog and preset-picker interaction, are derived from CC Switch and remain covered by its MIT license. Copyright © 2025 Jason Young. See [third-party notices](THIRD-PARTY-NOTICES.md) for the full attribution and license boundary.
+The 3.0 routing feature embeds the original provider-manager renderer and selected runtime components from [CC Switch](https://github.com/farion1231/cc-switch), pinned to commit `06082e189d65e6d6dbadc35dacdac1ce6c79d89a`. The embedded provider UI, OAuth, proxy, takeover, recovery and protocol-conversion runtime are derived from CC Switch and remain covered by its MIT license. Copyright © 2025 Jason Young. See [third-party notices](THIRD-PARTY-NOTICES.md) for the full attribution and license boundary.
 
 ![Subscription Lens provider overview in English](docs/images/providers.en-US.png)
 

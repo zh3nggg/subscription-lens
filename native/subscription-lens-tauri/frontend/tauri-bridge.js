@@ -94,6 +94,7 @@
     const protocol = parseToml(config, 'wire_api') || parseToml(config, 'api_format') || 'responses';
     const auth = settings.auth && typeof settings.auth === 'object' ? settings.auth : {};
     const envKey = Object.keys(auth)[0] || settings.envKey || 'OPENAI_API_KEY';
+    const providerType = String(provider?.meta?.providerType || '');
     return {
       ...provider,
       builtIn,
@@ -102,6 +103,7 @@
       model,
       protocol,
       envKey,
+      authMode: providerType === 'codex_oauth' ? 'codex_oauth' : null,
       storedCredential: Object.values(auth).some((value) => String(value || '').trim().length > 0),
       credentialSource: Object.keys(auth)[0] || null,
       modelCatalog,
@@ -493,34 +495,10 @@
 
   let loginDeviceCode = null;
 
-  async function providerSave(input) {
-    const existing = input.id ? (await providerStatus()).providers.find((item) => item.id === input.id) : null;
-    const official = Boolean(existing?.builtIn || input.official);
-    const settings = existing?.settingsConfig && typeof existing.settingsConfig === 'object' ? structuredClone(existing.settingsConfig) : {};
-    const auth = { ...(settings.auth || {}) };
-    if (input.apiKey) auth[input.envKey || 'OPENAI_API_KEY'] = input.apiKey;
-    settings.auth = auth;
-    settings.config = `model_provider = "custom"\nmodel = ${JSON.stringify(input.model || '')}\nmodel_reasoning_effort = "high"\ndisable_response_storage = true\n\n[model_providers.custom]\nname = ${JSON.stringify(input.name || '')}\nbase_url = ${JSON.stringify(input.baseUrl || '')}\nwire_api = ${JSON.stringify(input.protocol || 'responses')}\nrequires_openai_auth = ${official ? 'true' : 'false'}`;
-    if (Array.isArray(input.modelCatalog) && input.modelCatalog.length) settings.modelCatalog = { models: input.modelCatalog };
-    if (Array.isArray(input.modelMappings) && input.modelMappings.length) settings.modelMappings = input.modelMappings;
-    const provider = {
-      id: input.id || `sublens-${crypto.randomUUID()}`,
-      name: input.name || 'Custom provider',
-      settingsConfig: settings,
-      category: 'third_party',
-      icon: 'router',
-      iconColor: '#596eea',
-    };
-    if (input.id) await invoke('update_provider', { app: 'codex', provider, originalId: input.id });
-    else await invoke('add_provider', { app: 'codex', provider, addToLive: false });
-    invalidateQueryCache();
-    return normalizeProvider(provider);
-  }
-
   const api = {
     query: safe(buildQuery),
     providerList: safe(providerStatus),
-    providerSave: safe(providerSave),
+    providerManager: safe(() => invoke('open_sublens_provider_manager')),
     providerDelete: safe(async (id) => { const result = await invoke('delete_provider', { app: 'codex', id }); invalidateQueryCache(); return result; }),
     providerImportCurrent: safe(async () => { const result = await invoke('import_default_config', { app: 'codex' }); invalidateQueryCache(); return result; }),
     providerActivate: safe(async (id) => { const result = await invoke('switch_provider', { app: 'codex', id }); invalidateQueryCache(); return result; }),
