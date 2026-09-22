@@ -4,7 +4,7 @@ A Windows desktop app for **Codex subscription users** who want to see their rem
 
 [English](README.md) · [简体中文](docs/README.zh-CN.md) · [Nederlands](docs/README.nl.md)
 
-> **3.0 generation preview.** The published `3.0.0-beta.1` installer still uses the Electron desktop app. Development after beta.1 has moved to a Tauri host built directly on the pinned CC Switch application: its original provider screens, OAuth accounts, database, switch transactions, rollback and local proxy remain one native runtime, while Subscription Lens adds its Codex quota and usage overview. Keep 1.6.5 available as a fallback while evaluating previews.
+> **3.0 generation preview.** The published `3.0.0-beta.1` installer still uses the Electron desktop app. Development after beta.1 moves the runtime to Tauri and the pinned CC Switch backend, while retaining Subscription Lens's own sidebar, overview, quota, charts and project/session usage interface. CCS remains the single owner of provider accounts, switching, rollback and the local proxy. Keep 1.6.5 available as a fallback while evaluating previews.
 
 ## What you can do
 
@@ -26,7 +26,7 @@ The provider and model charts also show average cost per 1M tokens for the selec
 
 ### Codex provider routing in the 3.0 generation
 
-The published beta.1 adds a **Providers** page for Codex routing. The next Tauri build replaces that independent page with CC Switch's own provider list and add/edit dialogs. OpenAI Official login, provider credentials, model catalogs, takeover, recovery, hot switching, rollback and Responses/Chat conversion therefore use the same CCS components, commands and database. Subscription Lens does not keep a second provider store or rewrite the switch payload. Codex GUI and CLI remain the task interface.
+The published beta.1 adds a **Providers** page for Codex routing. The next Tauri build keeps the Subscription Lens route page visually, while OpenAI Official login, provider credentials, model catalogs, takeover, recovery, hot switching, rollback and Responses/Chat conversion use the CCS command boundary and database. Subscription Lens does not keep a second provider store or overwrite CCS switch state. Codex GUI and CLI remain the task interface.
 
 The Codex overview can recommend a model mix from the last 14 days of model usage and the current quota pace. It targets the next reset and shows its confidence. Because OpenAI does not publish an exact subscription-quota weight for each model, this is an adaptive recommendation based on API-equivalent intensity, not a guarantee.
 

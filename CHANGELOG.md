@@ -45,8 +45,8 @@
 
 # Unreleased
 
-- Tauri 架构改为直接加载 CC Switch 原生 React 前端：供应商新增、编辑、OAuth、保存、切换和回滚全部使用 CCS 原组件与原命令；Subscription Lens 的 30 天 Codex 总览、套餐额度、API 等价成本、缓存占比、供应商和模型分布作为一级统计页接入同一 CCS 数据库和会话同步，不再通过 Electron 供应商外壳或第二套保存逻辑。
-- The Tauri app now loads CC Switch's native React frontend directly. Provider creation, editing, OAuth, persistence, switching and rollback use the original CCS components and commands. Subscription Lens adds a first-class 30-day Codex overview with quota, API-equivalent cost, cache ratio, provider and model distributions on the same CCS database and session sync, without an Electron provider shell.
+- Tauri 主界面恢复为 Subscription Lens 的原有 Electron 视觉体系：侧栏、总览、套餐额度、分布饼图、活动页的项目 / 会话 / 记录 tab 和统计卡片保持原布局；供应商持久化、OAuth、保存、切换、回滚和本地代理继续由同一套 CCS 原生命令和数据库处理。
+- The Tauri main window restores the established Subscription Lens Electron visual system: sidebar, overview, quota, distribution chart, activity project/session/record tabs and statistic cards keep their original layout. Provider persistence, OAuth, saving, switching, rollback and the local proxy continue to use the same native CCS commands and database.
 - 供应商保存链路现在按 CC Switch 的 Codex `settingsConfig` 结构落盘：认证、完整配置和 `modelCatalog.models` 一起保存；模型目录保留显示名、上下文窗口、推理档位等字段，编辑时不输入新 API Key 也不会清空已保存凭据。模型发现结果也直接转换为同一目录结构，并由内嵌路由按该目录投影到 Codex。
 - Provider persistence now follows CC Switch's Codex `settingsConfig` shape: authentication, the complete config and `modelCatalog.models` are saved together. Model display names, context windows and reasoning levels survive edits, and leaving the API Key blank no longer clears the encrypted credential. Discovery results use the same catalog shape and the embedded router projects it to Codex.
 - 路由供应商编辑器新增可编辑的模型映射表：Codex 前台显示兼容别名，嵌入式 CC Switch 按每行映射到任意供应商的上游模型。适用于 DeepSeek、Qwen、Kimi、OpenRouter 和自定义兼容端点；模型菜单不再暴露会被 ChatGPT 登录态拒绝的第三方 slug。

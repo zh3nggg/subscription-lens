@@ -5,31 +5,30 @@ Tauri library and React application into the same executable, so provider and
 authentication state has one owner from the first startup.
 
 The `sublens-host` feature makes the runtime load this crate's
-`tauri.conf.json`. The host bundles CC Switch's provider list, add/edit dialogs,
-OAuth account management, database, switch transactions, rollback logic, local
-proxy and usage importers. Subscription Lens changes the product configuration,
-starts on Codex and exposes the native statistics dashboard as a top-level page.
-The statistics read the same CCS database that records routed requests and
-imports Codex sessions.
+`tauri.conf.json`. It keeps the Subscription Lens renderer as the app shell:
+sidebar navigation, overview cards, quota panels, distribution chart, activity
+tabs, projects and sessions retain the Electron layout. Provider persistence,
+OAuth account management, switch transactions, rollback logic, local proxy and
+usage importers still come from the CC Switch runtime and database.
 
-The legacy checked-in `frontend/` and `tauri-bridge.js` are migration reference
-files only. `frontendDist` does not select them and provider operations never
-pass through them. The Electron application remains a fallback build during the
-transition; it is not part of the Tauri provider path.
+The checked-in `frontend/` and `tauri-bridge.js` are the active Tauri renderer.
+They preserve the established Subscription Lens visual language and translate
+their calls to native CCS commands. The Electron application remains a fallback
+build during the transition; it is not part of the Tauri provider path.
 
 OpenAI Official account login, account selection, logout, provider creation,
-model catalogs, API-key storage, connectivity checks and deletion are the
-upstream CCS screens and commands. Subscription Lens does not reconstruct their
-payloads or keep a parallel provider store.
+model catalogs, API-key storage, connectivity checks and deletion use the
+upstream CCS command boundary and database. Subscription Lens does not keep a
+parallel provider store.
 
 On Windows the host embeds the Common Controls v6 manifest required by the CCS
 dialog runtime. Its WebView2 profile is isolated under the app's local data
 directory (`main/webview`) so startup does not reuse a locked CCS/Electron
 profile.
 
-The host intentionally has no `devUrl`. Debug executables load the compiled
-React renderer from the embedded asset protocol, so double-clicking the binary
-does not depend on a development server.
+The host intentionally has no `devUrl`. Debug executables load the checked-in
+Subscription Lens renderer from the embedded asset protocol, so double-clicking
+the binary does not depend on a development server.
 
 ## Local verification
 

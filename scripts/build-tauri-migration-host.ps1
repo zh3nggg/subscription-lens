@@ -35,16 +35,6 @@ if ($LASTEXITCODE -ne 0) {
 
 $args = @($Action, "--target-dir", $TargetDir)
 try {
-  Push-Location $runtimeDir
-  try {
-    $env:VITE_SUBLENS_HOST = "1"
-    & pnpm run build:renderer
-    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-  } finally {
-    Remove-Item Env:VITE_SUBLENS_HOST -ErrorAction SilentlyContinue
-    Pop-Location
-  }
-
   Push-Location $hostDir
   try {
     & $cargo @args
