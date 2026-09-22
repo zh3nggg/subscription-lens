@@ -4,7 +4,7 @@ Een desktopapp voor **Codex-abonnees** op Windows en Apple Silicon Macs die hun 
 
 [English](../README.md) · [简体中文](README.zh-CN.md) · [Nederlands](README.nl.md)
 
-> **3.0-generatie-preview.** `3.0.0-beta.1` is een grote sprong vanaf de stabiele 1.6.x-lijn. De eerdere publieke versies gebruikten de Electron-desktopapp; deze versie behoudt die Electron-interface en bundelt de CC Switch-compatibele routeringsruntime. Dit is geen migratie vanaf Tauri. Houd 1.6.5 beschikbaar als terugval tijdens het testen.
+> **3.0-generatie-preview.** `3.0.0-beta.2` voegt een Apple Silicon macOS-build toe aan de Electron-gebaseerde 3.0-preview en bundelt de CC Switch-compatibele routeringsruntime. Dit is geen migratie vanaf Tauri. Houd 1.6.5 beschikbaar als terugval tijdens het testen.
 
 ## Wat kun je ermee?
 
@@ -40,11 +40,18 @@ De routeringsfunctie van versie 3.0 bundelt geselecteerde componenten uit [CC Sw
 
 ## Downloaden en aan de slag
 
-**3.0.0-beta.1 Preview · Windows x64.** Dit is de eerste 3.0-generatiepreview na de stabiele 1.6.x-lijn. De collector verwerkt nog niet alle recordformaten volledig; totalen kunnen te hoog of te laag zijn. Kosten zijn schattingen, geen factuur of gegarandeerde besparing. Deze build is niet digitaal ondertekend en heeft geen automatische updates.
+**3.0.0-beta.2 Preview · macOS Apple Silicon.** Vereist een Mac met M-chip en macOS 13 of nieuwer. De collector verwerkt nog niet alle recordformaten volledig; totalen kunnen te hoog of te laag zijn. Kosten zijn schattingen, geen factuur of gegarandeerde besparing. Automatische updates zijn niet beschikbaar.
 
-[Download 3.0.0-beta.1](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0-beta.1)
+[Download 3.0.0-beta.2](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0-beta.2)
 
-Gebruik `Subscription-Lens-3.0.0-beta.1-installer-x64.exe` voor een normale installatie. Sluit Subscription Lens, start het installatiebestand en behoud bij een upgrade de bestaande installatiemap (bijvoorbeeld `D:\SubLens`). Omdat dit een grote generatiesprong is, houd je 1.6.5 of een back-up van de gegevens aan totdat je de preview hebt gecontroleerd. Kies `Subscription-Lens-3.0.0-beta.1-electron-x64.zip` voor een losse versie zonder installatie: pak die uit in een eigen map en start `Subscription Lens.exe`; de ZIP werkt een geïnstalleerde app niet bij.
+### Installeren op macOS
+
+1. Download `Subscription-Lens-3.0.0-beta.2-arm64.dmg`, open het bestand en sleep **Subscription Lens** naar **Programma's**. De ZIP bevat dezelfde app als draagbaar archief.
+2. Deze preview is lokaal ad-hoc ondertekend maar niet door Apple genotariseerd. macOS kan daarom melden dat de ontwikkelaar niet kan worden gecontroleerd. Control-klik in **Programma's** op **Subscription Lens**, kies **Open** en bevestig opnieuw met **Open**. Dit is normaal alleen bij de eerste start nodig.
+3. Als macOS de app nog blokkeert, open je **Systeeminstellingen → Privacy en beveiliging**, zoek je de melding voor Subscription Lens en kies je **Toch openen**. Verifieer je identiteit en bevestig **Open**. Schakel Gatekeeper niet wereldwijd uit.
+4. Je kunt de download vooraf controleren met `SHA256SUMS.txt` uit dezelfde release.
+
+**Windows-gebruikers:** gebruik voor het huidige x64-installatiebestand en de draagbare ZIP nog [3.0.0-beta.1](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0-beta.1). Bewaar 1.6.5 of een gegevensback-up totdat de 3.0-preview is gecontroleerd.
 
 1. Kies **Monitoring starten** voor de standaardmap van Codex, of **Map kiezen** voor een eigen map met `sessions` of `archived_sessions`.
 2. Open **Verbindingen → Account verbinden** om limieten op te halen via de lokaal geïnstalleerde Codex. Gebruik **Aanmelden bij ChatGPT** als je nog niet bent aangemeld.
@@ -60,7 +67,7 @@ Je hebt geen API-sleutel, Node.js, Python of Docker nodig. Voor accountgegevens 
 
 - **Vooraf capaciteit bekijken.** Het overzicht toont resterende limieten en de tijd tot herstel. Een quotaschatting vereist minstens drie metingen, 15 minuten en een meetbare verandering binnen hetzelfde account, venster en herstelmoment. Alle bewaarde metingen in het actieve quotavenster worden gebruikt, zodat het gemiddelde het volledige venster omvat in plaats van alleen de laatste twee uur. Gegevens ouder dan drie minuten, resets en tellercorrecties onderdrukken onbetrouwbare schattingen. Een schatting gaat uit van het gemiddelde tempo van dit venster en is geen garantie. Lokale tokens worden nooit naar abonnementslimieten omgerekend.
 - **Tijdens het werk compact blijven.** Ctrl+Shift+M opent het compacte venster, dat je optioneel kunt vastzetten. Escape herstelt het overzicht. Een klik op het systeemvakpictogram opent het compacte venster als systeemvakmodus actief is.
-- **Gerichte meldingen.** Schakel meldingen in bij 20% en 5% resterend en bij gemeten herstel. Meldingen worden per account en venster ontdubbeld. Stille uren zijn standaard 22:00–08:00 lokale tijd. Laat de app actief; Windows kan meldingen onderdrukken.
+- **Gerichte meldingen.** Schakel meldingen in bij 20% en 5% resterend en bij gemeten herstel. Meldingen worden per account en venster ontdubbeld. Stille uren zijn standaard 22:00–08:00 lokale tijd. Laat de app actief; meldingsinstellingen van het besturingssysteem kunnen levering onderdrukken.
 - **Duur werk terugvinden.** Selecteer een project of grafiekdatum, sorteer sessies op kosten of recente activiteit en bekijk de exacte records. Ctrl+K opent zoeken. Subagents tonen alleen hun eigen gebruik; kosten worden niet dubbel in een oudersessie opgeteld.
 - **Automatisch verlengen.** Kies een maandelijkse verlengdag. Kortere maanden gebruiken de laatste dag zonder de vaste verlengdag te wijzigen. De abonnementsbetaling herhaalt zich; extra betalingen gelden alleen voor de huidige periode. Bestaande installaties behouden eerst handmatige datums.
 - **Gegevens controleren.** Bekijk ontbrekende tarieven, verwerkingsfouten en de tariefdatum met directe links naar records en bronnen. Tariefdekking bewijst niet dat de accountgeschiedenis volledig is. Vergelijkingen gebruiken het direct voorafgaande tijdvak van gelijke duur.
@@ -110,6 +117,4 @@ Ontwikkeld met ondersteuning van **GPT-6 Astra**.
 [CodexBar](https://github.com/steipete/CodexBar) dient als referentie voor limieten en desktopinteractie. MIT-gelicentieerde broncode van [codex-usage](https://github.com/zJay26/codex-usage) is opgenomen voor de volgende engine-integratie; de bron blijft met de licentievermelding behouden voor verdere integratie van de accounting-engine.
 
 MIT. Zie [licenties van derden](../THIRD-PARTY-NOTICES.md) voor bronnen en auteursrechten. Dit is een onafhankelijk project, niet verbonden aan OpenAI of onderschreven door de genoemde projecten.
-
-
 

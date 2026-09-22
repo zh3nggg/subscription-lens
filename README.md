@@ -4,7 +4,7 @@ A desktop app for **Codex subscription users** on Windows and Apple Silicon Macs
 
 [English](README.md) · [简体中文](docs/README.zh-CN.md) · [Nederlands](docs/README.nl.md)
 
-> **3.0 generation preview.** `3.0.0-beta.1` is a major-version jump from the 1.6.x stable line. The earlier public releases used the Electron desktop app; this release keeps that Electron UI and bundles the CC Switch-compatible routing runtime. It is not a Tauri migration. Keep 1.6.5 available as a fallback while evaluating the preview.
+> **3.0 generation preview.** `3.0.0-beta.2` adds an Apple Silicon macOS build to the Electron-based 3.0 preview. It bundles the CC Switch-compatible routing runtime and is not a Tauri migration. Keep 1.6.5 available as a fallback while evaluating the preview.
 
 ## What you can do
 
@@ -40,11 +40,18 @@ The 3.0 routing feature embeds selected components from [CC Switch](https://gith
 
 ## Download and get started
 
-**3.0.0-beta.1 Preview · Windows x64.** This is the first 3.0-generation preview after the 1.6.x stable line. The collector does not yet handle all client record formats; totals may be too high or too low. Costs are estimates, not a bill or guaranteed savings. The build is unsigned and has no automatic updater.
+**3.0.0-beta.2 Preview · macOS Apple Silicon.** Requires an M-series Mac and macOS 13 or later. The collector does not yet handle all client record formats; totals may be too high or too low. Costs are estimates, not a bill or guaranteed savings. There is no automatic updater.
 
-[Download 3.0.0-beta.1](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0-beta.1)
+[Download 3.0.0-beta.2](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0-beta.2)
 
-For a normal installation, use `Subscription-Lens-3.0.0-beta.1-installer-x64.exe`. Close Subscription Lens, run the installer, and keep the existing installation folder (for example, `D:\SubLens`) if you are upgrading. Because this is a major-generation jump, keep the 1.6.5 installation or its data backup until you have verified the preview. Use `Subscription-Lens-3.0.0-beta.1-electron-x64.zip` for a separate, no-install copy: extract it to its own folder and run `Subscription Lens.exe`; it does not update an installed copy.
+### Install on macOS
+
+1. Download `Subscription-Lens-3.0.0-beta.2-arm64.dmg`, open it, and drag **Subscription Lens** into **Applications**. The ZIP contains the same app for users who prefer a portable archive.
+2. This preview is ad-hoc signed but not Apple-notarized, so macOS may report that the developer cannot be verified. In **Applications**, Control-click **Subscription Lens**, choose **Open**, then choose **Open** again. This confirmation is needed only on first launch.
+3. If macOS still blocks it, open **System Settings → Privacy & Security**, scroll to the security message for Subscription Lens, choose **Open Anyway**, authenticate, and confirm **Open**. Do not disable Gatekeeper globally.
+4. Optionally verify the download with `SHA256SUMS.txt` from the same release before opening it.
+
+**Windows users:** remain on [3.0.0-beta.1](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0-beta.1) for the current x64 installer and portable ZIP. Keep the 1.6.5 installation or its data backup until you have verified the 3.0 preview.
 
 1. Select **Start monitoring** to read the default Codex folder, or **Choose folder** for a custom folder containing `sessions` or `archived_sessions`.
 2. Open **Connections → Connect account** to query limits through your locally installed Codex. If signed out, use **Sign in to ChatGPT**.
@@ -60,7 +67,7 @@ No API key, Node.js, Python or Docker is needed to run the app. Account queries 
 
 - **Know when to slow down.** The overview prioritizes account capacity and reset time. Quota estimates require at least three observations across 15 minutes in the same account/window/reset. They use every retained observation in the active quota window, so the average covers the full window rather than only the last two hours. A positive change estimates the average burn rate; a stable window is shown as no observed consumption. Stale data (over three minutes), resets and counter corrections suppress unreliable estimates. Forecasts assume the window's average pace continues; they are not guarantees.
 - **Stay in your work.** Open Compact view with Ctrl+Shift+M; optionally pin it above other windows. Escape restores the dashboard. A tray click opens this view when tray mode is enabled.
-- **Get quiet alerts.** Opt into alerts at 20% and 5% remaining and observed quota recovery. Alerts are deduplicated per window and account. Quiet hours default to 22:00–08:00 local time. The app must remain running; Windows notification settings can suppress delivery.
+- **Get quiet alerts.** Opt into alerts at 20% and 5% remaining and observed quota recovery. Alerts are deduplicated per window and account. Quiet hours default to 22:00–08:00 local time. The app must remain running; operating-system notification settings can suppress delivery.
 - **Find expensive work.** Select a project or chart date, sort sessions by cost or recency, then inspect the exact records. Ctrl+K opens search. Session totals count each record once; subagent rows show their own usage, not an inclusive parent total.
 - **Keep billing current.** Choose Monthly renewal and your renewal day. Short months clamp to their last day without changing the anchor. Plan payment repeats; extra payments apply only to the current cycle. Existing installations keep manual dates until you change the mode.
 - **Check the evidence.** Data health shows unpriced reasons, parsing issues and price snapshot date, with direct links to affected records and sources. Pricing coverage does not prove complete account history. Previous-period comparisons use the immediately preceding interval of equal elapsed length, not a calendar-month forecast.

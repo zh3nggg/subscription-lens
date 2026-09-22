@@ -5,7 +5,10 @@ const fs = require('node:fs');
 const path = require('node:path');
 
 const dist = path.resolve(__dirname, '..', 'dist');
-const packages = fs.readdirSync(dist).filter(name => /\.(?:dmg|exe|zip)$/.test(name)).sort();
+const version = require('../package.json').version;
+const packages = fs.readdirSync(dist)
+  .filter(name => name.includes(`-${version}-`) && /\.(?:dmg|exe|zip)$/.test(name))
+  .sort();
 if (!packages.length) throw new Error(`No release packages found in ${dist}.`);
 
 function sha256(file) {

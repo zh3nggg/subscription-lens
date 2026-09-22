@@ -4,11 +4,11 @@
 
 ## English
 
-### Current release: 3.0.0-beta.1 preview
+### Current release: 3.0.0-beta.2 preview
 
 This is a new generation after the 1.6.x stable line. Earlier public releases used Electron; the 3.0 preview keeps the Electron UI and embeds the CC Switch-compatible routing runtime. It is not a Tauri migration. Keep 1.6.5 as the stable fallback while this preview is evaluated.
 
-Windows desktop app for Codex subscriptions, with Chinese, English and Dutch UI. Local usage analytics, account quota, full-active-window forecasting, billing comparison, compact view and optional notifications are available. Full Codex feature parity with CodexBar and codex-usage is **not yet complete**. See [coverage](docs/COMPATIBILITY.md).
+Windows and Apple Silicon macOS desktop app for Codex subscriptions, with Chinese, English and Dutch UI. Local usage analytics, account quota, full-active-window forecasting, billing comparison, compact view and optional notifications are available. Full Codex feature parity with CodexBar and codex-usage is **not yet complete**. See [coverage](docs/COMPATIBILITY.md).
 
 ### Next track: 1.5 domestic agent compatibility and billing deduplication
 
@@ -26,11 +26,11 @@ Current scope includes Codex subscriptions and optional local records from Qwen 
 
 ## 简体中文
 
-### 当前版本：3.0.0-beta.1 预览版
+### 当前版本：3.0.0-beta.2 预览版
 
 这是继 1.6.x 稳定版本线之后的代际跳跃版本。此前公开版本使用 Electron；3.0 预览版继续沿用 Electron 界面，并内嵌兼容 CC Switch 的路由运行时，不是 Tauri 迁移。测试期间请保留 1.6.5 作为稳定回退版本。
 
-面向 Codex 套餐的 Windows 桌面应用，支持中文、英语、荷兰语。已提供本地用量分析、账户额度、完整额度窗口预测、账期对比、专注窗口和可选提醒。**尚未完整覆盖 CodexBar 与 codex-usage 的 Codex 功能**，详见[覆盖清单](docs/COMPATIBILITY.md)。
+面向 Codex 套餐的 Windows 与 Apple Silicon macOS 桌面应用，支持中文、英语、荷兰语。已提供本地用量分析、账户额度、完整额度窗口预测、账期对比、专注窗口和可选提醒。**尚未完整覆盖 CodexBar 与 codex-usage 的 Codex 功能**，详见[覆盖清单](docs/COMPATIBILITY.md)。
 
 ### 下一版本主线：国产 Agent 兼容与去重计费
 
@@ -48,11 +48,11 @@ Current scope includes Codex subscriptions and optional local records from Qwen 
 
 ## Nederlands
 
-### Huidige versie: 3.0.0-beta.1 preview
+### Huidige versie: 3.0.0-beta.2 preview
 
 Dit is een nieuwe generatie na de stabiele 1.6.x-lijn. Eerdere publieke versies gebruikten Electron; de 3.0-preview behoudt de Electron-interface en bundelt de CC Switch-compatibele routeringsruntime. Dit is geen migratie vanaf Tauri. Houd 1.6.5 als stabiele terugval beschikbaar tijdens de evaluatie.
 
-Een Windows-desktopapp voor Codex-abonnementen, in het Chinees, Engels en Nederlands. Lokale gebruiksanalyse, accountlimieten, voorspellingen over het volledige actieve venster, periodevergelijking, compacte weergave en optionele meldingen zijn beschikbaar. **Volledige Codex-functionaliteit van CodexBar en codex-usage is nog niet bereikt.** Zie het [overzicht](docs/COMPATIBILITY.md).
+Een desktopapp voor Codex-abonnementen op Windows en Apple Silicon macOS, in het Chinees, Engels en Nederlands. Lokale gebruiksanalyse, accountlimieten, voorspellingen over het volledige actieve venster, periodevergelijking, compacte weergave en optionele meldingen zijn beschikbaar. **Volledige Codex-functionaliteit van CodexBar en codex-usage is nog niet bereikt.** Zie het [overzicht](docs/COMPATIBILITY.md).
 
 ### Volgende lijn: compatibiliteit met binnenlandse agents en deduplicatie
 
@@ -67,7 +67,6 @@ Een Windows-desktopapp voor Codex-abonnementen, in het Chinees, Engels en Nederl
 De eerste acceptatieset en bewijsniveaus staan in [compatibiliteit met Chinese platforms](docs/DOMESTIC-COMPATIBILITY.md). Gesloten IDE-producten zonder gedocumenteerde export, log of API blijven kandidaat.
 
 De huidige scope omvat Codex-abonnementen en lokale records van Qwen Code, Kimi Code, CodeBuddy Code, Qoder, CC Switch, Claude Code, Gemini CLI en JSONL. Qoder Credits blijven in de oorspronkelijke eenheid en worden niet opgeteld bij API-equivalente USD. Versie 1.5 breidt dit uit volgens bewijsniveau; IDE-formaten zonder stabiele bron blijven kandidaat.
-
 
 
 

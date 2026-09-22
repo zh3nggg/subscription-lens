@@ -1,6 +1,6 @@
 {
   "name": "subscription-lens",
-  "version": "3.0.0-beta.1",
+  "version": "3.0.0-beta.2",
   "description": "Local Codex subscription usage monitor",
   "main": "src/main.cjs",
   "author": "Subscription Lens contributors",
