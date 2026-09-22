@@ -1,6 +1,6 @@
 # 余量 · Subscription Lens
 
-面向 **Codex 套餐用户**的 Windows 桌面应用：查看还剩多少额度、哪些项目消耗了 Tokens，并推荐一套能将额度用到下次重置前的模型使用配比；同时比较已记录用量按 API 价格估算后与套餐实付的差额。无需 API Key。
+面向 Windows 与 Apple Silicon Mac 上 **Codex 套餐用户**的桌面应用：查看还剩多少额度、哪些项目消耗了 Tokens，并推荐一套能将额度用到下次重置前的模型使用配比；同时比较已记录用量按 API 价格估算后与套餐实付的差额。无需 API Key。
 
 [English](../README.md) · [简体中文](README.zh-CN.md) · [Nederlands](README.nl.md)
 
@@ -26,7 +26,7 @@
 
 ### 3.0 预览版：Codex 供应商路由
 
-3.0 预览版新增“路由”页面：可导入当前 Codex 配置并识别登录态，也可通过 DeepSeek、Qwen、Moonshot／Kimi、OpenRouter 模板自动填充地址、模型和环境变量。API Key 可以直接在应用内填写，并由 Windows 安全存储加密；高级协议设置按需展开，支持编辑、地址即时校验和保存并测试。内嵌的 CC Switch 运行时负责本机代理接管、恢复、供应商热切换，以及 Responses／Chat 协议转换。首次接入本机 Router 需要重启一次 Codex，之后可在应用内一键切换供应商，不再重启 Codex GUI／CLI。停止路由、切回 OpenAI Official 或退出程序时，Subscription Lens 会恢复接管前快照。已有 ChatGPT 登录态的旧会话继续使用官方模型标识，代理在转发时映射到选定的兼容上游模型。
+3.0 预览版新增“路由”页面：可导入当前 Codex 配置并识别登录态，也可通过 DeepSeek、Qwen、Moonshot／Kimi、OpenRouter 模板自动填充地址、模型和环境变量。API Key 可以直接在应用内填写，并由操作系统安全存储加密；高级协议设置按需展开，支持编辑、地址即时校验和保存并测试。内嵌的 CC Switch 运行时负责本机代理接管、恢复、供应商热切换，以及 Responses／Chat 协议转换。首次接入本机 Router 需要重启一次 Codex，之后可在应用内一键切换供应商，不再重启 Codex GUI／CLI。停止路由、切回 OpenAI Official 或退出程序时，Subscription Lens 会恢复接管前快照。已有 ChatGPT 登录态的旧会话继续使用官方模型标识，代理在转发时映射到选定的兼容上游模型。
 
 Codex 总览会结合当前额度窗口内的模型历史与平均额度速度，推荐下个重置前的模型使用比例，并标注可信度。由于 OpenAI 未公布各模型对应套餐额度的精确权重，该建议使用 API 等价强度持续校准，不承诺精确耗尽额度。
 
@@ -86,7 +86,7 @@ Codex 总览会结合当前额度窗口内的模型历史与平均额度速度�
 
 ## 本地存储
 
-默认保存于 `%APPDATA%\Subscription Lens`，包含本应用的 SQLite 账本及设置。卸载默认保留此数据。不会删除或改写 Codex 记录。
+Windows 默认保存于 `%APPDATA%\Subscription Lens`，macOS 默认保存于 `~/Library/Application Support/Subscription Lens`，包含本应用的 SQLite 账本及设置。移除应用默认保留此数据。不会删除或改写 Codex 记录。
 
 高级部署可设置 `LENS_DATA_DIR` 指向自己的数据目录；便携 ZIP 默认仍使用标准用户数据目录。不要把同一正在运行的数据库放在同步盘上供多设备同时写入。
 
@@ -101,7 +101,7 @@ Codex 总览会结合当前额度窗口内的模型历史与平均额度速度�
 
 ## 当前范围与下一版计划
 
-当前支持 Windows 上的 Codex 套餐与多供应商本地记录；普通 ChatGPT 聊天和其他设备用量不自动采集。尚未完整覆盖 CodexBar 与 codex-usage 的 Codex 功能。
+当前支持 Windows 与 Apple Silicon macOS 上的 Codex 套餐与多供应商本地记录；普通 ChatGPT 聊天和其他设备用量不自动采集。尚未完整覆盖 CodexBar 与 codex-usage 的 Codex 功能。
 
 1.4 已加入 Qwen Code、Kimi Code、CodeBuddy Code 的只读连接器，并识别经 Claude Code、CC Switch 或兼容网关使用的 GLM、通义、Kimi、MiniMax、DeepSeek。旧版格式、套餐额度／积分接口及更多国产工具继续按[验收范围](DOMESTIC-COMPATIBILITY.md)推进。
 
@@ -109,7 +109,7 @@ Codex 总览会结合当前额度窗口内的模型历史与平均额度速度�
 
 ## 源码构建与参与贡献
 
-使用 Windows x64 和 Node.js 24，依赖版本固定在 package-lock.json。界面测试、翻译维护及实验性统计引擎说明见[贡献指南](../CONTRIBUTING.md)。真实账户测试仅供手动运行。
+使用 Node.js 24；Apple Silicon macOS 构建还需要 Rust 1.95 与 Xcode Command Line Tools，用于编译内嵌的 CC Switch Router。依赖版本固定在 package-lock.json。界面测试、翻译维护及实验性统计引擎说明见[贡献指南](../CONTRIBUTING.md)。真实账户测试仅供手动运行。
 
 ```powershell
 npm ci
@@ -117,6 +117,8 @@ npm test
 npm start
 npm run dist
 ```
+
+在 Apple Silicon Mac 上先执行 `git submodule update --init --recursive`，再运行 `npm run dist`，会生成本机临时签名的 arm64 DMG 与 ZIP；Windows 仍生成现有的 x64 NSIS 与 ZIP。
 
 ## 开发与致谢
 

@@ -1,5 +1,6 @@
 node_modules/
 dist/
+.DS_Store
 .cache/
 test-results/
 *.sqlite*
@@ -14,3 +15,4 @@ auth.json
 outputs/subscription-lens-*/
 *.exe
 *.zip
+/assets/router/subscription-lens-router

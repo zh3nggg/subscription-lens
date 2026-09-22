@@ -815,6 +815,10 @@
     "Select codex.exe",
     "Selecteer codex.exe"
   ],
+  "请选择 Codex 程序": [
+    "Select the Codex executable",
+    "Selecteer het Codex-programma"
+  ],
   "登录地址未通过校验": [
     "Sign-in URL could not be verified",
     "Aanmeldadres kon niet worden geverifieerd"

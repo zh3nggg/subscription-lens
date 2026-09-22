@@ -2,7 +2,7 @@
  * while its own state and its fake Codex directory remain isolated. */
 const { spawn } = require('node:child_process');
 const fs = require('node:fs'); const os = require('node:os'); const path = require('node:path');
-const executable = path.resolve(__dirname, '..', 'assets', 'router', 'subscription-lens-router.exe');
+const executable = path.resolve(__dirname, '..', 'assets', 'router', `subscription-lens-router${process.platform === 'win32' ? '.exe' : ''}`);
 if (!fs.existsSync(executable)) throw new Error(`CC Switch router runtime is missing: ${executable}`);
 const home = fs.mkdtempSync(path.join(os.tmpdir(), 'subscription-lens-router-check-'));
 const codexHome = path.join(home, 'fake-codex');

@@ -1,6 +1,6 @@
 # Subscription Lens
 
-Een Windows-desktopapp voor **Codex-abonnees** die hun resterende limieten willen bekijken, willen zien welke projecten tokens gebruiken en een modelmix willen kiezen die de limiet tot de volgende reset laat meegaan. De app vergelijkt ook vastgelegd gebruik tegen API-tarieven met de abonnementsbetaling. Geen API-sleutel nodig.
+Een desktopapp voor **Codex-abonnees** op Windows en Apple Silicon Macs die hun resterende limieten willen bekijken, willen zien welke projecten tokens gebruiken en een modelmix willen kiezen die de limiet tot de volgende reset laat meegaan. De app vergelijkt ook vastgelegd gebruik tegen API-tarieven met de abonnementsbetaling. Geen API-sleutel nodig.
 
 [English](../README.md) · [简体中文](README.zh-CN.md) · [Nederlands](README.nl.md)
 
@@ -26,7 +26,7 @@ De diagrammen per aanbieder en model tonen ook de gemiddelde kosten per 1M token
 
 ### Codex-providerroutering in de 3.0-preview
 
-De 3.0-preview voegt een pagina **Leveranciers** toe: importeer de huidige Codex-configuratie en herken de inlogsessie, of kies een DeepSeek-, Qwen-, Moonshot/Kimi- of OpenRouter-sjabloon om endpoint, model en omgevingsvariabele automatisch in te vullen. API-sleutels kunnen direct in de app worden ingevoerd en worden versleuteld opgeslagen met Windows-beveiligde opslag. Geavanceerde protocolinstellingen verschijnen alleen wanneer nodig; bewerken, directe endpointvalidatie en opslaan en testen zijn beschikbaar. Voor het wisselen wordt automatisch een back-up gemaakt en Codex kan via een lokale router worden gestuurd. Taken en antwoorden blijven in Codex GUI/CLI; Subscription Lens beheert de route en gebruiksregistratie. Providers met Responses API kunnen rechtstreeks worden gebruikt; alleen Chat Completions vereist nog een protocoladapter.
+De 3.0-preview voegt een pagina **Leveranciers** toe: importeer de huidige Codex-configuratie en herken de inlogsessie, of kies een DeepSeek-, Qwen-, Moonshot/Kimi- of OpenRouter-sjabloon om endpoint, model en omgevingsvariabele automatisch in te vullen. API-sleutels kunnen direct in de app worden ingevoerd en worden versleuteld opgeslagen met de beveiligde opslag van het besturingssysteem. Geavanceerde protocolinstellingen verschijnen alleen wanneer nodig; bewerken, directe endpointvalidatie en opslaan en testen zijn beschikbaar. Voor het wisselen wordt automatisch een back-up gemaakt en Codex kan via een lokale router worden gestuurd. Taken en antwoorden blijven in Codex GUI/CLI; Subscription Lens beheert de route en gebruiksregistratie. Providers met Responses API kunnen rechtstreeks worden gebruikt; alleen Chat Completions vereist nog een protocoladapter.
 
 Geïnstalleerde tools in standaardmappen worden automatisch gevonden en kunnen samen worden verbonden; aangepaste locaties blijven beschikbaar. Het Codex-overzicht adviseert een modelmix op basis van de modelhistorie en het gemiddelde quotatempo in het actieve venster. Omdat OpenAI geen exacte quotagewichten per model publiceert, toont het advies de betrouwbaarheid en blijft het zichzelf kalibreren.
 
@@ -74,7 +74,7 @@ Limietmetingen blijven bewaard zolang het bijbehorende quotavenster actief is en
 
 De app leest Codex-records zonder ze te wijzigen. Gebruiksmetadata, waaronder projectnamen, worden opgeslagen; gespreksinhoud wordt niet opgeslagen. Codex beheert de aanmelding. Je hoeft geen cookies of tokens te plakken.
 
-Gegevens staan in `%APPDATA%\Subscription Lens` en blijven standaard behouden na het verwijderen van de app. De ZIP-versie gebruikt dezelfde gegevensmap. Stel `LENS_DATA_DIR` in voor een andere locatie. Deel een actieve database niet tussen apparaten.
+Gegevens staan op Windows in `%APPDATA%\Subscription Lens` en op macOS in `~/Library/Application Support/Subscription Lens`. Ze blijven standaard behouden na het verwijderen van de app. Stel `LENS_DATA_DIR` in voor een andere locatie. Deel een actieve database niet tussen apparaten.
 
 De meegeleverde tarieven zijn een **momentopname van Standard-tarieven in USD op 2026-09-16**. Ze worden toegepast op het verzamelde historische gebruik; het zijn geen historische tarieven per gebeurtenis. Fast/Batch, regionale toeslagen en toolkosten zijn niet inbegrepen. Onbekende modellen of onvolledige tarieven blijven onberekend. Bij het bijwerken van de tarieven worden bestaande records opnieuw berekend.
 
@@ -84,7 +84,7 @@ Lokale records en accounttotalen worden apart getoond en nooit bij elkaar opgete
 
 ## Huidige scope en volgende update
 
-Ondersteunt Codex-abonnementen en lokale records van meerdere aanbieders op Windows. Gewone ChatGPT-gesprekken en gebruik op andere apparaten worden niet automatisch ingelezen. Volledige Codex-functionaliteit van CodexBar en codex-usage is nog niet bereikt.
+Ondersteunt Codex-abonnementen en lokale records van meerdere aanbieders op Windows en Apple Silicon macOS. Gewone ChatGPT-gesprekken en gebruik op andere apparaten worden niet automatisch ingelezen. Volledige Codex-functionaliteit van CodexBar en codex-usage is nog niet bereikt.
 
 Versie 1.4 voegt read-only connectors voor Qwen Code, Kimi Code en CodeBuddy Code toe, plus herkenning van GLM-, Qwen-, Kimi-, MiniMax- en DeepSeek-modellen via Claude Code, CC Switch of compatibele gateways. Oudere formaten en quota- of creditinterfaces blijven op de [acceptatieroadmap](DOMESTIC-COMPATIBILITY.md).
 
@@ -92,7 +92,7 @@ Versie 1.4 voegt read-only connectors voor Qwen Code, Kimi Code en CodeBuddy Cod
 
 ## Zelf bouwen en bijdragen
 
-Gebruik Windows x64 en Node.js 24. Afhankelijkheden zijn vastgelegd in package-lock.json. Zie [CONTRIBUTING.md](../CONTRIBUTING.md) voor synthetische interfacetests, vertalingen en de experimentele engine. De test met een echt account is uitsluitend voor handmatig gebruik.
+Gebruik Node.js 24. Voor de Apple Silicon macOS-build zijn ook Rust 1.95 en de Xcode Command Line Tools nodig om de ingebouwde CC Switch-router te compileren. Afhankelijkheden zijn vastgelegd in package-lock.json. Zie [CONTRIBUTING.md](../CONTRIBUTING.md) voor synthetische interfacetests, vertalingen en de experimentele engine. De test met een echt account is uitsluitend voor handmatig gebruik.
 
 ```powershell
 npm ci
@@ -101,6 +101,8 @@ npm start
 npm run dist
 ```
 
+Voer op een Apple Silicon Mac eerst `git submodule update --init --recursive` uit. Daarna maakt `npm run dist` lokaal ad-hoc ondertekende arm64 DMG- en ZIP-pakketten. Windows behoudt de bestaande x64 NSIS- en ZIP-doelen.
+
 ## Ontwikkeling en dankwoord
 
 Ontwikkeld met ondersteuning van **GPT-6 Astra**.
@@ -108,9 +110,6 @@ Ontwikkeld met ondersteuning van **GPT-6 Astra**.
 [CodexBar](https://github.com/steipete/CodexBar) dient als referentie voor limieten en desktopinteractie. MIT-gelicentieerde broncode van [codex-usage](https://github.com/zJay26/codex-usage) is opgenomen voor de volgende engine-integratie; de bron blijft met de licentievermelding behouden voor verdere integratie van de accounting-engine.
 
 MIT. Zie [licenties van derden](../THIRD-PARTY-NOTICES.md) voor bronnen en auteursrechten. Dit is een onafhankelijk project, niet verbonden aan OpenAI of onderschreven door de genoemde projecten.
-
-
-
 
 
 

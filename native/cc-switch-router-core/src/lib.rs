@@ -33,10 +33,7 @@
 pub mod app_store { pub fn get_app_config_dir_override() -> Option<std::path::PathBuf> { std::env::var_os("SUBSCRIPTION_LENS_ROUTER_DATA").map(std::path::PathBuf::from) } }
 pub mod tray { pub const TRAY_ID: &str = "subscription-lens-router"; pub fn create_tray_menu(_: &tauri::AppHandle, _: &crate::store::AppState) -> Result<(), String> { Ok(()) } }
 
-pub mod services {
-    #[path = "../../../cc-switch-runtime/src-tauri/src/services/mod.rs"] mod upstream;
-    pub use upstream::*;
-}
+#[path = "../../cc-switch-runtime/src-tauri/src/services/mod.rs"] pub mod services;
 
 pub mod commands {
     use std::sync::Arc;

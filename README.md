@@ -1,6 +1,6 @@
 # Subscription Lens
 
-A Windows desktop app for **Codex subscription users** who want to see their remaining quota, understand which projects use their tokens, and choose a model mix that carries their quota to the next reset. It also compares recorded usage at API rates with the subscription payment. No API key is required.
+A desktop app for **Codex subscription users** on Windows and Apple Silicon Macs who want to see their remaining quota, understand which projects use their tokens, and choose a model mix that carries their quota to the next reset. It also compares recorded usage at API rates with the subscription payment. No API key is required.
 
 [English](README.md) · [简体中文](docs/README.zh-CN.md) · [Nederlands](docs/README.nl.md)
 
@@ -26,7 +26,7 @@ The provider and model charts also show average cost per 1M tokens for the selec
 
 ### Codex provider routing in the 3.0 preview
 
-The 3.0 preview adds a **Providers** page for Codex routing. It imports the current `config.toml`, recognizes the official Codex login session without an API key, and offers templates for common OpenAI-compatible providers. Endpoint, model and credential fields are filled automatically; API keys can be entered in the app and are encrypted with Windows secure storage. The embedded CC Switch runtime owns the loopback takeover, recovery, provider hot switching and Responses/Chat protocol conversion. Subscription Lens keeps a pre-routing snapshot and restores it when routing stops or the app exits. Codex GUI and CLI remain the task interface; an existing ChatGPT-authenticated task keeps its official model slug while the router maps it to the chosen compatible upstream model.
+The 3.0 preview adds a **Providers** page for Codex routing. It imports the current `config.toml`, recognizes the official Codex login session without an API key, and offers templates for common OpenAI-compatible providers. Endpoint, model and credential fields are filled automatically; API keys can be entered in the app and are encrypted with the operating system's secure storage. The embedded CC Switch runtime owns the loopback takeover, recovery, provider hot switching and Responses/Chat protocol conversion. Subscription Lens keeps a pre-routing snapshot and restores it when routing stops or the app exits. Codex GUI and CLI remain the task interface; an existing ChatGPT-authenticated task keeps its official model slug while the router maps it to the chosen compatible upstream model.
 
 The Codex overview can recommend a model mix from the last 14 days of model usage and the current quota pace. It targets the next reset and shows its confidence. Because OpenAI does not publish an exact subscription-quota weight for each model, this is an adaptive recommendation based on API-equivalent intensity, not a guarantee.
 
@@ -74,7 +74,7 @@ Quota observations are stored locally while their quota window is active and for
 
 The app reads Codex records without changing them. It stores usage metadata, including project names, but not chat bodies. Authentication is managed by Codex; the app does not ask you to paste cookies or tokens.
 
-Data is saved in `%APPDATA%\Subscription Lens`. Uninstalling retains data by default. The portable ZIP uses the same user data location. Set `LENS_DATA_DIR` for a custom location. Do not share a live database between devices.
+Data is saved in `%APPDATA%\Subscription Lens` on Windows and `~/Library/Application Support/Subscription Lens` on macOS. Removing the app retains data by default. Set `LENS_DATA_DIR` for a custom location. Do not share a live database between devices.
 
 The bundled prices are the **2026-09-16 Standard USD snapshot**. These rates are applied to collected history, not historical prices at each event's time. Fast/Batch, regional surcharges and tool fees are not included. Unknown models or incomplete pricing remain unpriced. Updating the catalog recalculates existing records.
 
@@ -84,7 +84,7 @@ Local records and account summaries are shown separately, never added together. 
 
 ## Current scope and roadmap
 
-Supports Codex subscriptions and selected local multi-provider records on Windows. Regular ChatGPT conversations and other-device usage are not collected automatically. Full Codex feature parity with CodexBar and codex-usage is not complete.
+Supports Codex subscriptions and selected local multi-provider records on Windows and Apple Silicon macOS. Regular ChatGPT conversations and other-device usage are not collected automatically. Full Codex feature parity with CodexBar and codex-usage is not complete.
 
 Version 1.4 adds read-only Qwen Code, Kimi Code and CodeBuddy Code connectors, plus GLM, Qwen, Kimi, MiniMax and DeepSeek attribution through Claude Code, CC Switch or compatible gateways. Legacy formats, quota/credit interfaces and more domestic tools remain on the [acceptance roadmap](docs/DOMESTIC-COMPATIBILITY.md).
 
@@ -92,7 +92,7 @@ Version 1.4 adds read-only Qwen Code, Kimi Code and CodeBuddy Code connectors, p
 
 ## Build and contribute
 
-Use Windows x64 and Node.js 24. Dependencies are pinned in package-lock.json. See [CONTRIBUTING.md](CONTRIBUTING.md) for synthetic UI tests, translation changes and the experimental native engine. The real-account smoke test is manual-only.
+Use Node.js 24. The Apple Silicon macOS build also requires Rust 1.95 and Xcode Command Line Tools for the embedded CC Switch router. Dependencies are pinned in package-lock.json. See [CONTRIBUTING.md](CONTRIBUTING.md) for synthetic UI tests, translation changes and the experimental native engine. The real-account smoke test is manual-only.
 
 ```powershell
 npm ci
@@ -100,6 +100,8 @@ npm test
 npm start
 npm run dist
 ```
+
+On an Apple Silicon Mac, initialize the pinned runtime with `git submodule update --init --recursive`; `npm run dist` then creates locally ad-hoc-signed arm64 DMG and ZIP packages. Windows keeps its existing x64 NSIS and ZIP targets.
 
 ## Development and acknowledgements
 

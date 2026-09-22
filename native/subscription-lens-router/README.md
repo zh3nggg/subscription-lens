@@ -8,7 +8,8 @@ It delegates provider import, provider switching, proxy startup, Codex
 takeover, recovery and protocol conversion to CC Switch. It never accepts an
 API key through a command line or browser deep link.
 
-The build is intentionally not yet wired into `electron-builder`: it must first
-pass a clean-room test that starts the sidecar, activates a temporary Codex
-home, kills and restarts the sidecar, then confirms the upstream recovery path
-restores or reclaims configuration safely.
+The release build is staged under `assets/router/` and unpacked beside the
+Electron ASAR. Windows uses `subscription-lens-router.exe`; Apple Silicon
+macOS uses the executable `subscription-lens-router`. Packaging is gated by an
+isolated status check and a clean-room takeover, hot-switch, and official
+restore integration test.

@@ -105,8 +105,9 @@ class CCSwitchSidecar extends EventEmitter {
 }
 
 function defaultSidecarPath(appRoot, packaged) {
+  const executable = `subscription-lens-router${process.platform === 'win32' ? '.exe' : ''}`;
   return packaged
-    ? path.join(process.resourcesPath, 'app.asar.unpacked', 'assets', 'router', 'subscription-lens-router.exe')
-    : path.join(appRoot, 'native', 'subscription-lens-router', 'target', 'release', 'subscription-lens-router.exe');
+    ? path.join(process.resourcesPath, 'app.asar.unpacked', 'assets', 'router', executable)
+    : path.join(appRoot, 'native', 'subscription-lens-router', 'target', 'release', executable);
 }
 module.exports = { CCSwitchSidecar, defaultSidecarPath };
