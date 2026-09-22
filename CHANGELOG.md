@@ -45,6 +45,8 @@
 
 # Unreleased
 
+- 修复 Tauri 连接页把每条 CCS 请求日志误报成一个 Codex 会话、在 10,000 条读取上限处显示假性累计值且始终显示 0 个源文件的问题；现在会话和文件数来自 CCS 原生会话扫描器。项目页只根据可关联的 Codex 会话分组，模型摘要会在单元格内截断，不再撑出横向滚动。
+- Fixed Tauri connection statistics that treated every CCS request log as a Codex conversation, surfaced the 10,000-row read limit as a false count, and always showed zero source files. Session and file counts now come from CCS's native session scanner. Projects aggregate only linkable Codex sessions and model summaries truncate within their cells.
 - Tauri 主界面恢复为 Subscription Lens 的原有 Electron 视觉体系：侧栏、总览、套餐额度、分布饼图、活动页的项目 / 会话 / 记录 tab 和统计卡片保持原布局；供应商持久化、OAuth、保存、切换、回滚和本地代理继续由同一套 CCS 原生命令和数据库处理。
 - The Tauri main window restores the established Subscription Lens Electron visual system: sidebar, overview, quota, distribution chart, activity project/session/record tabs and statistic cards keep their original layout. Provider persistence, OAuth, saving, switching, rollback and the local proxy continue to use the same native CCS commands and database.
 - 供应商保存链路现在按 CC Switch 的 Codex `settingsConfig` 结构落盘：认证、完整配置和 `modelCatalog.models` 一起保存；模型目录保留显示名、上下文窗口、推理档位等字段，编辑时不输入新 API Key 也不会清空已保存凭据。模型发现结果也直接转换为同一目录结构，并由内嵌路由按该目录投影到 Codex。

@@ -166,7 +166,11 @@
     // cache counters again would double-count the same tokens.
     const total = input + output;
     const usd = moneyNumber(item.totalCostUsd);
-    const session = item.sessionId || item.requestId;
+    // Session-import rows keep the root Codex thread in their request id.
+    // `get_request_logs` does not currently serialize the database session_id,
+    // so recover it here instead of treating every token event as a session.
+    const sessionMatch = String(item.requestId || '').match(/^codex_session:thread-v1:([^:]+):\d+$/);
+    const session = item.sessionId || sessionMatch?.[1] || item.requestId;
     const catalogEntry = sessionCatalog.get(String(session)) || null;
     const isCodexSession = item.dataSource === 'codex_session';
     const project = catalogEntry?.project || (isCodexSession ? '未分类' : item.providerName || item.appType || 'Codex');
@@ -313,7 +317,7 @@
     const modelFilter = filters.model || null;
     const providerName = null;
     const common = { startDate, endDate, appType: 'codex', providerName, model: modelFilter };
-    const [summary, trends, models, providers, logs, settings, providerInfo, authStatus, sessionCatalogRows] = await Promise.all([
+    const [summary, trends, models, providers, logs, settings, providerInfo, authStatus, scannedSessions] = await Promise.all([
       invoke('get_usage_summary', common),
       invoke('get_usage_trends', common),
       invoke('get_model_stats', common),
@@ -325,12 +329,16 @@
       invoke('get_settings'),
       providerStatus(),
       invoke('auth_get_status', { authProvider: 'codex_oauth' }).catch(() => null),
-      invoke('get_codex_session_catalog').catch(() => []),
+      // This is CCS's own session scanner. It supplies the authoritative
+      // local file and thread count; request logs represent token events,
+      // not conversations.
+      invoke('list_sessions').catch(() => []),
     ]);
-    const sessionCatalog = new Map((sessionCatalogRows || []).map((entry) => [String(entry.sessionId), {
+    const codexSessions = (scannedSessions || []).filter((entry) => entry?.providerId === 'codex');
+    const sessionCatalog = new Map(codexSessions.map((entry) => [String(entry.sessionId), {
       title: entry.title || null,
-      cwd: entry.cwd || null,
-      project: projectNameFromCwd(entry.cwd) || '未分类',
+      cwd: entry.projectDir || null,
+      project: projectNameFromCwd(entry.projectDir) || '未分类',
     }]));
     let quota = null;
     try { quota = mapQuota(await invoke('get_codex_oauth_quota', { accountId: null })); } catch { /* quota is optional */ }
@@ -358,7 +366,11 @@
       ? String(b.at || '').localeCompare(String(a.at || ''))
       : (b.unpriced ? -1 : b.usd) - (a.unpriced ? -1 : a.usd) || String(b.at || '').localeCompare(String(a.at || '')));
     const logRows = orderedRows.slice(offset, offset + limit);
-    const hierarchy = aggregateHierarchy(allLogRows);
+    // Only session-import records can be associated with a local Codex
+    // conversation. Proxy requests without a session id remain in totals,
+    // but must not create thousands of fake one-request sessions/projects.
+    const sessionRows = allLogRows.filter((row) => row.origin === 'codex_session' && sessionCatalog.has(String(row.session)));
+    const hierarchy = aggregateHierarchy(sessionRows);
     const providerRows = (providers || []).map((item) => ({ provider: item.providerName || item.providerId || 'Unknown', model: '', tokens: number(item.realTotalTokens, number(item.totalTokens)), usd: moneyNumber(item.totalCost), events: number(item.requestCount) }));
     const modelsRows = (models || []).map(mapModel);
     // Session logs do not persist the selected upstream provider. Classify
@@ -369,10 +381,13 @@
       key: `${providerForModel(item.model)}:${item.model}`,
       provider: providerForModel(item.model),
     }));
-    const sessionCount = hierarchy.sessions.length;
-    const baseSummary = hierarchy.summary.events === events && !filters.project && !filters.session && !filters.day && !filters.query && !filters.unpriced
-      ? { tokens: totalTokens, usd, events, unpriced: 0 }
-      : hierarchy.summary;
+    const sourceSessionCount = codexSessions.length;
+    const hasHierarchyFilter = Boolean(filters.project || filters.session || filters.day || filters.query || filters.unpriced);
+    // The headline remains the CCS usage total. Project/session drill-downs
+    // intentionally show only records with an actual local session link.
+    const baseSummary = hasHierarchyFilter
+      ? hierarchy.summary
+      : { tokens: totalTokens, usd, events, unpriced: 0 };
     const outlooks = quota ? quota.windows.map((window) => ({
       ...window,
       remaining: Math.max(0, 100 - number(window.used)),
@@ -401,7 +416,7 @@
       monitor: { sources: [], providers: providerRows, models: modelsRows, summary: { requests: events, tokens: totalTokens, estimated: usd, pricedTokens: totalTokens, unpriced: 0 } },
       period: filters.period || 'month',
       range: { from: startDate ? new Date(startDate * 1000).toISOString() : null, to: new Date(endDate * 1000).toISOString() },
-      summary: { tokens: baseSummary.tokens, cached: number(summary?.totalCacheReadTokens), output: number(summary?.totalOutputTokens), pricedTokens: baseSummary.tokens, unpriced: baseSummary.unpriced, events: baseSummary.events, sessions: sessionCount, usd: baseSummary.usd, diff: null, ratio: null },
+      summary: { tokens: baseSummary.tokens, cached: number(summary?.totalCacheReadTokens), output: number(summary?.totalOutputTokens), pricedTokens: baseSummary.tokens, unpriced: baseSummary.unpriced, events: baseSummary.events, sessions: hierarchy.sessions.length, usd: baseSummary.usd, diff: null, ratio: null },
       models: modelsRows,
       modelProviders,
       projects: hierarchy.projects.slice(0, 50),
@@ -419,8 +434,8 @@
       account: { state: authStatus?.authenticated ? 'connected' : 'signed_out', plan: null, usage: null, updatedAt: null, lastError: null },
       settings: appSettings,
       scanner: { running: false, processed: 0, files: 0, lastScan: null, errors: 0 },
-      stats: { sessions: sessionCount, records: allLogRows.length, earliest: startDate ? new Date(startDate * 1000).toISOString() : null, latest: new Date(endDate * 1000).toISOString() },
-      fileStats: { files: 0, errors: 0 },
+      stats: { sessions: sourceSessionCount, records: number(logs?.total, allLogRows.length), earliest: startDate ? new Date(startDate * 1000).toISOString() : null, latest: new Date(endDate * 1000).toISOString() },
+      fileStats: { files: new Set(codexSessions.map((entry) => entry.sourcePath).filter(Boolean)).size, errors: 0 },
       allModels: modelsRows.map((item) => item.model),
       catalog: await modelCatalog(),
       detectedRoot: root,
