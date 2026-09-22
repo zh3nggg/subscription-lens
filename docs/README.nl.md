@@ -4,6 +4,8 @@ Een Windows-desktopapp voor **Codex-abonnees** die hun resterende limieten wille
 
 [English](../README.md) · [简体中文](README.zh-CN.md) · [Nederlands](README.nl.md)
 
+> **3.0-generatie-preview.** `3.0.0-beta.1` is een grote sprong vanaf de stabiele 1.6.x-lijn. De eerdere publieke versies gebruikten de Electron-desktopapp; deze versie behoudt die Electron-interface en bundelt de CC Switch-compatibele routeringsruntime. Dit is geen migratie vanaf Tauri. Houd 1.6.5 beschikbaar als terugval tijdens het testen.
+
 ## Wat kun je ermee?
 
 | Behoefte | Functies |
@@ -22,9 +24,9 @@ Verbind Qwen Code, Kimi Code, CodeBuddy Code, Qoder, CC Switch, Claude Code, Gem
 
 De diagrammen per aanbieder en model tonen ook de gemiddelde kosten per 1M tokens voor de geselecteerde periode. Alleen tokens met een prijs vormen de noemer; ongeprijsd gebruik blijft zichtbaar maar telt niet mee in het gemiddelde.
 
-### Nog niet uitgebracht: Codex-providerroutering
+### Codex-providerroutering in de 3.0-preview
 
-De ontwikkelbuild voegt een pagina **Leveranciers** toe: importeer de huidige Codex-configuratie en herken de inlogsessie, of kies een DeepSeek-, Qwen-, Moonshot/Kimi- of OpenRouter-sjabloon om endpoint, model en omgevingsvariabele automatisch in te vullen. API-sleutels kunnen direct in de app worden ingevoerd en worden versleuteld opgeslagen met Windows-beveiligde opslag. Geavanceerde protocolinstellingen verschijnen alleen wanneer nodig; bewerken, directe endpointvalidatie en opslaan en testen zijn beschikbaar. Voor het wisselen wordt automatisch een back-up gemaakt en Codex kan via een lokale router worden gestuurd. Taken en antwoorden blijven in Codex GUI/CLI; Subscription Lens beheert de route en gebruiksregistratie. Providers met Responses API kunnen rechtstreeks worden gebruikt; alleen Chat Completions vereist nog een protocoladapter.
+De 3.0-preview voegt een pagina **Leveranciers** toe: importeer de huidige Codex-configuratie en herken de inlogsessie, of kies een DeepSeek-, Qwen-, Moonshot/Kimi- of OpenRouter-sjabloon om endpoint, model en omgevingsvariabele automatisch in te vullen. API-sleutels kunnen direct in de app worden ingevoerd en worden versleuteld opgeslagen met Windows-beveiligde opslag. Geavanceerde protocolinstellingen verschijnen alleen wanneer nodig; bewerken, directe endpointvalidatie en opslaan en testen zijn beschikbaar. Voor het wisselen wordt automatisch een back-up gemaakt en Codex kan via een lokale router worden gestuurd. Taken en antwoorden blijven in Codex GUI/CLI; Subscription Lens beheert de route en gebruiksregistratie. Providers met Responses API kunnen rechtstreeks worden gebruikt; alleen Chat Completions vereist nog een protocoladapter.
 
 Geïnstalleerde tools in standaardmappen worden automatisch gevonden en kunnen samen worden verbonden; aangepaste locaties blijven beschikbaar. Het Codex-overzicht adviseert een modelmix op basis van de modelhistorie en het gemiddelde quotatempo in het actieve venster. Omdat OpenAI geen exacte quotagewichten per model publiceert, toont het advies de betrouwbaarheid en blijft het zichzelf kalibreren.
 
@@ -34,11 +36,11 @@ Geïnstalleerde tools in standaardmappen worden automatisch gevonden en kunnen s
 
 ## Downloaden en aan de slag
 
-**1.6.5 Stable · Windows x64.** De collector verwerkt nog niet alle recordformaten volledig; totalen kunnen te hoog of te laag zijn. Kosten zijn schattingen, geen factuur of gegarandeerde besparing. Deze build is niet digitaal ondertekend en heeft geen automatische updates.
+**3.0.0-beta.1 Preview · Windows x64.** Dit is de eerste 3.0-generatiepreview na de stabiele 1.6.x-lijn. De collector verwerkt nog niet alle recordformaten volledig; totalen kunnen te hoog of te laag zijn. Kosten zijn schattingen, geen factuur of gegarandeerde besparing. Deze build is niet digitaal ondertekend en heeft geen automatische updates.
 
-[Download 1.6.5](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.6.5)
+[Download 3.0.0-beta.1](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0-beta.1)
 
-Gebruik `Subscription-Lens-1.6.5-x64.exe` voor een eerste installatie of upgrade. Sluit Subscription Lens, start het installatiebestand en behoud bij een upgrade de bestaande installatiemap (bijvoorbeeld `D:\SubLens`). Het vervangt de oude app met behoud van instellingen en lokaal gebruik. Kies de draagbare ZIP alleen voor een losse versie zonder installatie: pak die uit in een eigen map en start `Subscription Lens.exe`; de ZIP werkt een geïnstalleerde app niet bij.
+Gebruik `Subscription-Lens-3.0.0-beta.1-installer-x64.exe` voor een normale installatie. Sluit Subscription Lens, start het installatiebestand en behoud bij een upgrade de bestaande installatiemap (bijvoorbeeld `D:\SubLens`). Omdat dit een grote generatiesprong is, houd je 1.6.5 of een back-up van de gegevens aan totdat je de preview hebt gecontroleerd. Kies `Subscription-Lens-3.0.0-beta.1-electron-x64.zip` voor een losse versie zonder installatie: pak die uit in een eigen map en start `Subscription Lens.exe`; de ZIP werkt een geïnstalleerde app niet bij.
 
 1. Kies **Monitoring starten** voor de standaardmap van Codex, of **Map kiezen** voor een eigen map met `sessions` of `archived_sessions`.
 2. Open **Verbindingen → Account verbinden** om limieten op te halen via de lokaal geïnstalleerde Codex. Gebruik **Aanmelden bij ChatGPT** als je nog niet bent aangemeld.

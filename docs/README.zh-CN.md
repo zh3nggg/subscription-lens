@@ -4,6 +4,8 @@
 
 [English](../README.md) · [简体中文](README.zh-CN.md) · [Nederlands](README.nl.md)
 
+> **3.0 代际预览版。** `3.0.0-beta.1` 是从 1.6.x 稳定版本线跳到的新一代版本。此前公开版本使用 Electron 桌面应用；本版本继续沿用 Electron 界面，并把兼容 CC Switch 的路由运行时直接打包进应用。这不是从 Tauri 迁移而来的版本。测试预览版时请保留 1.6.5 作为回退版本。
+
 ## 主要功能
 
 | 使用需求 | 对应功能 |
@@ -22,9 +24,9 @@
 
 供应商和模型饼图还会显示所选时间段的平均每百万 Tokens 成本。分母只包含已计价 Tokens；未计价用量仍会显示，但不会被纳入平均值。
 
-### 未发布：Codex 供应商路由
+### 3.0 预览版：Codex 供应商路由
 
-开发版新增“路由”页面：可导入当前 Codex 配置并识别登录态，也可通过 DeepSeek、Qwen、Moonshot／Kimi、OpenRouter 模板自动填充地址、模型和环境变量。API Key 可以直接在应用内填写，并由 Windows 安全存储加密；高级协议设置按需展开，支持编辑、地址即时校验和保存并测试。内嵌的 CC Switch 运行时负责本机代理接管、恢复、供应商热切换，以及 Responses／Chat 协议转换。首次接入本机 Router 需要重启一次 Codex，之后可在应用内一键切换供应商，不再重启 Codex GUI／CLI。停止路由、切回 OpenAI Official 或退出程序时，Subscription Lens 会恢复接管前快照。已有 ChatGPT 登录态的旧会话继续使用官方模型标识，代理在转发时映射到选定的兼容上游模型。
+3.0 预览版新增“路由”页面：可导入当前 Codex 配置并识别登录态，也可通过 DeepSeek、Qwen、Moonshot／Kimi、OpenRouter 模板自动填充地址、模型和环境变量。API Key 可以直接在应用内填写，并由 Windows 安全存储加密；高级协议设置按需展开，支持编辑、地址即时校验和保存并测试。内嵌的 CC Switch 运行时负责本机代理接管、恢复、供应商热切换，以及 Responses／Chat 协议转换。首次接入本机 Router 需要重启一次 Codex，之后可在应用内一键切换供应商，不再重启 Codex GUI／CLI。停止路由、切回 OpenAI Official 或退出程序时，Subscription Lens 会恢复接管前快照。已有 ChatGPT 登录态的旧会话继续使用官方模型标识，代理在转发时映射到选定的兼容上游模型。
 
 Codex 总览会结合当前额度窗口内的模型历史与平均额度速度，推荐下个重置前的模型使用比例，并标注可信度。由于 OpenAI 未公布各模型对应套餐额度的精确权重，该建议使用 API 等价强度持续校准，不承诺精确耗尽额度。
 
@@ -34,13 +36,13 @@ Codex 总览会结合当前额度窗口内的模型历史与平均额度速度�
 
 ## 下载与快速开始
 
-**1.6.5 正式版 · Windows x64。** 当前采集器尚未完整适配所有客户端记录格式，汇总可能偏高或偏低；费用是估算值，不是账单或保证节省的金额。安装包未做代码签名，暂不支持自动更新。
+**3.0.0-beta.1 预览版 · Windows x64。** 这是继 1.6.x 稳定版本线之后的首个 3.0 代际版本。当前采集器尚未完整适配所有客户端记录格式，汇总可能偏高或偏低；费用是估算值，不是账单或保证节省的金额。安装包未做代码签名，暂不支持自动更新。
 
-[下载 1.6.5](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.6.5)
+[下载 3.0.0-beta.1](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0-beta.1)
 
-首次安装或覆盖升级都应下载 `Subscription-Lens-1.6.5-x64.exe`。先关闭 Subscription Lens，运行安装器；升级时保留原安装目录（例如 `D:\SubLens`），即可替换旧程序并保留设置和本机用量历史。ZIP 仅适合免安装的独立副本：解压到单独目录后运行 `Subscription Lens.exe`，它不会更新已安装版本。
+常规安装请下载 `Subscription-Lens-3.0.0-beta.1-installer-x64.exe`。先关闭 Subscription Lens，运行安装器；如果是覆盖升级，请保留原安装目录（例如 `D:\SubLens`）。因为这是代际跳跃版本，请在确认预览版稳定前保留 1.6.5 或备份其数据。免安装副本请使用 `Subscription-Lens-3.0.0-beta.1-electron-x64.zip`，解压到单独目录后运行 `Subscription Lens.exe`，它不会更新已安装版本。
 
-1. 从 GitHub Releases 下载安装包；首次安装或升级均运行 `Subscription-Lens-1.6.5-x64.exe`。
+1. 从 GitHub Releases 下载安装包；首次安装或升级均运行 `Subscription-Lens-3.0.0-beta.1-installer-x64.exe`。
 2. 首次打开点击“开始监测”；自定义 Codex Home 可点“选择目录”。目录应包含 `sessions` 或 `archived_sessions`。
 3. 在“连接”中点击“连接账户”。应用使用本机 Codex 的官方登录；未登录时按按钮打开浏览器登录。
 4. 在“设置”中填写账期起止、套餐实付与额外额度（USD）。结束日期不含当天；可选手动日期或按续费日自动滚动。

@@ -1,6 +1,8 @@
-# Subscription Lens 1.6.5
+# Subscription Lens 3.0.0-beta.1
 
-Windows x64 stable release · 中文 / English / Nederlands
+Windows x64 preview release · 中文 / English / Nederlands
+
+3.0.0-beta.1 is a new-generation preview after the 1.6.x stable line. Earlier public releases used Electron; this preview keeps the Electron application shell and embeds the CC Switch-compatible routing runtime. It is not a Tauri migration. Keep 1.6.5 available as the stable fallback while evaluating the preview.
 
 ## Release boundary
 
@@ -10,6 +12,7 @@ Windows x64 stable release · 中文 / English / Nederlands
 - Average cost per 1M tokens, Tokens/cost switching, model drill-down, Qoder local records and Codex quota/model-mix features remain available.
 - Costs are API-equivalent estimates or source-reported amounts, not invoices. Qoder Credits remain separate from USD. Regular ChatGPT conversations and other-device usage are not collected automatically.
 - The Windows installer preserves the application identity, settings and local usage history during in-place upgrades. The build is unsigned and does not auto-update.
+- The release includes an Electron NSIS installer and a separate Electron portable ZIP. The previous 1.6.x stable installation can remain available as a fallback during this major-generation jump.
 
 ## 发布边界
 
@@ -19,6 +22,7 @@ Windows x64 stable release · 中文 / English / Nederlands
 - 平均每百万 Tokens 成本、Tokens／费用切换、模型下钻、Qoder 本地记录以及 Codex 额度／模型组合功能继续可用。
 - 费用是 API 等价估算或来源报告值，不是账单；Qoder Credits 与美元分开。普通 ChatGPT 对话和其他设备用量不会自动采集。
 - Windows 安装器支持原位覆盖升级并保留程序身份、设置和本机用量历史。安装包未签名，也不自动更新。
+- 本版本提供 Electron NSIS 安装包和独立的 Electron 便携 ZIP；这是代际跳跃版本，测试期间可保留 1.6.x 稳定版作为回退。
 
 See [release notes](../RELEASE-NOTES.md), [source setup](PROVIDER-MONITORING.md), [validation](VALIDATION.md) and [third-party notices](../THIRD-PARTY-NOTICES.md).
 

@@ -4,6 +4,8 @@ A Windows desktop app for **Codex subscription users** who want to see their rem
 
 [English](README.md) · [简体中文](docs/README.zh-CN.md) · [Nederlands](docs/README.nl.md)
 
+> **3.0 generation preview.** `3.0.0-beta.1` is a major-version jump from the 1.6.x stable line. The earlier public releases used the Electron desktop app; this release keeps that Electron UI and bundles the CC Switch-compatible routing runtime. It is not a Tauri migration. Keep 1.6.5 available as a fallback while evaluating the preview.
+
 ## What you can do
 
 | Task | Features |
@@ -22,9 +24,9 @@ Connect Qwen Code, Kimi Code, CodeBuddy Code, Qoder, CC Switch, Claude Code, Gem
 
 The provider and model charts also show average cost per 1M tokens for the selected period. The denominator includes only priced tokens; unpriced usage remains visible and is excluded from the average. Multi-provider views combine connected sources with exact duplicate suppression and flag possible overlaps instead of silently adding ambiguous records.
 
-### Unreleased: Codex provider routing
+### Codex provider routing in the 3.0 preview
 
-The local development build adds a **Providers** page for Codex routing. It imports the current `config.toml`, recognizes the official Codex login session without an API key, and offers templates for common OpenAI-compatible providers. Endpoint, model and credential fields are filled automatically; API keys can be entered in the app and are encrypted with Windows secure storage. The embedded CC Switch runtime owns the loopback takeover, recovery, provider hot switching and Responses/Chat protocol conversion. Subscription Lens keeps a pre-routing snapshot and restores it when routing stops or the app exits. Codex GUI and CLI remain the task interface; an existing ChatGPT-authenticated task keeps its official model slug while the router maps it to the chosen compatible upstream model.
+The 3.0 preview adds a **Providers** page for Codex routing. It imports the current `config.toml`, recognizes the official Codex login session without an API key, and offers templates for common OpenAI-compatible providers. Endpoint, model and credential fields are filled automatically; API keys can be entered in the app and are encrypted with Windows secure storage. The embedded CC Switch runtime owns the loopback takeover, recovery, provider hot switching and Responses/Chat protocol conversion. Subscription Lens keeps a pre-routing snapshot and restores it when routing stops or the app exits. Codex GUI and CLI remain the task interface; an existing ChatGPT-authenticated task keeps its official model slug while the router maps it to the chosen compatible upstream model.
 
 The Codex overview can recommend a model mix from the last 14 days of model usage and the current quota pace. It targets the next reset and shows its confidence. Because OpenAI does not publish an exact subscription-quota weight for each model, this is an adaptive recommendation based on API-equivalent intensity, not a guarantee.
 
@@ -34,11 +36,11 @@ The Codex overview can recommend a model mix from the last 14 days of model usag
 
 ## Download and get started
 
-**1.6.5 Stable · Windows x64.** The current collector does not yet handle all client record formats; totals may be too high or too low. Costs are estimates, not a bill or guaranteed savings. The build is unsigned and has no automatic updater.
+**3.0.0-beta.1 Preview · Windows x64.** This is the first 3.0-generation preview after the 1.6.x stable line. The collector does not yet handle all client record formats; totals may be too high or too low. Costs are estimates, not a bill or guaranteed savings. The build is unsigned and has no automatic updater.
 
-[Download 1.6.5](https://github.com/zh3nggg/subscription-lens/releases/tag/v1.6.5)
+[Download 3.0.0-beta.1](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0-beta.1)
 
-Use `Subscription-Lens-1.6.5-x64.exe` for a first installation or an upgrade. Close Subscription Lens, run the installer, and keep the existing installation folder (for example, `D:\SubLens`) when upgrading. It replaces the old app and retains settings and local usage history. Use the portable ZIP only for a separate, no-install copy: extract it to its own folder and run `Subscription Lens.exe`; it does not update an installed copy.
+For a normal installation, use `Subscription-Lens-3.0.0-beta.1-installer-x64.exe`. Close Subscription Lens, run the installer, and keep the existing installation folder (for example, `D:\SubLens`) if you are upgrading. Because this is a major-generation jump, keep the 1.6.5 installation or its data backup until you have verified the preview. Use `Subscription-Lens-3.0.0-beta.1-electron-x64.zip` for a separate, no-install copy: extract it to its own folder and run `Subscription Lens.exe`; it does not update an installed copy.
 
 1. Select **Start monitoring** to read the default Codex folder, or **Choose folder** for a custom folder containing `sessions` or `archived_sessions`.
 2. Open **Connections → Connect account** to query limits through your locally installed Codex. If signed out, use **Sign in to ChatGPT**.
