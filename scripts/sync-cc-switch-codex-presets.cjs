@@ -61,8 +61,24 @@ const presets = balancedObjects(source, arrayStart).map((block, index) => {
   const configModel = (config.match(/^model\s*=\s*["']([^"']+)/m) || [])[1] || '';
   const catalogBody = arrayBody(block, 'modelCatalog(');
   const catalogModels = [];
+  const catalogEntries = [];
+  for (const entry of balancedObjects(catalogBody, 0)) {
+    const entryModel = quoted(entry, 'model');
+    if (!entryModel) continue;
+    const candidate = { model: entryModel };
+    const displayName = quoted(entry, 'displayName');
+    if (displayName) candidate.displayName = displayName;
+    const contextWindow = (entry.match(/\bcontextWindow:\s*(\d+)/) || [])[1];
+    if (contextWindow) candidate.contextWindow = Number(contextWindow);
+    const reasoningBody = arrayBody(entry, 'reasoningLevels');
+    if (reasoningBody) candidate.reasoningLevels = [...reasoningBody.matchAll(/["']([^"']+)["']/g)].map(match => match[1]);
+    const defaultReasoningLevel = quoted(entry, 'defaultReasoningLevel');
+    if (defaultReasoningLevel) candidate.defaultReasoningLevel = defaultReasoningLevel;
+    catalogEntries.push(candidate);
+  }
   for (const match of catalogBody.matchAll(/\bmodel:\s*["']([^"']+)["']/g)) catalogModels.push(match[1]);
   if (!catalogModels.length) for (const match of catalogBody.matchAll(/["']([^"']+)["']/g)) if (!match[1].includes(' ') && !match[1].includes(':')) catalogModels.push(match[1]);
+  for (const entry of catalogEntries) if (!catalogModels.includes(entry.model)) catalogModels.push(entry.model);
   const model = generated?.[3] || configModel || catalogModels[0] || '';
   const apiFormat = quoted(block, 'apiFormat') || 'openai_responses';
   const category = quoted(block, 'category') || (block.includes('isOfficial: true') ? 'official' : 'others');
@@ -73,6 +89,7 @@ const presets = balancedObjects(source, arrayStart).map((block, index) => {
     baseUrl: endpoint,
     model,
     models: [...new Set(catalogModels)].slice(0, 30),
+    modelCatalog: catalogEntries.length ? catalogEntries.slice(0, 100) : [...new Set(catalogModels)].slice(0, 30).map(model => ({ model, displayName: model })),
     category,
     protocol: apiFormat === 'openai_chat' ? 'chat' : apiFormat === 'anthropic' ? 'anthropic' : 'responses',
     websiteUrl: quoted(block, 'websiteUrl'),
@@ -85,7 +102,7 @@ const presets = balancedObjects(source, arrayStart).map((block, index) => {
   };
 }).filter(item => item.name);
 
-presets.push({ id: 'custom', upstreamIndex: -1, name: 'Custom', baseUrl: '', model: '', models: [], category: 'custom', protocol: 'responses', websiteUrl: '', apiKeyUrl: '', icon: '', iconColor: '', partner: false, primePartner: false, official: false });
+presets.push({ id: 'custom', upstreamIndex: -1, name: 'Custom', baseUrl: '', model: '', models: [], modelCatalog: [], category: 'custom', protocol: 'responses', websiteUrl: '', apiKeyUrl: '', icon: '', iconColor: '', partner: false, primePartner: false, official: false });
 const revision = require('node:child_process').execFileSync('git', ['-C', path.dirname(path.dirname(sourcePath)), 'rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
 const payload = { source: 'CC Switch codexProviderPresets', revision, generatedAt: new Date().toISOString(), presets };
 fs.writeFileSync(outputPath, `'use strict';\n// Generated from the pinned CC Switch source. Do not edit manually.\nglobalThis.CCSwitchCodexPresets=${JSON.stringify(payload, null, 2)};\n`);

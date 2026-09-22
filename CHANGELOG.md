@@ -45,6 +45,8 @@
 
 # Unreleased
 
+- 供应商保存链路现在按 CC Switch 的 Codex `settingsConfig` 结构落盘：认证、完整配置和 `modelCatalog.models` 一起保存；模型目录保留显示名、上下文窗口、推理档位等字段，编辑时不输入新 API Key 也不会清空已保存凭据。模型发现结果也直接转换为同一目录结构，并由内嵌路由按该目录投影到 Codex。
+- Provider persistence now follows CC Switch's Codex `settingsConfig` shape: authentication, the complete config and `modelCatalog.models` are saved together. Model display names, context windows and reasoning levels survive edits, and leaving the API Key blank no longer clears the encrypted credential. Discovery results use the same catalog shape and the embedded router projects it to Codex.
 - 路由供应商编辑器新增可编辑的模型映射表：Codex 前台显示兼容别名，嵌入式 CC Switch 按每行映射到任意供应商的上游模型。适用于 DeepSeek、Qwen、Kimi、OpenRouter 和自定义兼容端点；模型菜单不再暴露会被 ChatGPT 登录态拒绝的第三方 slug。
 - The route-provider editor now has an editable model mapping table: Codex shows compatible aliases and the embedded CC Switch maps every row to an upstream model for any provider. It supports DeepSeek, Qwen, Kimi, OpenRouter and custom compatible endpoints without placing third-party slugs in the ChatGPT-authenticated picker.
 - De route-providereditor heeft nu een bewerkbare modeltoewijzingstabel: Codex toont compatibele aliassen en de ingebedde CC Switch vertaalt elke rij naar een upstreammodel van elke provider. Dit ondersteunt DeepSeek, Qwen, Kimi, OpenRouter en aangepaste compatibele endpoints zonder externe slugs in de ChatGPT-aangemelde modelkiezer te tonen.

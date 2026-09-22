@@ -186,6 +186,44 @@ test('provider keeps a deduplicated Codex model catalog including its default', 
   } finally { fs.rmSync(dir, { recursive: true, force: true }); }
 });
 
+test('provider saves the CC Switch modelCatalog shape without exposing credentials', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sublens-provider-ccs-shape-'));
+  try {
+    const store = new Store(dir);
+    const vault = { isAvailable: () => true, encrypt: value => `sealed:${value}`, decrypt: value => value.replace(/^sealed:/, '') };
+    const manager = new ProviderManager({ store, getCodexHome: () => path.join(dir, '.codex'), dataDir: dir, credentialVault: vault });
+    const provider = manager.save({
+      name: 'DeepSeek', model: 'deepseek-v4-flash', baseUrl: 'https://api.deepseek.com/v1',
+      envKey: 'DEEPSEEK_API_KEY', apiKey: 'deepseek-secret', catalogModels: [
+        { model: 'deepseek-v4-flash', displayName: 'DeepSeek V4 Flash', contextWindow: 64000, reasoningLevels: ['low', 'high', 'max'], defaultReasoningLevel: 'high' },
+        { model: 'deepseek-v4-pro', displayName: 'DeepSeek V4 Pro', contextWindow: 128000 }
+      ]
+    });
+    assert.deepEqual(provider.settingsConfig.modelCatalog.models, [
+      { model: 'deepseek-v4-flash', displayName: 'DeepSeek V4 Flash', contextWindow: 64000, reasoningLevels: ['low', 'high', 'max'], defaultReasoningLevel: 'high' },
+      { model: 'deepseek-v4-pro', displayName: 'DeepSeek V4 Pro', contextWindow: 128000 }
+    ]);
+    assert.equal(provider.catalogModels[1].model, 'deepseek-v4-pro');
+    assert.doesNotMatch(JSON.stringify(provider.settingsConfig), /deepseek-secret/);
+    assert.equal(manager.resolveCredential(manager.get(provider.id)), 'deepseek-secret');
+    store.close();
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});
+
+test('editing a provider without a new key preserves the catalog and encrypted key', () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sublens-provider-ccs-edit-'));
+  try {
+    const store = new Store(dir);
+    const vault = { isAvailable: () => true, encrypt: value => `sealed:${value}`, decrypt: value => value.replace(/^sealed:/, '') };
+    const manager = new ProviderManager({ store, getCodexHome: () => path.join(dir, '.codex'), dataDir: dir, credentialVault: vault });
+    const first = manager.save({ name: 'Gateway', model: 'vendor-fast', baseUrl: 'https://gateway.example/v1', apiKey: 'keep-me', catalogModels: [{ model: 'vendor-fast', displayName: 'Fast' }] });
+    const edited = manager.save({ id: first.id, name: 'Gateway renamed', model: 'vendor-fast', baseUrl: first.baseUrl, catalogModels: first.catalogModels });
+    assert.equal(manager.resolveCredential(edited), 'keep-me');
+    assert.deepEqual(edited.settingsConfig.modelCatalog.models, [{ model: 'vendor-fast', displayName: 'Fast' }]);
+    store.close();
+  } finally { fs.rmSync(dir, { recursive: true, force: true }); }
+});
+
 test('provider stores explicit compatible-Codex aliases for upstream model mappings', () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), 'sublens-provider-mapping-'));
   try {

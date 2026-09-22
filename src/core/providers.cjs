@@ -34,6 +34,88 @@ function normalizeModelMappings(value, defaultModel) {
   }).slice(0, CODEX_COMPATIBLE_ALIASES.length);
 }
 
+// CC Switch stores Codex's model directory as
+// { modelCatalog: { models: [{ model, displayName, contextWindow, ... }] } }.
+// Keep the richer shape as the source of truth.  The old string array and
+// alias mapping fields remain as compatibility projections for profiles saved
+// by Subscription Lens 3.0 beta and are derived from this list.
+function normalizeCodexCatalogModels(value, defaultModel) {
+  const raw = value && !Array.isArray(value) && Array.isArray(value.models)
+    ? value.models
+    : Array.isArray(value) ? value : [];
+  const seen = new Set();
+  const result = [];
+  const add = item => {
+    const source = typeof item === 'string' ? { model: item, displayName: item } : item && typeof item === 'object' ? item : null;
+    const model = String(source?.model || '').trim().slice(0, 180);
+    if (!model || seen.has(model) || /[\r\n\0]/.test(model)) return;
+    seen.add(model);
+    const displayName = String(source?.displayName || '').trim().slice(0, 180);
+    const rawContext = source?.contextWindow ?? source?.context_window;
+    const contextWindow = Number.isFinite(Number(rawContext)) && Number(rawContext) > 0 ? Math.floor(Number(rawContext)) : undefined;
+    const levels = source?.reasoningLevels ?? source?.reasoning_levels;
+    const reasoningLevels = Array.isArray(levels)
+      ? levels.map(level => String(level || '').trim()).filter(Boolean).slice(0, 16)
+      : undefined;
+    const defaultReasoningLevel = String(source?.defaultReasoningLevel ?? source?.default_reasoning_level ?? '').trim();
+    const modalities = Array.isArray(source?.inputModalities ?? source?.input_modalities)
+      ? (source.inputModalities ?? source.input_modalities).map(item => String(item || '').trim()).filter(Boolean).slice(0, 8)
+      : undefined;
+    result.push({
+      model,
+      ...(displayName ? { displayName } : {}),
+      ...(contextWindow ? { contextWindow } : {}),
+      ...(typeof source?.supportsParallelToolCalls === 'boolean' ? { supportsParallelToolCalls: source.supportsParallelToolCalls } : {}),
+      ...(modalities?.length ? { inputModalities: modalities } : {}),
+      ...(String(source?.baseInstructions || '').trim() ? { baseInstructions: String(source.baseInstructions).trim().slice(0, 20000) } : {}),
+      ...(reasoningLevels?.length ? { reasoningLevels } : {}),
+      ...(defaultReasoningLevel ? { defaultReasoningLevel } : {})
+    });
+  };
+  raw.forEach(add);
+  if (defaultModel) {
+    add(String(defaultModel));
+    const defaultIndex = result.findIndex(item => item.model === String(defaultModel).trim());
+    if (defaultIndex > 0) result.unshift(result.splice(defaultIndex, 1)[0]);
+  }
+  return result.slice(0, 100);
+}
+
+function buildCodexSettingsConfig(provider, catalogModels, incoming) {
+  let parsed = incoming;
+  if (typeof parsed === 'string' && parsed.trim()) {
+    try { parsed = JSON.parse(parsed); } catch { parsed = {}; }
+  }
+  const existing = parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+  const config = typeof existing.config === 'string' && existing.config.trim()
+    ? existing.config
+    : writeProviderConfig('', provider);
+  // Never copy API keys into the profile JSON.  CC Switch's settings shape is
+  // preserved, while Subscription Lens keeps the secret in its encrypted vault.
+  const auth = existing.auth && typeof existing.auth === 'object' && !Array.isArray(existing.auth)
+    ? { ...existing.auth }
+    : {};
+  delete auth.OPENAI_API_KEY;
+  return {
+    ...existing,
+    auth,
+    config,
+    modelCatalog: { models: catalogModels }
+  };
+}
+
+function codexCatalogFromModelsResponse(body, fallbackModel) {
+  const entries = Array.isArray(body?.data) ? body.data.map(item => ({
+    model: String(item?.id || item?.model || '').trim(),
+    displayName: String(item?.name || item?.display_name || item?.id || item?.model || '').trim(),
+    ...(Number(item?.context_window ?? item?.contextWindow) > 0 ? { contextWindow: Number(item.context_window ?? item.contextWindow) } : {}),
+    ...(Array.isArray(item?.reasoning_levels ?? item?.reasoningLevels) ? { reasoningLevels: item.reasoning_levels ?? item.reasoningLevels } : {}),
+    ...(item?.default_reasoning_level || item?.defaultReasoningLevel ? { defaultReasoningLevel: item.default_reasoning_level ?? item.defaultReasoningLevel } : {})
+  })) : [];
+  const modelEntries = normalizeCodexCatalogModels(entries, fallbackModel);
+  return { modelEntries, models: modelEntries.map(item => item.model) };
+}
+
 function rootConfigLines(text) {
   const lines = String(text || '').split(/\r?\n/);
   const firstTable = lines.findIndex(line => /^\s*\[/.test(line));
@@ -145,13 +227,22 @@ class ProviderManager {
     if (id !== builtin.id && name === 'OpenAI') throw new Error('第三方供应商名称不能为 OpenAI');
     const baseUrl = String(input.baseUrl || '').trim().replace(/\/$/, ''); if (!validUrl(baseUrl)) throw new Error('供应商地址无效');
     const model = String(input.model || '').trim().slice(0, 180); if (!model) throw new Error('模型名称无效');
-    const modelCatalog = [...new Set([model, ...(Array.isArray(input.modelCatalog) ? input.modelCatalog : [])].map(value => String(value || '').trim().slice(0, 180)).filter(value => value && !/[\r\n\0]/.test(value)))].slice(0, 100);
+    const existing = this.providers.find(p => p.id === id);
+    const existingCatalog = existing?.catalogModels || existing?.settingsConfig?.modelCatalog || existing?.modelCatalog || [];
+    const catalogModels = normalizeCodexCatalogModels(
+      Object.hasOwn(input, 'catalogModels') ? input.catalogModels
+        : Object.hasOwn(input, 'modelCatalog') ? input.modelCatalog
+        : existingCatalog,
+      model,
+    );
+    const modelCatalog = catalogModels.map(item => item.model);
     const modelMappings = normalizeModelMappings(input.modelMappings, model);
     const envKey = String(input.envKey || 'OPENAI_API_KEY').trim().toUpperCase(); if (!ENV_RE.test(envKey)) throw new Error('环境变量名称无效');
     const protocol = input.protocol === 'chat' ? 'chat' : 'responses';
-    const existing = this.providers.find(p => p.id === id);
-    const provider = { ...(existing || {}), id, name, kind: id === builtin.id ? 'official' : 'custom', baseUrl, model, modelCatalog, modelMappings, protocol, envKey, enabled: input.enabled !== false, builtIn: id === builtin.id, pricing: input.pricing === 'custom' ? 'custom' : 'catalog', capabilities: { responses: protocol === 'responses', streaming: true, tools: true, reasoning: protocol === 'responses' } };
+    const provider = { ...(existing || {}), id, name, kind: id === builtin.id ? 'official' : 'custom', baseUrl, model, modelCatalog, catalogModels, modelMappings, protocol, envKey, enabled: input.enabled !== false, builtIn: id === builtin.id, pricing: input.pricing === 'custom' ? 'custom' : 'catalog', capabilities: { responses: protocol === 'responses', streaming: true, tools: true, reasoning: protocol === 'responses' } };
     if (existing && existing.builtIn && id === builtin.id) Object.assign(provider, { ...clone(builtin), ...provider });
+    provider.settingsConfig = buildCodexSettingsConfig(provider, catalogModels,
+      Object.hasOwn(input, 'settingsConfig') ? input.settingsConfig : existing?.settingsConfig);
     this.providers = [...this.providers.filter(p => p.id !== id), provider]; this.store.set('providers', this.providers);
     if (Object.hasOwn(input, 'apiKey')) this.setStoredCredential(id, String(input.apiKey || '').trim());
     const listed = this.list().find(item => item.id === id);
@@ -170,7 +261,16 @@ class ProviderManager {
     const providerId = (text.match(/^\s*model_provider\s*=\s*["']([^"']+)/m) || [])[1];
     const baseUrl = providerId && (text.match(new RegExp(`\\[model_providers\\.${escapeRegExp(providerId)}\\][\\s\\S]*?base_url\\s*=\\s*["']([^"']+)`, 'm')) || [])[1];
     const isOfficial = providerId === 'openai' || !baseUrl || /^https:\/\/api\.openai\.com(?:\/v1)?$/i.test(baseUrl.replace(/\/$/, ''));
-    const imported = this.save({ id: isOfficial ? 'openai-official' : providerId || 'openai-official', name: isOfficial ? 'OpenAI Official' : providerId || 'Imported Codex', baseUrl: baseUrl || builtin.baseUrl, model, envKey: 'OPENAI_API_KEY', protocol: 'responses' });
+    let importedCatalog = [];
+    const catalogRef = (text.match(/^\s*model_catalog_json\s*=\s*["']([^"']+)["']/m) || [])[1];
+    if (catalogRef) {
+      try {
+        const catalogPath = path.resolve(path.dirname(configPath), catalogRef);
+        const catalog = JSON.parse(await fsp.readFile(catalogPath, 'utf8'));
+        importedCatalog = Array.isArray(catalog?.models) ? catalog.models : [];
+      } catch { /* External or stale catalog files are optional during import. */ }
+    }
+    const imported = this.save({ id: isOfficial ? 'openai-official' : providerId || 'openai-official', name: isOfficial ? 'OpenAI Official' : providerId || 'Imported Codex', baseUrl: baseUrl || builtin.baseUrl, model, envKey: 'OPENAI_API_KEY', protocol: 'responses', catalogModels: importedCatalog });
     this.activeId = imported.id; this.store.set('activeProviderId', this.activeId);
     return imported;
   }
@@ -253,8 +353,9 @@ class ProviderManager {
     const headers = { accept: 'application/json' }; if (key) headers.authorization = `Bearer ${key}`;
     const started = Date.now(); let response;
     try { response = await fetch(url, { headers, signal: AbortSignal.timeout(12000) }); } catch (error) { return { ok: false, provider: id, latencyMs: Date.now() - started, error: error.message, secretConfigured: Boolean(key) }; }
-    let models = []; try { const body = await response.json(); models = Array.isArray(body.data) ? body.data.map(m => m.id).filter(Boolean).slice(0, 100) : []; } catch { /* Some endpoints do not expose a JSON model list. */ }
-    return { ok: response.ok, status: response.status, provider: id, latencyMs: Date.now() - started, models, protocol: provider.protocol, secretConfigured: Boolean(key), error: response.ok ? null : `HTTP ${response.status}` };
+    let models = []; let modelEntries = [];
+    try { const body = await response.json(); ({ models, modelEntries } = codexCatalogFromModelsResponse(body, provider.model)); } catch { /* Some endpoints do not expose a JSON model list. */ }
+    return { ok: response.ok, status: response.status, provider: id, latencyMs: Date.now() - started, models, modelEntries, protocol: provider.protocol, secretConfigured: Boolean(key), error: response.ok ? null : `HTTP ${response.status}` };
   }
   async discover(input = {}) {
     const baseUrl = String(input.baseUrl || '').trim().replace(/\/$/, '');
@@ -269,11 +370,11 @@ class ProviderManager {
     const started = Date.now(); let response;
     try { response = await fetch(`${baseUrl}/models`, { headers, signal: AbortSignal.timeout(12000) }); }
     catch (error) { return { ok: false, latencyMs: Date.now() - started, models: [], error: error.message }; }
-    let models = [];
-    try { const body = await response.json(); models = Array.isArray(body.data) ? body.data.map(item => item.id).filter(Boolean).slice(0, 100) : []; } catch { /* Some compatible endpoints do not expose models. */ }
-    return { ok: response.ok, status: response.status, latencyMs: Date.now() - started, models, error: response.ok ? null : `HTTP ${response.status}` };
+    let models = []; let modelEntries = [];
+    try { const body = await response.json(); ({ models, modelEntries } = codexCatalogFromModelsResponse(body, input.model)); } catch { /* Some compatible endpoints do not expose models. */ }
+    return { ok: response.ok, status: response.status, latencyMs: Date.now() - started, models, modelEntries, error: response.ok ? null : `HTTP ${response.status}` };
   }
   status() { return { activeId: this.activeId, providers: this.list(), configPath: path.join(this.getCodexHome(), 'config.toml'), backupDir: this.backupDir }; }
 }
 
-module.exports = { ProviderManager, builtin, writeProviderConfig, CODEX_COMPATIBLE_ALIASES };
+module.exports = { ProviderManager, builtin, writeProviderConfig, CODEX_COMPATIBLE_ALIASES, normalizeCodexCatalogModels };

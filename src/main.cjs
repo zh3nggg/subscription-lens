@@ -80,7 +80,7 @@ function register(){
     if(!key)throw Error('请先在高级设置中保存 API Key');
     const wasRunning=sidecar.status().running;
     await sidecar.start();
-    await sidecar.request({command:'activateCodexProvider',providerId:provider.id,name:provider.name,baseUrl:provider.baseUrl,apiKey:key,upstreamModel:provider.model,modelMappings:provider.modelMappings||[],protocol:provider.protocol},60_000);
+    await sidecar.request({command:'activateCodexProvider',providerId:provider.id,name:provider.name,baseUrl:provider.baseUrl,apiKey:key,upstreamModel:provider.model,modelMappings:provider.modelMappings||[],modelCatalog:provider.catalogModels||provider.modelCatalog||[],protocol:provider.protocol},60_000);
     service.store.set('ccSwitchRoutingActive',true);
     const result=service.providers.switchActive(id);changed();
     return {...result,mode:wasRunning?'cc-switch-hot':'cc-switch-takeover',needsRestart:!wasRunning};

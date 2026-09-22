@@ -27,6 +27,26 @@ struct ModelMapping {
     upstream: String,
 }
 
+#[derive(Deserialize, Serialize, Clone)]
+#[serde(rename_all = "camelCase")]
+struct CatalogModel {
+    model: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    display_name: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    context_window: Option<u64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    supports_parallel_tool_calls: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    input_modalities: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    base_instructions: Option<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    reasoning_levels: Option<Vec<String>>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    default_reasoning_level: Option<String>,
+}
+
 #[derive(Deserialize)]
 #[serde(tag = "command", rename_all = "camelCase")]
 enum Command {
@@ -43,6 +63,8 @@ enum Command {
         upstream_model: String,
         #[serde(rename = "modelMappings", default)]
         model_mappings: Vec<ModelMapping>,
+        #[serde(rename = "modelCatalog", default)]
+        model_catalog: Vec<CatalogModel>,
         #[serde(default)]
         protocol: Option<String>,
     },
@@ -76,7 +98,7 @@ fn quoted_toml(raw: &str) -> String { serde_json::to_string(raw).unwrap_or_else(
 
 fn build_provider(
     provider_id: String, name: String, base_url: String, api_key: String,
-    upstream_model: String, model_mappings: Vec<ModelMapping>, protocol: Option<String>,
+    upstream_model: String, model_mappings: Vec<ModelMapping>, model_catalog: Vec<CatalogModel>, protocol: Option<String>,
 ) -> Result<Provider, String> {
     let base_url = base_url.trim().trim_end_matches('/').to_string();
     let upstream_model = upstream_model.trim().to_string();
@@ -91,6 +113,21 @@ fn build_provider(
         if !CODEX_COMPATIBLE_ALIASES.contains(&mapping.alias.trim()) || !aliases.insert(mapping.alias.trim().to_string()) || mapping.upstream.trim().is_empty() || mapping.upstream.chars().any(char::is_control) {
             return Err("Invalid or duplicate Codex model mapping".to_string());
         }
+    }
+    let mut catalog = Vec::new();
+    let mut catalog_ids = std::collections::HashSet::new();
+    for entry in model_catalog {
+        let model = entry.model.trim().to_string();
+        if model.is_empty() || model.chars().any(char::is_control) || !catalog_ids.insert(model.clone()) {
+            continue;
+        }
+        catalog.push(CatalogModel { model, ..entry });
+        if catalog.len() >= 100 { break; }
+    }
+    if catalog.is_empty() {
+        catalog.push(CatalogModel { model: upstream_model.clone(), display_name: Some(upstream_model.clone()), context_window: None, supports_parallel_tool_calls: None, input_modalities: None, base_instructions: None, reasoning_levels: None, default_reasoning_level: None });
+    } else if !catalog_ids.contains(&upstream_model) {
+        catalog.insert(0, CatalogModel { model: upstream_model.clone(), display_name: Some(upstream_model.clone()), context_window: None, supports_parallel_tool_calls: None, input_modalities: None, base_instructions: None, reasoning_levels: None, default_reasoning_level: None });
     }
     let primary_alias = mappings.first().map(|mapping| mapping.alias.trim()).unwrap_or(SAFE_FALLBACK_MODEL);
     let wire_api = if protocol.as_deref() == Some("chat") { "chat" } else { "responses" };
@@ -114,9 +151,7 @@ fn build_provider(
             // forwarding. Publishing third-party slugs here makes existing
             // chats fail client-side before the proxy can run.
             "codexAliasMappings": mappings.clone(),
-            "modelCatalog": {
-                "models": mappings.iter().map(|mapping| json!({ "model": mapping.alias.trim() })).collect::<Vec<_>>()
-            },
+            "modelCatalog": { "models": catalog },
         }), Some(base_url),
     ))
 }
@@ -172,8 +207,8 @@ async fn main() {
         let shutdown = matches!(serde_json::from_str::<Command>(&line), Ok(Command::Shutdown));
         let response = match serde_json::from_str::<Command>(&line) {
             Ok(Command::Status) => state.proxy_service.get_status().await.map(|status| ok(json!(status))).unwrap_or_else(fail),
-            Ok(Command::ActivateCodexProvider { provider_id, name, base_url, api_key, upstream_model, model_mappings, protocol }) => {
-                match safe_id(&provider_id).and_then(|id| build_provider(id, name, base_url, api_key, upstream_model, model_mappings, protocol)) {
+            Ok(Command::ActivateCodexProvider { provider_id, name, base_url, api_key, upstream_model, model_mappings, model_catalog, protocol }) => {
+                match safe_id(&provider_id).and_then(|id| build_provider(id, name, base_url, api_key, upstream_model, model_mappings, model_catalog, protocol)) {
                     Ok(provider) => activate(&state, provider).await.map(ok).unwrap_or_else(fail),
                     Err(error) => fail(error),
                 }

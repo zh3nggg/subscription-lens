@@ -2602,5 +2602,85 @@
   "选择预设后可继续调整下方字段。": [
     "Choose a preset, then adjust the fields below if needed.",
     "Kies een preset en pas daarna zo nodig de velden hieronder aan."
+  ],
+  "先输入或保存 API Key，再获取模型目录。": [
+    "Enter or save an API key before fetching the model catalog.",
+    "Voer een API-sleutel in of sla hem op voordat je de modelcatalogus ophaalt."
+  ],
+  "按 CC Switch 的 Codex 供应商结构添加端点、凭据和模型目录。": [
+    "Add an endpoint, credentials and model catalog using the CC Switch Codex provider structure.",
+    "Voeg een endpoint, referenties en modelcatalogus toe volgens de Codex-providerstructuur van CC Switch."
+  ],
+  "保存到 Codex config.toml 的默认 model；留空时使用模型目录第一行。": [
+    "The default model saved to Codex config.toml; the first model in the catalog is used when this is empty.",
+    "Het standaardmodel dat in Codex config.toml wordt opgeslagen; het eerste catalogusmodel wordt gebruikt als dit leeg is."
+  ],
+  "模型目录会按 CC Switch 格式保存，编辑时保留显示名、上下文窗口和推理档位。": [
+    "The model catalog is saved in the CC Switch format, preserving display names, context windows and reasoning levels when edited.",
+    "De modelcatalogus wordt opgeslagen in het CC Switch-formaat; weergavenamen, contextvensters en redeneerniveaus blijven behouden bij bewerken."
+  ],
+  "上游格式": [
+    "Upstream format",
+    "Upstreamindeling"
+  ],
+  "Responses（原生）": [
+    "Responses (native)",
+    "Responses (native)"
+  ],
+  "这些字段对应 CC Switch 的 Codex 配置。": [
+    "These fields correspond to the CC Switch Codex configuration.",
+    "Deze velden komen overeen met de Codex-configuratie van CC Switch."
+  ],
+  "模型目录": [
+    "Model catalog",
+    "Modelcatalogus"
+  ],
+  "这是 Codex 看到的模型列表。每行保存显示名、真实模型 ID、上下文窗口和供应商接受的推理档位。": [
+    "This is the model list shown to Codex. Each row saves a display name, real model ID, context window and reasoning levels accepted by the provider.",
+    "Dit is de modellijst die Codex ziet. Elke rij bewaart een weergavenaam, echte model-ID, contextvenster en redeneerniveaus die de provider accepteert."
+  ],
+  "添加模型": [
+    "Add model",
+    "Model toevoegen"
+  ],
+  "显示名称 / 真实模型 ID": [
+    "Display name / real model ID",
+    "Weergavenaam / echte model-ID"
+  ],
+  "上下文 / 推理档位": [
+    "Context / reasoning levels",
+    "Context / redeneerniveaus"
+  ],
+  "显示名称": [
+    "Display name",
+    "Weergavenaam"
+  ],
+  "真实模型 ID": [
+    "Real model ID",
+    "Echte model-ID"
+  ],
+  "上下文窗口": [
+    "Context window",
+    "Contextvenster"
+  ],
+  "推理档位：low, high, max": [
+    "Reasoning levels: low, high, max",
+    "Redeneerniveaus: low, high, max"
+  ],
+  "移除模型": [
+    "Remove model",
+    "Model verwijderen"
+  ],
+  "还没有模型目录，点击添加模型或获取模型列表。": [
+    "No model catalog yet. Add a model or fetch the model list.",
+    "Nog geen modelcatalogus. Voeg een model toe of haal de modellijst op."
+  ],
+  "保存后会写入 CC Switch 兼容的 modelCatalog.models；不会把 API Key 写入配置文件。": [
+    "Saving writes CC Switch-compatible modelCatalog.models; the API key is never written to the config file.",
+    "Opslaan schrijft modelCatalog.models in CC Switch-formaat; de API-sleutel wordt nooit in het configuratiebestand gezet."
+  ],
+  "高级选项": [
+    "Advanced options",
+    "Geavanceerde opties"
   ]
 }
