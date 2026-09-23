@@ -39,7 +39,10 @@ jobs:
         run: npm test
 
       - name: Build DMG and ZIP
-        run: npm run dist
+        run: |
+          npm run predist
+          npx --no-install electron-builder --mac dmg zip --arm64 --publish never
+          npm run postdist
 
       - name: Verify packages
         shell: bash
