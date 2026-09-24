@@ -1,3 +1,23 @@
+# 3.0.0-beta.3 · 本地预览（未发布）
+
+Windows 本地测试安装包包含本节所列的多设备 R2 同步、设备总览及近期 Tauri 修复。安装包保存在本机，未创建 GitHub Release；源码随项目更新提交。
+
+- Tauri Windows 版新增可选 Cloudflare R2 多设备同步：每台设备在专用 bucket 前缀下维护一个 Sublens JSON 统计快照；密钥进入 Windows 凭据管理器，快照仅含匿名记录/会话标识、时间、模型、Token 分类与可用计价，不含原始日志、聊天正文、项目路径或认证信息。bucket 支持应用内创建；打开应用时同步，并在运行期间每 5 分钟双向同步。
+- 新增总览「本机 / 多设备」视图，并支持在设备页查看已同步设备统计和按设备打开用量记录。
+- Added opt-in Cloudflare R2 multi-device sync to the Windows Tauri app. Each device maintains one Sublens JSON usage snapshot under a dedicated bucket prefix. Keys are stored in Windows Credential Manager; snapshots contain only anonymized record/session IDs, timestamps, models, token categories and available pricing, never raw logs, chat text, project paths or auth data. Buckets can be created in-app. Sync runs on launch and every five minutes while the app remains open.
+- Added a Local / All devices selector to the Codex overview, plus a synced-device list and per-device usage drill-down.
+- De Windows Tauri-app kan nu optioneel gebruikssnapshots via Cloudflare R2 tussen apparaten synchroniseren. Elk apparaat beheert één Sublens-JSON-bestand onder een aparte bucketprefix. Sleutels staan in Windows Credential Manager; snapshots bevatten alleen geanonimiseerde record-/sessie-ID's, tijdstippen, modellen, tokencategorieën en beschikbare tarieven, nooit ruwe logs, chattekst, projectpaden of authenticatiegegevens. Buckets kunnen in de app worden aangemaakt. Synchronisatie gebeurt bij het starten en elke vijf minuten zolang de app open is.
+- Het Codex-overzicht heeft nu een keuze tussen Dit apparaat en Alle apparaten; de apparatenpagina toont gesynchroniseerde totalen en gebruik per apparaat.
+- Tauri 版多供应商采集支持 CodeBuddy 与 Qoder：自动发现常用目录，也可选择自定义日志目录；扫描记录只保存请求用量元数据，不保存聊天正文或原始日志。用量视图支持来源筛选、分页、跨来源重复提示；价格视图支持本地自定义计价规则，未知价格继续标为未计价。
+- Added Tauri collectors for CodeBuddy and Qoder with common-folder discovery and custom log-folder selection. Scans retain usage metadata only, never chat bodies or raw log lines. Usage supports source filtering, pagination and cross-source duplicate hints; custom local price rules are available and unknown prices remain unpriced.
+- De Tauri-app verzamelt nu lokaal gebruik van CodeBuddy en Qoder, met automatische detectie en keuze van een aangepaste logmap. Alleen gebruiksmetadata wordt bewaard, geen chatinhoud of ruwe logs. Gebruik ondersteunt bronfilters, paginering en meldingen bij mogelijke dubbelen; onbekende prijzen blijven ongeprijsd.
+- Windows Tauri 版（包括调试启动）现在不会附带终端窗口，诊断信息仍写入应用日志。
+- Windows Tauri builds now launch without an attached terminal window, including debug builds; diagnostics remain available in the app log.
+- Windows Tauri-builds starten nu zonder gekoppeld terminalvenster, ook tijdens debuggebruik; diagnostiek blijft beschikbaar via het app-logboek.
+- 修复 Tauri 版切换到多供应商视图后，用量和价格页面因监控数据结构不完整而崩溃的问题；无已连接来源时显示明确空状态，不将 Codex 本机统计误作多供应商记录。
+- Fixed crashes in the Tauri multi-provider usage and pricing views caused by an incomplete monitor data shape. Empty states now appear when no monitor source is connected, without presenting local Codex statistics as multi-provider records.
+- Herstelde crashes in de Tauri-weergaven voor gebruik en prijzen met meerdere providers. Zonder verbonden bron verschijnt nu een lege status; lokale Codex-statistieken worden niet als gegevens van meerdere providers weergegeven.
+
 # 3.0.0-beta.2
 
 - 新增 Apple Silicon macOS 构建：Electron 主应用、内嵌 CC Switch Router、Codex 自动发现、菜单栏与托盘均已适配 arm64 macOS；发布流程生成临时签名的 DMG、ZIP 与 SHA256 清单。

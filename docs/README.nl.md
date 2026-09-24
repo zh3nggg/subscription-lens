@@ -15,12 +15,16 @@ Een desktopapp voor **Codex-abonnees** op Windows en Apple Silicon Macs die hun 
 | Je modelmix plannen | Maak van de modelhistorie en het gemiddelde tempo in het actieve quotavenster een aanbevolen mix voor de volgende reset, met betrouwbaarheid en bijsturing per model. |
 | Gebruik met je betaling vergelijken | Geschatte equivalente API-kosten naast je werkelijke betaling per factuurperiode bekijken. |
 | Limieten tijdens het werk volgen | Een compact vastzetbaar venster, systeemvak en optionele limietmeldingen met stille uren. |
-| Apparaten privé vergelijken | Koppel lokale Codex-records aan een stabiel apparaat, filter per apparaat en wissel anonieme pakketten uit zonder chatinhoud of paden. |
+| Apparaten privé vergelijken | De huidige, nog niet uitgebrachte Windows Tauri-broncode synchroniseert optioneel één privacyvriendelijke Sublens-gebruikssnapshot per apparaat via Cloudflare R2; bronlogs, chatinhoud en projectpaden worden niet geüpload. |
 | Exporteren en delen | Records naar CSV exporteren of een HTML-overzicht opslaan zonder projectnamen of accountidentificaties. |
 
 ## Aanbieders volgen in 1.5
 
 Verbind Qwen Code, Kimi Code, CodeBuddy Code, Qoder, CC Switch, Claude Code, Gemini CLI of je eigen API-gebruiksbestand. Op Windows leest Qoder Quest lokale IDE-agentlogs met contextsnapshots; deze Tokens worden duidelijk als schatting gemarkeerd. Qoder-streams kunnen ook met het ingebouwde script worden vastgelegd; Credits blijven gescheiden van API-equivalent USD en cumulatieve resultaten worden overgeslagen om dubbele kosten te voorkomen. Chinese modelfamilies worden in hetzelfde diagram toegewezen aan Alibaba Cloud, Moonshot AI, Zhipu AI, MiniMax en DeepSeek. [Bronnen en kostendefinities](PROVIDER-MONITORING.md).
+
+De Tauri 3.x-versie verzamelt momenteel native gebruiksgegevens van alleen CodeBuddy Code en Qoder. De overige hierboven genoemde bronnen zijn nog beschikbaar in de Electron-monitoringversie en zijn niet aangesloten op Tauri.
+
+De huidige, nog niet uitgebrachte Windows Tauri-broncode biedt daarnaast optionele R2-synchronisatie tussen apparaten. Je kunt in de app een aparte bucket aanmaken of een bestaande bucket opgeven; Sublens bewaart één JSON-snapshot per apparaat onder een bucketprefix (een virtuele map in R2). De Access Key staat in Windows Credential Manager. Snapshots bevatten alleen gehashte record-/sessie-ID's, tijdstippen, modellen, tokencategorieën en beschikbare kosten; nooit bronlogs, chattekst, projectpaden, API-sleutels of aanmeldgegevens. Synchronisatie gebeurt bij het starten en elke vijf minuten zolang de app open is. De weergave kan daardoor maximaal vijf minuten achterlopen.
 
 De diagrammen per aanbieder en model tonen ook de gemiddelde kosten per 1M tokens voor de geselecteerde periode. Alleen tokens met een prijs vormen de noemer; ongeprijsd gebruik blijft zichtbaar maar telt niet mee in het gemiddelde.
 
@@ -91,7 +95,7 @@ De meegeleverde tarieven zijn een **momentopname van Standard-tarieven in USD op
 
 Equivalente API-kosten zijn een schatting, geen factuur of gegarandeerde besparing. Vul je werkelijke betaling in om te vergelijken. Ontbrekende gegevens kunnen de geschatte waarde verlagen.
 
-Lokale records en accounttotalen worden apart getoond en nooit bij elkaar opgeteld. Gewone ChatGPT-gesprekken worden niet ondersteund. Andere apparaten en details van cloudtaken worden niet automatisch ingelezen. Historische lokale records worden niet automatisch aan het verbonden account toegewezen; selecteer op gedeelde computers alleen je eigen mappen.
+Lokale records en accounttotalen worden apart getoond en nooit bij elkaar opgeteld. Gewone ChatGPT-gesprekken en details van cloudtaken worden niet verzameld. Totalen van meerdere apparaten bevatten alleen snapshots die je zelf hebt ingeschakeld. Historische lokale records worden niet automatisch aan het verbonden account toegewezen; selecteer op gedeelde computers alleen je eigen mappen.
 
 ## Huidige scope en volgende update
 

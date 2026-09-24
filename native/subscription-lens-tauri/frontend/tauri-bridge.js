@@ -47,7 +47,7 @@
   const safe = (fn) => (...args) => Promise.resolve().then(() => fn(...args)).then(success, failure);
   window.addEventListener('error', (event) => recordFrontendLog('error', event.message || 'renderer error', { source: event.filename, line: event.lineno, column: event.colno }));
   window.addEventListener('unhandledrejection', (event) => recordFrontendLog('error', `unhandled rejection: ${event.reason?.message || event.reason || 'unknown'}`));
-  recordFrontendLog('info', 'renderer initialized', { version: '3.0.0', host: 'tauri' });
+  recordFrontendLog('info', 'renderer initialized', { version: '3.0.0-beta.3', host: 'tauri' });
 
   const codexHome = () => {
     const home = String(navigator.userAgent || '').includes('Windows') ? '%USERPROFILE%' : '~';
@@ -239,6 +239,7 @@
   const queryCache = new Map();
   const queryInflight = new Map();
   let queryGeneration = 0;
+  let deviceSyncInflight = null;
   const QUERY_CACHE_TTL_MS = 15_000;
   function queryCacheKey(filters) {
     return JSON.stringify({
@@ -319,7 +320,13 @@
     const modelFilter = filters.model || null;
     const providerName = null;
     const common = { startDate, endDate, appType: 'codex', providerName, model: modelFilter };
-    const [summary, trends, models, providers, logs, settings, providerInfo, authStatus, scannedSessions] = await Promise.all([
+    const monitorPromise = invoke('sublens_monitor_query', {
+      from: new Date((startDate ?? 0) * 1000).toISOString(), to: new Date(endDate * 1000).toISOString(),
+      connection: filters.connection || 'all', provider: filters.provider || null, model: filters.model || null,
+      query: filters.query || null, day: filters.day || null, failed: Boolean(filters.failed), overlap: filters.overlap || null,
+      unpriced: Boolean(filters.unpriced), sort: filters.sort || 'cost', offset: number(filters.offset), limit: number(filters.limit, 50),
+    }).catch((error) => { recordFrontendLog('error', 'multi-provider monitor query failed', { message: error?.message }); return null; });
+    const [summary, trends, models, providers, logs, settings, providerInfo, authStatus, scannedSessions, monitor, deviceCloud, deviceSync] = await Promise.all([
       invoke('get_usage_summary', common),
       invoke('get_usage_trends', common),
       invoke('get_model_stats', common),
@@ -335,6 +342,9 @@
       // local file and thread count; request logs represent token events,
       // not conversations.
       invoke('list_sessions').catch(() => []),
+      monitorPromise,
+      invoke('sublens_device_query', { from: startDate ?? 0, to: endDate, deviceId: filters.device || null }).catch(() => ({ devices: [], summary: { tokens: 0, cached: 0, output: 0, events: 0, sessions: 0, usd: 0, pricedTokens: 0, unpriced: 0 }, models: [], days: [], rows: [] })),
+      invoke('sublens_device_get_config').catch(() => ({ configured: false, credentialsSaved: false, accountId: '', bucket: '', prefix: 'subscription-lens/devices', deviceId: '', deviceName: '' })),
     ]);
     const codexSessions = (scannedSessions || []).filter((entry) => entry?.providerId === 'codex');
     const sessionCatalog = new Map(codexSessions.map((entry) => [String(entry.sessionId), {
@@ -414,19 +424,20 @@
       startup: prefs.startup ?? settings?.launchOnStartup ?? false,
       accountEnabled: Boolean(authStatus?.authenticated),
     };
+    const deviceSelected = Boolean(filters.device);
     return {
-      monitor: { sources: [], providers: providerRows, models: modelsRows, summary: { requests: events, tokens: totalTokens, estimated: usd, pricedTokens: totalTokens, unpriced: 0 } },
+      monitor: monitor || { source: 'all', sources: [], detected: [], compatibility: [], providers: [], models: [], rates: [], groups: [], modelGroups: [], days: [], rows: [], offset: 0, limit: 50, summary: { requests: 0, tokens: 0, estimated: 0, reported: 0, pricedTokens: 0, unpriced: 0 } },
       period: filters.period || 'month',
       range: { from: startDate ? new Date(startDate * 1000).toISOString() : null, to: new Date(endDate * 1000).toISOString() },
-      summary: { tokens: baseSummary.tokens, cached: number(summary?.totalCacheReadTokens), output: number(summary?.totalOutputTokens), pricedTokens: baseSummary.tokens, unpriced: baseSummary.unpriced, events: baseSummary.events, sessions: hierarchy.sessions.length, usd: baseSummary.usd, diff: null, ratio: null },
-      models: modelsRows,
+      summary: deviceSelected ? deviceCloud.summary : { tokens: baseSummary.tokens, cached: number(summary?.totalCacheReadTokens), output: number(summary?.totalOutputTokens), pricedTokens: baseSummary.tokens, unpriced: baseSummary.unpriced, events: baseSummary.events, sessions: hierarchy.sessions.length, usd: baseSummary.usd, diff: null, ratio: null },
+      models: deviceSelected ? deviceCloud.models : modelsRows,
       modelProviders,
       projects: hierarchy.projects.slice(0, 50),
       sessions: hierarchy.sessions.slice(offset, offset + limit),
       sessionTotal: hierarchy.sessions.length,
-      days: trendDays,
+      days: deviceSelected ? deviceCloud.days : trendDays,
       trend: { days: trendDays, models: modelsRows, modelsByDay: [] },
-      rows: logRows,
+      rows: deviceSelected ? deviceCloud.rows : logRows,
       offset,
       limit,
       quota,
@@ -441,9 +452,11 @@
       allModels: modelsRows.map((item) => item.model),
       catalog: await modelCatalog(),
       detectedRoot: root,
-      devices: [],
+      devices: deviceCloud.devices || [],
+      deviceCloud,
+      deviceSync,
       currentDevice: null,
-      desktop: { compact: false, pinned: false, version: '3.0.0', detectedMonitors: [] },
+      desktop: { compact: false, pinned: false, version: '3.0.0-beta.3', detectedMonitors: monitor?.detected || [] },
       health: { reasons: [], readErrors: 0, parseErrors: 0, partial: 0 },
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       providers: providerInfo,
@@ -498,6 +511,31 @@
   const api = {
     query: safe(buildQuery),
     providerList: safe(providerStatus),
+    chooseMonitor: safe(async (kind) => {
+      if (!['codebuddy', 'qoder'].includes(kind)) throw new Error('仅支持 CodeBuddy 和 Qoder');
+      const candidates = await invoke('sublens_monitor_discover');
+      const candidate = (candidates || []).find((item) => item.kind === kind && !item.connected);
+      const path = await invoke('pick_directory', { defaultPath: candidate?.path || undefined });
+      if (!path) return null;
+      return invoke('sublens_monitor_add_source', { kind, path });
+    }),
+    addDetectedMonitors: safe(async (kind) => {
+      const candidates = await invoke('sublens_monitor_discover');
+      const pending = (candidates || []).filter((item) => !item.connected && (kind == null || item.kind === kind));
+      let added = 0;
+      for (const item of pending) { await invoke('sublens_monitor_add_source', { kind: item.kind, path: item.path }); added += 1; }
+      return { added };
+    }),
+    configureMonitor: safe((id, options) => invoke('sublens_monitor_configure', { id, enabled: options?.enabled !== false })),
+    monitorRate: safe((provider, model, rates) => invoke('sublens_monitor_set_rate', { provider, model, rates })),
+    exportMonitor: safe(async (filters) => {
+      const data = await buildQuery(filters || {});
+      const rows = data.monitor?.rows || [];
+      const safeRows = rows.map(({ path, filePath, raw, body, ...row }) => row);
+      const blob = new Blob([JSON.stringify({ generatedAt: new Date().toISOString(), rows: safeRows }, null, 2)], { type: 'application/json' });
+      const anchor = document.createElement('a'); anchor.href = URL.createObjectURL(blob); anchor.download = `subscription-lens-providers-${new Date().toISOString().slice(0,10)}.json`; anchor.click(); URL.revokeObjectURL(anchor.href);
+      return safeRows.length;
+    }),
     providerManager: safe(() => {
       localStorage.setItem('cc-switch-last-app', 'codex');
       localStorage.setItem('cc-switch-last-view', 'providers');
@@ -602,6 +640,12 @@
     }),
     exportDeviceLedger: safe(() => 0),
     importDeviceLedger: safe(() => ({ added: 0 })),
+    getDeviceSyncConfig: safe(() => invoke('sublens_device_get_config')),
+    saveDeviceSyncConfig: safe(async (settings) => { const result = await invoke('sublens_device_save_config', settings); invalidateQueryCache(); return result; }),
+    disconnectDeviceSync: safe(async () => { const result = await invoke('sublens_device_disconnect'); invalidateQueryCache(); return result; }),
+    testDeviceSync: safe(() => invoke('sublens_device_test_connection')),
+    createDeviceBucket: safe(() => invoke('sublens_device_create_bucket')),
+    syncDevices: safe(async () => { if (deviceSyncInflight) return deviceSyncInflight; deviceSyncInflight = invoke('sublens_device_sync').then((result) => { invalidateQueryCache(); return result; }).finally(() => { deviceSyncInflight = null; }); return deviceSyncInflight; }),
     renameDevice: safe(() => true),
     previewReport: safe(async (filters) => {
       const data = await buildQuery(filters || {});

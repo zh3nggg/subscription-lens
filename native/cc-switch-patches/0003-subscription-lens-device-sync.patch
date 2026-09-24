@@ -1,0 +1,1124 @@
+diff --git a/src-tauri/Cargo.lock b/src-tauri/Cargo.lock
+index 730f3e77..066a3205 100644
+--- a/src-tauri/Cargo.lock
++++ b/src-tauri/Cargo.lock
+@@ -788,6 +788,7 @@ dependencies = [
+  "objc2 0.5.2",
+  "objc2-app-kit 0.2.2",
+  "once_cell",
++ "quick-xml",
+  "regex",
+  "reqwest 0.12.28",
+  "rquickjs",
+diff --git a/src-tauri/Cargo.toml b/src-tauri/Cargo.toml
+index 7e005f18..419606c6 100644
+--- a/src-tauri/Cargo.toml
++++ b/src-tauri/Cargo.toml
+@@ -18,9 +18,6 @@ doctest = false
+ [features]
+ default = []
+ test-hooks = []
+-# Build the CC Switch runtime as the Subscription Lens desktop host.  The
+-# provider database, OAuth managers, proxy and switching commands stay exactly
+-# the same; only the Tauri product configuration and bundled frontend change.
+ sublens-host = []
+ 
+ [build-dependencies]
+@@ -83,6 +80,7 @@ rust_decimal = "1.33"
+ uuid = { version = "1.11", features = ["v4"] }
+ sha2 = "0.10"
+ hmac = "0.12"
++quick-xml = "0.38"
+ json5 = "0.4"
+ json-five = "0.3.1"
+ sys-locale = "0.3"
+@@ -100,6 +98,7 @@ libc = "0.2"
+ winreg = "0.52"
+ windows-sys = { version = "0.61", features = [
+     "Win32_Globalization",
++    "Win32_Security_Credentials",
+     "Win32_Storage_FileSystem",
+     "Win32_UI_Shell",
+ ] }
+diff --git a/src-tauri/src/lib.rs b/src-tauri/src/lib.rs
+index 319e8c17..1fba8e4e 100644
+--- a/src-tauri/src/lib.rs
++++ b/src-tauri/src/lib.rs
+@@ -35,6 +35,10 @@ mod services;
+ mod session_manager;
+ mod settings;
+ mod store;
++#[cfg(feature = "sublens-host")]
++mod sublens_monitor;
++#[cfg(feature = "sublens-host")]
++mod sublens_devices;
+ 
+ mod tray;
+ mod usage_events;
+@@ -1371,6 +1375,30 @@ pub fn run() {
+             Ok(())
+         })
+         .invoke_handler(tauri::generate_handler![
++            #[cfg(feature = "sublens-host")]
++            sublens_monitor::sublens_monitor_discover,
++            #[cfg(feature = "sublens-host")]
++            sublens_monitor::sublens_monitor_add_source,
++            #[cfg(feature = "sublens-host")]
++            sublens_monitor::sublens_monitor_configure,
++            #[cfg(feature = "sublens-host")]
++            sublens_monitor::sublens_monitor_set_rate,
++            #[cfg(feature = "sublens-host")]
++            sublens_monitor::sublens_monitor_query,
++            #[cfg(feature = "sublens-host")]
++            sublens_devices::sublens_device_get_config,
++            #[cfg(feature = "sublens-host")]
++            sublens_devices::sublens_device_save_config,
++            #[cfg(feature = "sublens-host")]
++            sublens_devices::sublens_device_disconnect,
++            #[cfg(feature = "sublens-host")]
++            sublens_devices::sublens_device_test_connection,
++            #[cfg(feature = "sublens-host")]
++            sublens_devices::sublens_device_create_bucket,
++            #[cfg(feature = "sublens-host")]
++            sublens_devices::sublens_device_sync,
++            #[cfg(feature = "sublens-host")]
++            sublens_devices::sublens_device_query,
+             commands::get_providers,
+             commands::get_current_provider,
+             commands::add_provider,
+@@ -1721,7 +1749,6 @@ pub fn run() {
+     let context = tauri::generate_context!("../../subscription-lens-tauri/tauri.conf.json");
+     #[cfg(not(feature = "sublens-host"))]
+     let context = tauri::generate_context!();
+-
+     let app = builder
+         .build(context)
+         .expect("error while running tauri application");
+diff --git a/src-tauri/src/services/s3.rs b/src-tauri/src/services/s3.rs
+index c9d44dd1..72ab2ea8 100644
+--- a/src-tauri/src/services/s3.rs
++++ b/src-tauri/src/services/s3.rs
+@@ -358,6 +358,23 @@ pub(crate) async fn test_connection(creds: &S3Credentials) -> Result<(), AppErro
+     Err(s3_status_error("HEAD bucket", resp.status(), &url_str))
+ }
+ 
++/// Create a bucket on S3-compatible services that expose CreateBucket.
++pub(crate) async fn create_bucket(creds: &S3Credentials) -> Result<(), AppError> {
++    let url_str = build_bucket_url(creds);
++    let url = Url::parse(&url_str).map_err(|e| {
++        AppError::localized("s3.url.invalid", format!("S3 URL 无效: {e}"), format!("Invalid S3 URL: {e}"))
++    })?;
++    let body = format!("<CreateBucketConfiguration xmlns=\"http://s3.amazonaws.com/doc/2006-03-01/\"><LocationConstraint>{}</LocationConstraint></CreateBucketConfiguration>", creds.region);
++    let client = http_client::get();
++    let mut headers = reqwest::header::HeaderMap::new();
++    headers.insert("content-type", "application/xml".parse().unwrap());
++    sign_request("PUT", &url, &mut headers, &sha256_hex(body.as_bytes()), creds, chrono::Utc::now());
++    let response = client.put(url.as_str()).headers(headers).body(body).timeout(Duration::from_secs(DEFAULT_TIMEOUT_SECS)).send().await
++        .map_err(|e| s3_transport_error("s3.create_bucket_failed", "创建存储桶", "create bucket", &e))?;
++    if response.status().is_success() { return Ok(()); }
++    Err(s3_status_error("CreateBucket", response.status(), &url_str))
++}
++
+ /// Upload bytes to an S3 object.
+ pub(crate) async fn put_object(
+     creds: &S3Credentials,
+@@ -471,6 +488,100 @@ pub(crate) async fn get_object(
+     Ok(Some((bytes, etag)))
+ }
+ 
++/// List object keys under an S3 prefix. Used by the Sublens device snapshot
++/// sync; the caller applies a strict object-key allowlist before downloading.
++pub(crate) async fn list_objects_v2(
++    creds: &S3Credentials,
++    prefix: &str,
++    continuation: Option<&str>,
++) -> Result<(Vec<String>, Option<String>, bool), AppError> {
++    let mut url = Url::parse(&build_bucket_url(creds)).map_err(|e| {
++        AppError::localized(
++            "s3.url.invalid",
++            format!("S3 URL 无效: {e}"),
++            format!("Invalid S3 URL: {e}"),
++        )
++    })?;
++    {
++        let mut query = url.query_pairs_mut();
++        query.append_pair("list-type", "2");
++        query.append_pair("prefix", prefix);
++        query.append_pair("max-keys", "1000");
++        if let Some(token) = continuation {
++            query.append_pair("continuation-token", token);
++        }
++    }
++
++    let client = http_client::get();
++    let mut headers = reqwest::header::HeaderMap::new();
++    sign_request(
++        "GET",
++        &url,
++        &mut headers,
++        &sha256_hex(b""),
++        creds,
++        chrono::Utc::now(),
++    );
++    let response = client
++        .get(url.as_str())
++        .headers(headers)
++        .timeout(Duration::from_secs(DEFAULT_TIMEOUT_SECS))
++        .send()
++        .await
++        .map_err(|e| s3_transport_error("s3.list_failed", "列举对象", "list objects", &e))?;
++    if !response.status().is_success() {
++        return Err(s3_status_error("ListObjectsV2", response.status(), url.as_str()));
++    }
++    let bytes = response.bytes().await.map_err(|e| {
++        AppError::localized(
++            "s3.list_read_failed",
++            format!("读取 S3 对象列表失败: {e}"),
++            format!("Failed to read S3 object list: {e}"),
++        )
++    })?;
++
++    let mut reader = quick_xml::Reader::from_reader(bytes.as_ref());
++    reader.config_mut().trim_text(true);
++    let mut buffer = Vec::new();
++    let mut current = String::new();
++    let mut keys = Vec::new();
++    let mut next = None;
++    let mut truncated = false;
++    loop {
++        match reader.read_event_into(&mut buffer) {
++            Ok(quick_xml::events::Event::Start(event)) => {
++                current = String::from_utf8_lossy(event.local_name().as_ref()).into_owned();
++            }
++            Ok(quick_xml::events::Event::Text(event)) => {
++                let decoded = event.decode().map_err(|e| {
++                    AppError::localized("s3.xml.invalid", e.to_string(), e.to_string())
++                })?;
++                let value = quick_xml::escape::unescape(&decoded).map_err(|e| {
++                    AppError::localized("s3.xml.invalid", e.to_string(), e.to_string())
++                })?;
++                match current.as_str() {
++                    "Key" if !value.is_empty() => keys.push(value.into_owned()),
++                    "NextContinuationToken" if !value.is_empty() => next = Some(value.into_owned()),
++                    "IsTruncated" => truncated = value.eq_ignore_ascii_case("true"),
++                    _ => {}
++                }
++            }
++            Ok(quick_xml::events::Event::End(_)) => current.clear(),
++            Ok(quick_xml::events::Event::Eof) => break,
++            Ok(_) => {}
++            Err(error) => {
++                return Err(AppError::localized(
++                    "s3.xml.invalid",
++                    format!("S3 对象列表 XML 无效: {error}"),
++                    format!("Invalid S3 object list XML: {error}"),
++                ));
++            }
++        }
++        buffer.clear();
++    }
++    Ok((keys, next, truncated))
++}
++
+ /// Retrieve the ETag of an S3 object via HEAD. Returns `None` on 404.
+ pub(crate) async fn head_object(
+     creds: &S3Credentials,
+diff --git a/src-tauri/src/sublens_devices.rs b/src-tauri/src/sublens_devices.rs
+new file mode 100644
+index 00000000..679b8f4b
+--- /dev/null
++++ b/src-tauri/src/sublens_devices.rs
+@@ -0,0 +1,440 @@
++//! Privacy-filtered per-device Codex usage snapshots synced through Cloudflare R2.
++//! The bucket contains one Sublens JSON snapshot per device under a fixed prefix;
++//! no source logs, project paths, chat bodies, credentials or raw request IDs leave this app.
++
++use chrono::{DateTime, Utc};
++use rusqlite::{params, Connection, OptionalExtension};
++use serde::{Deserialize, Serialize};
++use serde_json::{json, Value};
++use sha2::{Digest, Sha256};
++use std::{fs, path::PathBuf};
++use tauri::{AppHandle, Manager, State};
++
++use crate::{
++    services::{s3::{self, S3Credentials}, usage_stats::{LogFilters, RequestLogDetail}},
++    store::AppState,
++};
++
++const SNAPSHOT_SCHEMA: &str = "subscription-lens.device-ledger.v2";
++const DEFAULT_PREFIX: &str = "subscription-lens/devices";
++const MAX_DEVICES: usize = 100;
++const MAX_RECORDS: u32 = 200_000;
++const MAX_OBJECT_BYTES: usize = 24 * 1024 * 1024;
++const MAX_SYNC_BYTES: usize = 128 * 1024 * 1024;
++
++#[derive(Debug, Clone, Serialize, Deserialize)]
++#[serde(rename_all = "camelCase")]
++struct DeviceConfig {
++    #[serde(default)] account_id: String,
++    #[serde(default)] bucket: String,
++    #[serde(default = "default_prefix")] prefix: String,
++    #[serde(default)] device_id: String,
++    #[serde(default)] device_name: String,
++}
++
++fn default_prefix() -> String { DEFAULT_PREFIX.to_string() }
++fn now() -> String { Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Millis, true) }
++fn digest(value: &str) -> String { format!("{:x}", Sha256::digest(value.as_bytes())) }
++
++fn storage_paths(app: &AppHandle) -> Result<(PathBuf, PathBuf), String> {
++    let dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
++    fs::create_dir_all(&dir).map_err(|e| format!("创建设备同步目录失败：{e}"))?;
++    Ok((dir.join("device-sync.json"), dir.join("usage-monitor.sqlite3")))
++}
++
++fn database(app: &AppHandle) -> Result<Connection, String> {
++    let (_, path) = storage_paths(app)?;
++    let db = Connection::open(path).map_err(|e| format!("打开设备统计库失败：{e}"))?;
++    db.busy_timeout(std::time::Duration::from_secs(3)).map_err(|e| e.to_string())?;
++    db.execute_batch("CREATE TABLE IF NOT EXISTS sl_cloud_devices(
++        device_id TEXT PRIMARY KEY, label TEXT NOT NULL, updated_at TEXT NOT NULL, synced_at TEXT NOT NULL DEFAULT '', data TEXT NOT NULL, etag TEXT
++    );").map_err(|e| e.to_string())?;
++    let has_etag: bool = db.query_row("SELECT EXISTS(SELECT 1 FROM pragma_table_info('sl_cloud_devices') WHERE name='etag')", [], |r| r.get(0)).unwrap_or(false);
++    if !has_etag { db.execute("ALTER TABLE sl_cloud_devices ADD COLUMN etag TEXT", []).map_err(|e| e.to_string())?; }
++    let has_synced_at: bool = db.query_row("SELECT EXISTS(SELECT 1 FROM pragma_table_info('sl_cloud_devices') WHERE name='synced_at')", [], |r| r.get(0)).unwrap_or(false);
++    if !has_synced_at { db.execute("ALTER TABLE sl_cloud_devices ADD COLUMN synced_at TEXT NOT NULL DEFAULT ''", []).map_err(|e| e.to_string())?; }
++    Ok(db)
++}
++
++fn load_config(app: &AppHandle) -> Result<DeviceConfig, String> {
++    let (path, _) = storage_paths(app)?;
++    let mut config = if path.exists() {
++        serde_json::from_slice::<DeviceConfig>(&fs::read(path).map_err(|e| e.to_string())?)
++            .map_err(|e| format!("读取设备同步设置失败：{e}"))?
++    } else { DeviceConfig {
++        account_id: String::new(), bucket: String::new(), prefix: default_prefix(),
++        device_id: uuid::Uuid::new_v4().to_string(),
++        device_name: std::env::var("COMPUTERNAME").unwrap_or_else(|_| "This device".into()),
++    }};
++    if config.device_id.is_empty() { config.device_id = uuid::Uuid::new_v4().to_string(); }
++    if config.device_name.is_empty() { config.device_name = "This device".into(); }
++    Ok(config)
++}
++
++fn save_config(app: &AppHandle, config: &DeviceConfig) -> Result<(), String> {
++    let (path, _) = storage_paths(app)?;
++    let bytes = serde_json::to_vec_pretty(config).map_err(|e| e.to_string())?;
++    let temp = path.with_extension("json.tmp");
++    fs::write(&temp, bytes).map_err(|e| format!("保存设备同步设置失败：{e}"))?;
++    fs::rename(temp, path).map_err(|e| format!("写入设备同步设置失败：{e}"))
++}
++
++const CREDENTIAL_TARGET: &str = "Subscription Lens / Cloudflare R2 device sync";
++
++#[cfg(windows)]
++fn save_credentials(access: &str, secret: &str) -> Result<(), String> {
++    use std::mem;
++    use windows_sys::Win32::Security::Credentials::{CredWriteW, CREDENTIALW, CRED_PERSIST_LOCAL_MACHINE, CRED_TYPE_GENERIC};
++    let payload = serde_json::to_vec(&json!({"accessKeyId":access,"secretAccessKey":secret})).map_err(|e| e.to_string())?;
++    if payload.len() > 5_000 { return Err("R2 凭据长度超出系统凭据库限制".into()); }
++    let target: Vec<u16> = CREDENTIAL_TARGET.encode_utf16().chain(Some(0)).collect();
++    let username: Vec<u16> = "Cloudflare R2".encode_utf16().chain(Some(0)).collect();
++    let credential = CREDENTIALW {
++        Type: CRED_TYPE_GENERIC,
++        TargetName: target.as_ptr() as *mut _,
++        UserName: username.as_ptr() as *mut _,
++        CredentialBlobSize: payload.len() as u32,
++        CredentialBlob: payload.as_ptr() as *mut u8,
++        Persist: CRED_PERSIST_LOCAL_MACHINE,
++        ..unsafe { mem::zeroed() }
++    };
++    let ok = unsafe { CredWriteW(&credential, 0) };
++    if ok == 0 { return Err(format!("写入 Windows 凭据管理器失败：{}", std::io::Error::last_os_error())); }
++    Ok(())
++}
++
++#[cfg(windows)]
++fn load_credentials() -> Result<(String, String), String> {
++    use windows_sys::Win32::Security::Credentials::{CredFree, CredReadW, CREDENTIALW, CRED_TYPE_GENERIC};
++    let target: Vec<u16> = CREDENTIAL_TARGET.encode_utf16().chain(Some(0)).collect();
++    let mut pointer: *mut CREDENTIALW = std::ptr::null_mut();
++    let ok = unsafe { CredReadW(target.as_ptr(), CRED_TYPE_GENERIC, 0, &mut pointer) };
++    if ok == 0 { return Ok((String::new(), String::new())); }
++    let result = unsafe {
++        let item = &*pointer;
++        let bytes = std::slice::from_raw_parts(item.CredentialBlob, item.CredentialBlobSize as usize);
++        serde_json::from_slice::<Value>(bytes).map_err(|e| e.to_string())
++    };
++    unsafe { CredFree(pointer as *const _); }
++    let value = result?;
++    Ok((value["accessKeyId"].as_str().unwrap_or_default().to_string(), value["secretAccessKey"].as_str().unwrap_or_default().to_string()))
++}
++
++#[cfg(windows)]
++fn delete_credentials() -> Result<(), String> {
++    use windows_sys::Win32::Security::Credentials::{CredDeleteW, CRED_TYPE_GENERIC};
++    let target: Vec<u16> = CREDENTIAL_TARGET.encode_utf16().chain(Some(0)).collect();
++    let _ = unsafe { CredDeleteW(target.as_ptr(), CRED_TYPE_GENERIC, 0) };
++    Ok(())
++}
++
++#[cfg(not(windows))]
++fn save_credentials(_: &str, _: &str) -> Result<(), String> { Err("当前平台尚未提供系统凭据库适配".into()) }
++#[cfg(not(windows))]
++fn load_credentials() -> Result<(String, String), String> { Ok((String::new(), String::new())) }
++#[cfg(not(windows))]
++fn delete_credentials() -> Result<(), String> { Ok(()) }
++
++fn credentials(config: &DeviceConfig) -> Result<S3Credentials, String> {
++    if config.account_id.len() < 16 || !config.account_id.bytes().all(|b| b.is_ascii_hexdigit()) {
++        return Err("Cloudflare Account ID 格式无效".into());
++    }
++    if !valid_bucket(&config.bucket) { return Err("R2 bucket 名称需为 3–63 位小写字母、数字或连字符，且首尾为字母或数字".into()); }
++    let (access_key_id, secret_access_key) = load_credentials()?;
++    if access_key_id.is_empty() || secret_access_key.is_empty() { return Err("请先保存 R2 Access Key ID 和 Secret Access Key".into()); }
++    Ok(S3Credentials {
++        access_key_id, secret_access_key, region: "auto".into(), bucket: config.bucket.clone(),
++        endpoint: format!("https://{}.r2.cloudflarestorage.com", config.account_id),
++    })
++}
++
++fn valid_bucket(bucket: &str) -> bool {
++    let bytes = bucket.as_bytes();
++    (3..=63).contains(&bytes.len())
++        && bytes.first().is_some_and(|b| b.is_ascii_lowercase() || b.is_ascii_digit())
++        && bytes.last().is_some_and(|b| b.is_ascii_lowercase() || b.is_ascii_digit())
++        && bytes.iter().all(|b| b.is_ascii_lowercase() || b.is_ascii_digit() || *b == b'-')
++}
++
++fn object_prefix(config: &DeviceConfig) -> String {
++    format!("{}/", config.prefix.trim_matches('/'))
++}
++
++#[tauri::command]
++pub fn sublens_device_get_config(app: AppHandle) -> Result<Value, String> {
++    let config = load_config(&app)?;
++    let (access, secret) = load_credentials()?;
++    Ok(json!({
++        "accountId":config.account_id,"bucket":config.bucket,"prefix":config.prefix,
++        "deviceId":config.device_id,"deviceName":config.device_name,
++        "configured":!config.account_id.is_empty()&&!config.bucket.is_empty()&&!access.is_empty()&&!secret.is_empty(),
++        "credentialsSaved":!access.is_empty()&&!secret.is_empty()
++    }))
++}
++
++#[tauri::command(rename_all = "camelCase")]
++pub fn sublens_device_save_config(
++    app: AppHandle, account_id: String, bucket: String, prefix: String,
++    device_name: String, access_key_id: String, secret_access_key: String,
++) -> Result<Value, String> {
++    let mut config = load_config(&app)?;
++    config.account_id = account_id.trim().to_ascii_lowercase();
++    config.bucket = bucket.trim().to_string();
++    config.prefix = prefix.trim().trim_matches('/').to_string();
++    if config.prefix.is_empty() { config.prefix = DEFAULT_PREFIX.into(); }
++    config.device_name = device_name.chars().filter(|c| !c.is_control()).take(80).collect::<String>().trim().to_string();
++    if config.device_name.is_empty() { return Err("请填写设备名称".into()); }
++    if config.account_id.len() < 16 || !config.account_id.bytes().all(|b| b.is_ascii_hexdigit()) { return Err("Cloudflare Account ID 格式无效".into()); }
++    if config.bucket.is_empty() { return Err("请填写 R2 bucket 名称".into()); }
++    if !access_key_id.trim().is_empty() || !secret_access_key.trim().is_empty() {
++        if access_key_id.trim().is_empty() || secret_access_key.trim().is_empty() { return Err("Access Key ID 和 Secret Access Key 需要同时填写".into()); }
++        save_credentials(access_key_id.trim(), secret_access_key.trim())?;
++    }
++    let _ = credentials(&config)?;
++    save_config(&app, &config)?;
++    Ok(json!({"saved":true}))
++}
++
++#[tauri::command]
++pub fn sublens_device_disconnect(app: AppHandle) -> Result<Value, String> {
++    let mut config = load_config(&app)?;
++    delete_credentials()?;
++    config.account_id.clear();
++    config.bucket.clear();
++    save_config(&app, &config)?;
++    Ok(json!({"disconnected":true}))
++}
++
++#[tauri::command]
++pub async fn sublens_device_test_connection(app: AppHandle) -> Result<Value, String> {
++    let config = load_config(&app)?;
++    let creds = credentials(&config)?;
++    s3::test_connection(&creds).await.map_err(|e| e.to_string())?;
++    let (keys, _, _) = s3::list_objects_v2(&creds, &object_prefix(&config), None).await.map_err(|e| e.to_string())?;
++    Ok(json!({"connected":true,"objects":keys.len()}))
++}
++
++#[tauri::command]
++pub async fn sublens_device_create_bucket(app: AppHandle) -> Result<Value, String> {
++    let config = load_config(&app)?;
++    let creds = credentials(&config)?;
++    s3::create_bucket(&creds).await.map_err(|e| e.to_string())?;
++    Ok(json!({"created":true,"bucket":config.bucket}))
++}
++
++fn local_snapshot(state: &AppState, config: &DeviceConfig) -> Result<Value, String> {
++    let filters = LogFilters { app_type: Some("codex".into()), ..LogFilters::default() };
++    let first = state.db.get_request_logs(&filters, 0, 10_000).map_err(|e| e.to_string())?;
++    if first.total > MAX_RECORDS { return Err(format!("本机共有 {} 条记录，超过单设备快照上限 {}；请先缩短本机历史范围", first.total, MAX_RECORDS)); }
++    let mut logs = first.data;
++    let pages = (first.total as usize + 9_999) / 10_000;
++    for page in 1..pages {
++        logs.extend(state.db.get_request_logs(&filters, page as u32, 10_000).map_err(|e| e.to_string())?.data);
++    }
++    let records: Vec<Value> = logs.iter().map(usage_record).collect();
++    Ok(json!({"schema":SNAPSHOT_SCHEMA,"device":{"id":config.device_id,"label":config.device_name},"updatedAt":now(),"records":records}))
++}
++
++fn usage_record(row: &RequestLogDetail) -> Value {
++    let input = row.input_tokens as u64;
++    let output = row.output_tokens as u64;
++    let cached = row.cache_read_tokens as u64;
++    let write = row.cache_creation_tokens as u64;
++    json!({
++        "id":digest(&row.request_id),
++        "at":DateTime::<Utc>::from_timestamp(row.created_at,0).unwrap_or_else(Utc::now).to_rfc3339_opts(chrono::SecondsFormat::Millis,true),
++        "model":row.model.chars().take(200).collect::<String>(),"input":input,"cached":cached,"write":write,
++        "output":output,"total":input+output,
++        "costUsd":if row.status_code < 400 && row.pricing_model.as_deref().is_some_and(|p| !p.is_empty()) { row.total_cost_usd.parse::<f64>().ok().filter(|v| v.is_finite() && *v >= 0.0) } else { None },
++        "session":digest(row.request_id.split(':').nth(2).unwrap_or(&row.request_id))[..24].to_string()
++    })
++}
++
++fn validate_snapshot(value: &Value) -> Result<(String, String), String> {
++    if value["schema"].as_str() != Some(SNAPSHOT_SCHEMA) { return Err("设备快照版本不受支持".into()); }
++    let allowed_top = ["schema", "device", "updatedAt", "records"];
++    if value.as_object().is_none_or(|object| object.keys().any(|key| !allowed_top.contains(&key.as_str())) || allowed_top.iter().any(|key| !object.contains_key(*key))) {
++        return Err("设备快照字段无效".into());
++    }
++    let id = value["device"]["id"].as_str().unwrap_or_default();
++    let label = value["device"]["label"].as_str().unwrap_or_default();
++    if uuid::Uuid::parse_str(id).is_err() || label.is_empty() || label.len() > 320 { return Err("设备快照身份无效".into()); }
++    if value["device"].as_object().is_none_or(|object| object.len() != 2 || !object.contains_key("id") || !object.contains_key("label"))
++        || value["updatedAt"].as_str().and_then(|s| DateTime::parse_from_rfc3339(s).ok()).is_none() {
++        return Err("设备快照元数据无效".into());
++    }
++    let rows = value["records"].as_array().ok_or("设备快照记录无效")?;
++    if rows.len() > MAX_RECORDS as usize { return Err("设备快照记录数超出上限".into()); }
++    for row in rows {
++        let allowed_row = ["id", "at", "model", "input", "cached", "write", "output", "total", "costUsd", "session"];
++        if row.as_object().is_none_or(|object| object.keys().any(|key| !allowed_row.contains(&key.as_str()))
++            || allowed_row.iter().filter(|key| **key != "costUsd").any(|key| !object.contains_key(*key))) {
++            return Err("设备快照记录字段无效".into());
++        }
++        let input = row["input"].as_u64().unwrap_or(u64::MAX);
++        let cached = row["cached"].as_u64().unwrap_or(u64::MAX);
++        let write = row["write"].as_u64().unwrap_or(u64::MAX);
++        let output = row["output"].as_u64().unwrap_or(u64::MAX);
++        let total = row["total"].as_u64().unwrap_or(u64::MAX);
++        if row["id"].as_str().is_none_or(|s| s.len() != 64 || !s.bytes().all(|b| b.is_ascii_hexdigit()))
++            || row["at"].as_str().and_then(|s| DateTime::parse_from_rfc3339(s).ok()).is_none()
++            || row["model"].as_str().is_none_or(|s| s.len() > 200)
++            || row["session"].as_str().is_none_or(|s| s.len() != 24 || !s.bytes().all(|b| b.is_ascii_hexdigit()))
++            || ["input","cached","write","output","total"].iter().any(|key| row[*key].as_u64().is_none())
++            || cached.saturating_add(write) > input
++            || input.checked_add(output) != Some(total)
++            || row["costUsd"].as_f64().is_some_and(|v| !v.is_finite() || v < 0.0)
++        { return Err("设备快照中包含无效记录".into()); }
++    }
++    Ok((id.to_string(), label.to_string()))
++}
++
++fn persist_snapshot(db: &Connection, snapshot: &Value, etag: Option<&str>) -> Result<(), String> {
++    let (id, label) = validate_snapshot(snapshot)?;
++    let updated = snapshot["updatedAt"].as_str().unwrap_or("");
++    db.execute("INSERT INTO sl_cloud_devices(device_id,label,updated_at,synced_at,data,etag) VALUES(?1,?2,?3,?4,?5,?6) ON CONFLICT(device_id) DO UPDATE SET label=excluded.label,updated_at=excluded.updated_at,synced_at=excluded.synced_at,data=excluded.data,etag=COALESCE(excluded.etag,sl_cloud_devices.etag)",
++        params![id,label,updated,now(),snapshot.to_string(),etag]).map_err(|e| e.to_string())?;
++    Ok(())
++}
++
++#[tauri::command]
++pub async fn sublens_device_sync(app: AppHandle, state: State<'_, AppState>) -> Result<Value, String> {
++    let config = load_config(&app)?;
++    let creds = credentials(&config)?;
++    let db = database(&app)?;
++    let mut snapshot = local_snapshot(state.inner(), &config)?;
++    let previous_local: Option<String> = db.query_row("SELECT data FROM sl_cloud_devices WHERE device_id=?1", [&config.device_id], |r| r.get(0)).optional().map_err(|e| e.to_string())?;
++    let unchanged = previous_local.as_deref().and_then(|data| serde_json::from_str::<Value>(data).ok()).is_some_and(|old| old["device"]==snapshot["device"] && old["records"]==snapshot["records"]);
++    if unchanged { snapshot = serde_json::from_str(previous_local.as_deref().unwrap_or("{}")).map_err(|e| e.to_string())?; }
++    let local_bytes = serde_json::to_vec(&snapshot).map_err(|e| e.to_string())?;
++    if local_bytes.len() > MAX_OBJECT_BYTES { return Err("设备快照超过 24 MiB 上传上限".into()); }
++    let key_prefix = object_prefix(&config);
++    let local_key = format!("{}{}.json", key_prefix, config.device_id);
++    if !unchanged { s3::put_object(&creds, &local_key, local_bytes, "application/json").await.map_err(|e| e.to_string())?; }
++    persist_snapshot(&db, &snapshot, None)?;
++
++    let mut continuation: Option<String> = None;
++    let mut processed = 0usize;
++    let mut downloaded_bytes = 0usize;
++    loop {
++        let (keys, next, truncated) = s3::list_objects_v2(&creds, &key_prefix, continuation.as_deref()).await.map_err(|e| e.to_string())?;
++        for key in keys {
++            let Some(file) = key.strip_prefix(&key_prefix) else { continue; };
++            let Some(id) = file.strip_suffix(".json") else { continue; };
++            if uuid::Uuid::parse_str(id).is_err() { continue; }
++            processed += 1;
++            if processed > MAX_DEVICES { return Err(format!("前缀下设备文件超过 {MAX_DEVICES} 个，请清理旧设备文件")); }
++            if id == config.device_id { continue; }
++            let remote_etag = s3::head_object(&creds, &key).await.map_err(|e| e.to_string())?;
++            let cached_etag: Option<String> = db.query_row("SELECT etag FROM sl_cloud_devices WHERE device_id=?1", [id], |r| r.get(0)).optional().map_err(|e| e.to_string())?.flatten();
++            if remote_etag.is_some() && remote_etag == cached_etag {
++                db.execute("UPDATE sl_cloud_devices SET synced_at=?1 WHERE device_id=?2", params![now(),id]).map_err(|e| e.to_string())?;
++                continue;
++            }
++            if let Some((bytes, get_etag)) = s3::get_object(&creds, &key, MAX_OBJECT_BYTES).await.map_err(|e| e.to_string())? {
++                downloaded_bytes = downloaded_bytes.saturating_add(bytes.len());
++                if downloaded_bytes > MAX_SYNC_BYTES { return Err("本次同步下载的设备快照总量超过 128 MiB，请缩小设备目录或清理旧设备文件".into()); }
++                let remote: Value = serde_json::from_slice(&bytes).map_err(|e| format!("设备文件格式无效：{e}"))?;
++                if validate_snapshot(&remote).is_ok() && remote["device"]["id"].as_str() == Some(id) { persist_snapshot(&db, &remote, remote_etag.as_deref().or(get_etag.as_deref()))?; }
++            }
++        }
++        if !truncated { break; }
++        continuation = next;
++        if continuation.is_none() { return Err("R2 返回了不完整的设备列表".into()); }
++    }
++    Ok(json!({"synced":processed,"updatedAt":now()}))
++}
++
++fn aggregate_device(value: &Value) -> Value {
++    let records = value["records"].as_array().cloned().unwrap_or_default();
++    let tokens: u64 = records.iter().map(|r| r["total"].as_u64().unwrap_or(0)).sum();
++    let usd: f64 = records.iter().map(|r| r["costUsd"].as_f64().unwrap_or(0.0)).sum();
++    let sessions: std::collections::BTreeSet<&str> = records.iter().filter_map(|r| r["session"].as_str()).collect();
++    json!({"tokens":tokens,"usd":usd,"events":records.len(),"sessions":sessions.len()})
++}
++
++#[tauri::command(rename_all = "camelCase")]
++pub fn sublens_device_query(app: AppHandle, from: i64, to: i64, device_id: Option<String>) -> Result<Value, String> {
++    let config = load_config(&app)?;
++    let db = database(&app)?;
++    let mut stmt = db.prepare("SELECT data, synced_at FROM sl_cloud_devices ORDER BY label,device_id").map_err(|e| e.to_string())?;
++    let all: Vec<(Value,String)> = stmt.query_map([], |row| Ok((row.get::<_,String>(0)?,row.get::<_,String>(1)?))).map_err(|e| e.to_string())?.filter_map(Result::ok).filter_map(|(data,synced)| serde_json::from_str(&data).ok().map(|value|(value,synced))).collect();
++    let device_rows: Vec<Value> = all.iter().map(|(value,synced)| json!({"id":value["device"]["id"],"label":value["device"]["label"],"local":value["device"]["id"]==config.device_id,"lastSync":if synced.is_empty(){value["updatedAt"].as_str().unwrap_or("")}else{synced.as_str()},"summary":aggregate_device(value)})).collect();
++    let mut totals = (0u64,0u64,0u64,0u64,0f64,0u64,0u64);
++    let mut sessions = std::collections::BTreeSet::new();
++    let mut models = std::collections::BTreeMap::<String,(u64,f64,u64)>::new();
++    let mut days = std::collections::BTreeMap::<String,(u64,f64,u64)>::new();
++    let mut recent = Vec::new();
++    for (device,_) in &all {
++        if device_id.as_deref().is_some_and(|id| device["device"]["id"].as_str()!=Some(id)) { continue; }
++        let label = device["device"]["label"].as_str().unwrap_or("Device");
++        for row in device["records"].as_array().into_iter().flatten() {
++            let at = row["at"].as_str().unwrap_or("");
++            let epoch = DateTime::parse_from_rfc3339(at).map(|d| d.timestamp()).unwrap_or(0);
++            if epoch < from || epoch >= to { continue; }
++            let tok=row["total"].as_u64().unwrap_or(0);let output=row["output"].as_u64().unwrap_or(0);let cached=row["cached"].as_u64().unwrap_or(0);let cost=row["costUsd"].as_f64();
++            totals.0+=tok;totals.1+=cached;totals.2+=output;totals.3+=1;if let Some(cost)=cost{totals.4+=cost;totals.5+=tok;}else{totals.6+=1;}
++            if let Some(session) = row["session"].as_str() { sessions.insert(format!("{}:{session}",device["device"]["id"].as_str().unwrap_or_default())); }
++            let model=row["model"].as_str().unwrap_or("Unknown").to_string();let m=models.entry(model.clone()).or_default();m.0+=tok;m.1+=cost.unwrap_or(0.0);m.2+=1;
++            let day=at.get(..10).unwrap_or("unknown").to_string();let d=days.entry(day).or_default();d.0+=tok;d.1+=cost.unwrap_or(0.0);d.2+=1;
++            recent.push(json!({"id":row["id"],"at":at,"project":label,"model":model,"total":tok,"cached":cached,"output":output,"price":{"amount":cost,"usd":cost.unwrap_or(0.0)}}));
++        }
++    }
++    recent.sort_by(|a,b| b["at"].as_str().cmp(&a["at"].as_str()));recent.truncate(100);
++    Ok(json!({"devices":device_rows,"summary":{"tokens":totals.0,"cached":totals.1,"output":totals.2,"events":totals.3,"sessions":sessions.len(),"usd":totals.4,"pricedTokens":totals.5,"unpriced":totals.6},
++        "models":models.into_iter().map(|(model,(tokens,usd,events))|json!({"model":model,"tokens":tokens,"usd":usd,"events":events})).collect::<Vec<_>>(),
++        "days":days.into_iter().map(|(date,(tokens,usd,events))|json!({"date":date,"tokens":tokens,"usd":usd,"events":events})).collect::<Vec<_>>(),"rows":recent}))
++}
++
++#[cfg(test)]
++mod tests {
++    use super::{usage_record, valid_bucket, validate_snapshot, SNAPSHOT_SCHEMA};
++    use crate::services::usage_stats::RequestLogDetail;
++    use serde_json::json;
++
++    fn log() -> RequestLogDetail {
++        RequestLogDetail {
++            request_id: "codex_session:thread-v1:private-thread-id:1".into(), provider_id: "codex".into(),
++            provider_name: Some("OpenAI".into()), app_type: "codex".into(), model: "gpt-5.6-sol".into(),
++            request_model: Some("gpt-5.6-sol".into()), cost_multiplier: "1".into(), input_tokens: 120,
++            output_tokens: 30, cache_read_tokens: 40, cache_creation_tokens: 0, input_token_semantics: 0,
++            input_cost_usd: "0.01".into(), output_cost_usd: "0.02".into(), cache_read_cost_usd: "0".into(),
++            cache_creation_cost_usd: "0".into(), total_cost_usd: "0.03".into(), is_streaming: false,
++            latency_ms: 10, first_token_ms: None, duration_ms: None, status_code: 200, error_message: None,
++            created_at: 1_750_000_000, data_source: Some("codex_session".into()), pricing_model: Some("gpt-5.6-sol".into()),
++        }
++    }
++
++    #[test]
++    fn snapshot_record_is_allowlisted_and_anonymizes_identifiers() {
++        let row = log();
++        let value = usage_record(&row);
++        assert_eq!(value["id"].as_str().unwrap().len(), 64);
++        assert_ne!(value["session"], "private-thread-id");
++        let serialized = value.to_string();
++        for forbidden in ["private-thread-id", "request_id", "provider_id", "error_message", "error_message", "projectDir", "chat"] {
++            assert!(!serialized.contains(forbidden));
++        }
++        assert_eq!(value["total"], 150);
++    }
++
++    #[test]
++    fn only_valid_sublens_device_snapshots_are_accepted() {
++        let id = uuid::Uuid::new_v4().to_string();
++        let mut snapshot = json!({"schema":SNAPSHOT_SCHEMA,"device":{"id":id,"label":"Workstation"},"updatedAt":"2026-09-24T12:00:00Z","records":[usage_record(&log())]});
++        assert!(validate_snapshot(&snapshot).is_ok());
++        snapshot["records"][0]["total"] = json!(999);
++        assert!(validate_snapshot(&snapshot).is_err());
++        snapshot["records"][0]["total"] = json!(150);
++        snapshot["records"][0]["chatBody"] = json!("must not pass through");
++        assert!(validate_snapshot(&snapshot).is_err());
++    }
++
++    #[test]
++    fn r2_bucket_names_are_restricted_to_safe_dns_labels() {
++        assert!(valid_bucket("sublens-usage-2026"));
++        assert!(!valid_bucket("-sublens"));
++        assert!(!valid_bucket("Sublens"));
++        assert!(!valid_bucket("sub/lens"));
++    }
++}
+diff --git a/src-tauri/src/sublens_monitor.rs b/src-tauri/src/sublens_monitor.rs
+new file mode 100644
+index 00000000..7902b51e
+--- /dev/null
++++ b/src-tauri/src/sublens_monitor.rs
+@@ -0,0 +1,447 @@
++//! Local, read-only usage collectors for Subscription Lens.
++//!
++//! This module deliberately reads only CodeBuddy and Qoder usage logs. It
++//! extracts token/latency/cost metadata and never stores raw log lines.
++
++use chrono::{DateTime, NaiveDateTime, Utc};
++use rusqlite::{params, Connection, OptionalExtension};
++use serde_json::{json, Map, Value};
++use sha2::{Digest, Sha256};
++use std::{
++    collections::{BTreeMap, BTreeSet},
++    fs::{self, File},
++    io::{BufRead, BufReader},
++    path::{Path, PathBuf},
++    time::UNIX_EPOCH,
++};
++use tauri::{AppHandle, Manager};
++
++const KINDS: [&str; 2] = ["codebuddy", "qoder"];
++const MAX_DEPTH: usize = 10;
++const MAX_FILES: usize = 25_000;
++const MAX_LINE: usize = 8 * 1024 * 1024;
++
++fn app_db(app: &AppHandle) -> Result<(PathBuf, Connection), String> {
++    let dir = app.path().app_data_dir().map_err(|e| e.to_string())?;
++    fs::create_dir_all(&dir).map_err(|e| format!("创建用量数据目录失败：{e}"))?;
++    let path = dir.join("usage-monitor.sqlite3");
++    let db = Connection::open(&path).map_err(|e| format!("打开用量数据库失败：{e}"))?;
++    db.busy_timeout(std::time::Duration::from_secs(2)).map_err(|e| e.to_string())?;
++    db.execute_batch(
++        "PRAGMA journal_mode=WAL;
++         CREATE TABLE IF NOT EXISTS sl_monitor_sources(
++           id TEXT PRIMARY KEY, kind TEXT NOT NULL, path TEXT NOT NULL UNIQUE COLLATE NOCASE,
++           enabled INTEGER NOT NULL DEFAULT 1, state TEXT NOT NULL DEFAULT 'idle',
++           last_at TEXT, invalid INTEGER NOT NULL DEFAULT 0, files INTEGER NOT NULL DEFAULT 0
++         );
++         CREATE TABLE IF NOT EXISTS sl_monitor_events(
++           source_id TEXT NOT NULL, event_id TEXT NOT NULL, at TEXT NOT NULL,
++           provider TEXT NOT NULL, model TEXT NOT NULL, file_path TEXT NOT NULL DEFAULT '', data TEXT NOT NULL,
++           PRIMARY KEY(source_id,event_id)
++         );
++         PRAGMA user_version=1;
++         CREATE INDEX IF NOT EXISTS sl_monitor_time ON sl_monitor_events(at);
++         CREATE TABLE IF NOT EXISTS sl_monitor_files(
++           source_id TEXT NOT NULL, path TEXT NOT NULL, size INTEGER NOT NULL, modified INTEGER NOT NULL,
++           PRIMARY KEY(source_id,path)
++         );
++         CREATE TABLE IF NOT EXISTS sl_monitor_rates(
++           provider TEXT NOT NULL, model TEXT NOT NULL, rates TEXT NOT NULL,
++           PRIMARY KEY(provider,model)
++         );",
++    ).map_err(|e| format!("初始化用量数据库失败：{e}"))?;
++    let event_columns: BTreeSet<String> = {
++        let mut stmt = db.prepare("PRAGMA table_info(sl_monitor_events)").map_err(|e| e.to_string())?;
++        let rows = stmt.query_map([], |r| r.get::<_, String>(1)).map_err(|e| e.to_string())?.filter_map(Result::ok).collect(); rows
++    };
++    if !event_columns.contains("file_path") {
++        db.execute("ALTER TABLE sl_monitor_events ADD COLUMN file_path TEXT NOT NULL DEFAULT ''", []).map_err(|e| e.to_string())?;
++    }
++    Ok((path, db))
++}
++
++fn home() -> Option<PathBuf> {
++    #[cfg(windows)]
++    { std::env::var_os("USERPROFILE").map(PathBuf::from) }
++    #[cfg(not(windows))]
++    { std::env::var_os("HOME").map(PathBuf::from) }
++}
++
++fn default_path(kind: &str) -> Result<PathBuf, String> {
++    if !KINDS.contains(&kind) { return Err("仅支持 CodeBuddy 和 Qoder".into()); }
++    if kind == "qoder" {
++        if let Some(path) = std::env::var_os("QODER_CONFIG_DIR") { return Ok(PathBuf::from(path)); }
++    }
++    home().map(|h| h.join(if kind == "qoder" { ".qoder" } else { ".codebuddy" }))
++        .ok_or_else(|| "无法确定用户目录".into())
++}
++
++fn id_for(kind: &str, path: &Path) -> String {
++    let mut h = Sha256::new(); h.update(kind.as_bytes()); h.update([0]); h.update(path.to_string_lossy().as_bytes());
++    format!("{:x}", h.finalize())[..24].to_string()
++}
++
++fn now_iso() -> String { Utc::now().to_rfc3339_opts(chrono::SecondsFormat::Millis, true) }
++fn as_u64(v: Option<&Value>) -> Option<u64> { v?.as_u64() }
++fn first<'a>(v: &'a Value, keys: &[&str]) -> Option<&'a Value> { keys.iter().find_map(|k| v.get(*k)) }
++fn text(v: Option<&Value>) -> Option<String> { v.and_then(Value::as_str).map(str::trim).filter(|s| !s.is_empty()).map(str::to_owned) }
++
++fn timestamp(v: Option<&Value>, line: Option<&str>) -> Option<String> {
++    if let Some(value) = text(v) {
++        if let Ok(dt) = DateTime::parse_from_rfc3339(&value) { return Some(dt.with_timezone(&Utc).to_rfc3339_opts(chrono::SecondsFormat::Millis, true)); }
++        for fmt in ["%Y-%m-%d %H:%M:%S%.f", "%Y-%m-%dT%H:%M:%S%.f"] {
++            if let Ok(dt) = NaiveDateTime::parse_from_str(&value, fmt) { return Some(dt.and_utc().to_rfc3339_opts(chrono::SecondsFormat::Millis, true)); }
++        }
++    }
++    let line = line?;
++    let prefix = line.get(..line.len().min(35))?;
++    for fmt in ["%Y-%m-%d %H:%M:%S%.f", "%Y-%m-%dT%H:%M:%S%.f"] {
++        if let Ok(dt) = NaiveDateTime::parse_from_str(prefix, fmt) { return Some(dt.and_utc().to_rfc3339_opts(chrono::SecondsFormat::Millis, true)); }
++    }
++    None
++}
++
++fn safe_label(value: Option<String>, fallback: &str) -> String {
++    let s = value.unwrap_or_else(|| fallback.to_owned());
++    s.chars().filter(|c| !c.is_control()).take(180).collect()
++}
++
++fn canonical(raw: &Value, kind: &str, source_path: &Path, line_no: u64, line_stamp: Option<&str>) -> Option<Value> {
++    let mut obj = raw;
++    if kind == "qoder" {
++        if raw.get("type").and_then(Value::as_str).is_some_and(|t| t == "result" || t == "system") { return None; }
++        if raw.get("usedTokens").and_then(Value::as_u64).is_some() {
++            let session = text(first(raw, &["sessionId", "session_id"]))?;
++            let used = as_u64(raw.get("usedTokens"))?;
++            let at = timestamp(first(raw, &["timestamp", "created_at", "at"]), line_stamp)?;
++            return Some(json!({
++                "id": format!("quest-context:{session}"), "at": at, "provider":"Qoder", "model":"Qoder Quest",
++                "session":session, "project":"Qoder Quest", "input":used, "cached":0, "write":0,
++                "output":0, "reasoning":0, "total":used, "tokenBasis":"estimated", "status":null,
++                "latencyMs":null, "ttftMs":null, "amount":null, "usd":null, "sourceAmount":null,
++                "sourceUnit":"Credits", "basis":"estimate", "origin":"qoder-quest-context", "pricingModel":"Qoder Quest"
++            }));
++        }
++        obj = raw.get("message").and_then(|m| m.get("message")).or_else(|| raw.get("message")).unwrap_or(raw);
++    }
++    let usage = if kind == "codebuddy" {
++        raw.pointer("/providerData/rawUsage").or_else(|| raw.pointer("/message/usage"))
++    } else {
++        first(obj, &["usage"]).or_else(|| first(raw, &["usage"]))
++            .or_else(|| raw.pointer("/data/usage"))
++    }?;
++    let (input, cached, write, output, reasoning) = if kind == "codebuddy" && raw.pointer("/providerData/rawUsage").is_some() {
++        let hit = as_u64(first(usage, &["prompt_cache_hit_tokens"]))
++            .or_else(|| usage.pointer("/prompt_tokens_details/cached_tokens").and_then(Value::as_u64)).unwrap_or(0);
++        let write = as_u64(first(usage, &["prompt_cache_write_tokens"])).unwrap_or(0);
++        let prompt = as_u64(first(usage, &["prompt_tokens"]));
++        let miss = as_u64(first(usage, &["prompt_cache_miss_tokens"])).or_else(|| prompt.map(|p| p.saturating_sub(hit + write)))?;
++        let output = as_u64(first(usage, &["completion_tokens"]))?;
++        let reasoning = as_u64(first(usage, &["completion_thinking_tokens"])).unwrap_or(0);
++        (miss.saturating_add(hit).saturating_add(write), hit, write, output, reasoning)
++    } else {
++        let input = as_u64(first(usage, &["input_tokens", "inputTokens", "prompt_tokens"]))?;
++        let cached = as_u64(first(usage, &["cache_read_input_tokens", "cacheReadInputTokens", "cached_tokens"])).unwrap_or(0);
++        let write = as_u64(first(usage, &["cache_creation_input_tokens", "cacheCreationInputTokens", "cache_write_input_tokens"])).unwrap_or(0);
++        let output = as_u64(first(usage, &["output_tokens", "outputTokens", "completion_tokens"]))?;
++        let reasoning = as_u64(first(usage, &["reasoning_tokens", "reasoningTokens", "reasoning_output_tokens"])).unwrap_or(0);
++        (input, cached, write, output, reasoning)
++    };
++    if cached.saturating_add(write) > input || reasoning > output { return None; }
++    let model = safe_label(
++        text(first(obj, &["model"]))
++            .or_else(|| text(raw.pointer("/providerData/model")))
++            .or_else(|| text(raw.pointer("/message/model")))
++            .or_else(|| text(first(raw, &["model"]))),
++        "unknown",
++    );
++    let provider = if kind == "codebuddy" { "CodeBuddy" } else { "Qoder" };
++    let session = safe_label(text(first(raw, &["sessionId", "session_id"]))
++        .or_else(|| text(raw.pointer("/data/session_id"))), source_path.file_stem()?.to_string_lossy().as_ref());
++    let project = source_path.parent().and_then(Path::file_name).map(|s| s.to_string_lossy().into_owned()).unwrap_or_else(|| provider.to_owned());
++    let at = timestamp(first(raw, &["timestamp", "created_at", "at"]).or_else(|| first(obj, &["timestamp"])), line_stamp)?;
++    let supplied_id = text(first(obj, &["id", "messageId"]))
++        .or_else(|| text(first(raw, &["id"])))
++        .or_else(|| text(raw.pointer("/providerData/messageId")));
++    let stable_id = supplied_id.unwrap_or_else(|| format!("{}:{}:{}:{}:{}", source_path.display(), line_no, at, model, input + output));
++    let mut h = Sha256::new(); h.update(stable_id.as_bytes()); let id = format!("{:x}", h.finalize());
++    let credits = first(usage, &["credits", "original_credits"]).or_else(|| first(raw, &["credits", "original_credits"]));
++    let credits_scaled = credits.and_then(|v| v.as_f64().or_else(|| v.as_str()?.parse::<f64>().ok()))
++        .filter(|v| v.is_finite() && *v >= 0.0 && *v <= 1.0e12)
++        .map(|v| format!("{:.0}", v * 1.0e15));
++    let mut event = Map::new();
++    event.insert("id".into(), json!(id)); event.insert("at".into(), json!(at)); event.insert("provider".into(), json!(provider));
++    event.insert("model".into(), json!(model)); event.insert("session".into(), json!(session)); event.insert("project".into(), json!(project));
++    event.insert("input".into(), json!(input)); event.insert("cached".into(), json!(cached)); event.insert("write".into(), json!(write));
++    event.insert("output".into(), json!(output)); event.insert("reasoning".into(), json!(reasoning)); event.insert("total".into(), json!(input.saturating_add(output)));
++    event.insert("tokenBasis".into(), json!("measured")); event.insert("status".into(), first(raw, &["status", "statusCode"]).cloned().unwrap_or(Value::Null));
++    event.insert("latencyMs".into(), first(raw, &["latencyMs"]).cloned().unwrap_or(Value::Null)); event.insert("ttftMs".into(), first(raw, &["ttftMs", "firstTokenMs"]).cloned().unwrap_or(Value::Null));
++    event.insert("amount".into(), Value::Null); event.insert("usd".into(), Value::Null); event.insert("sourceAmount".into(), credits_scaled.map(Value::String).unwrap_or(Value::Null));
++    event.insert("sourceUnit".into(), json!(if kind == "qoder" { "Credits" } else { "" }));
++    event.insert("basis".into(), json!("estimate"));
++    event.insert("origin".into(), json!(if kind == "qoder" { "qoder-cli" } else { "codebuddy-code" }));
++    event.insert("pricingModel".into(), json!(model));
++    Some(Value::Object(event))
++}
++
++fn candidates(kind: &str) -> Vec<PathBuf> {
++    let Ok(primary) = default_path(kind) else { return Vec::new(); };
++    let mut paths = vec![primary];
++    if kind == "qoder" {
++        if let Some(appdata) = std::env::var_os("APPDATA") { paths.push(PathBuf::from(appdata).join("Qoder").join("logs")); }
++    }
++    paths.into_iter().filter_map(|p| fs::canonicalize(&p).ok()).filter(|p| p.is_dir()).collect()
++}
++
++fn discover(db: &Connection) -> Result<Vec<Value>, String> {
++    let connected: Vec<(String,String)> = {
++        let mut stmt = db.prepare("SELECT kind,path FROM sl_monitor_sources") .map_err(|e| e.to_string())?;
++        let rows = stmt.query_map([], |r| Ok((r.get::<_,String>(0)?,r.get::<_,String>(1)?))).map_err(|e| e.to_string())?.filter_map(Result::ok).collect(); rows
++    };
++    let mut found = Vec::new();
++    for kind in KINDS { if let Some(path) = candidates(kind).into_iter().next() {
++        let candidate = path.to_string_lossy().to_lowercase();
++        let is_connected = connected.iter().any(|(stored_kind,stored_path)| stored_path.to_lowercase()==candidate || (kind=="qoder" && stored_kind=="qoder"));
++        found.push(json!({"kind":kind,"path":path.to_string_lossy(),"connected":is_connected}));
++    }}
++    Ok(found)
++}
++
++fn collect_files(root: &Path, kind: &str) -> Vec<PathBuf> {
++    fn visit(root: &Path, dir: &Path, kind: &str, depth: usize, out: &mut Vec<PathBuf>) {
++        if depth > MAX_DEPTH || out.len() >= MAX_FILES { return; }
++        let Ok(entries) = fs::read_dir(dir) else { return; };
++        for entry in entries.flatten() {
++            if out.len() >= MAX_FILES { break; }
++            let path = entry.path(); let Ok(ft) = entry.file_type() else { continue; };
++            if ft.is_symlink() { continue; }
++            if ft.is_dir() { visit(root, &path, kind, depth + 1, out); }
++            else if ft.is_file() {
++                let name = entry.file_name().to_string_lossy().to_string();
++                let yes = if kind == "codebuddy" {
++                    name.to_lowercase().ends_with(".jsonl") && !path.components().any(|c| c.as_os_str().to_string_lossy().eq_ignore_ascii_case("tool-results"))
++                        && (root.file_name().is_some_and(|s| s.to_string_lossy().eq_ignore_ascii_case("projects")) || path.starts_with(root.join("projects")))
++                } else {
++                    let lower = name.to_lowercase();
++                    ["qodercli.log","agent.log","quest.log","renderer.log","subscription-lens.jsonl"].contains(&lower.as_str())
++                        || (lower.starts_with("usage") && lower.ends_with(".jsonl")) || (lower.starts_with("events") && lower.ends_with(".jsonl"))
++                };
++                if yes { out.push(path); }
++            }
++        }
++        let _ = root;
++    }
++    let mut out = Vec::new(); visit(root, root, kind, 0, &mut out); out.sort(); out
++}
++
++fn scan_source(db: &mut Connection, id: &str, kind: &str, root: &Path) -> Result<(u64, u64, u64), String> {
++    let roots = if kind == "qoder" { let mut r = vec![root.to_path_buf()]; if let Some(appdata) = std::env::var_os("APPDATA") { let q = PathBuf::from(appdata).join("Qoder").join("logs"); if q.is_dir() && q != root { r.push(q); }} r } else { vec![root.to_path_buf()] };
++    let files: Vec<_> = roots.iter().flat_map(|r| collect_files(r, kind)).collect();
++    let seen: BTreeSet<String> = files.iter().map(|p| p.to_string_lossy().to_string()).collect();
++    let mut imported = 0; let mut invalid = 0; let mut unchanged = 0;
++    for path in &files {
++        let Ok(meta) = fs::metadata(path) else { continue; };
++        let size = meta.len(); let modified = meta.modified().ok().and_then(|m| m.duration_since(UNIX_EPOCH).ok()).map(|d| d.as_millis() as i64).unwrap_or(0);
++        let file_key = path.to_string_lossy().to_string();
++        let old: Option<(i64,i64)> = db.query_row("SELECT size,modified FROM sl_monitor_files WHERE source_id=?1 AND path=?2", params![id,file_key], |r| Ok((r.get(0)?,r.get(1)?))).optional().map_err(|e| e.to_string())?;
++        if old == Some((size as i64, modified)) { unchanged += 1; continue; }
++        let f = match File::open(path) { Ok(f) => f, Err(_) => { invalid += 1; continue; } };
++        let tx = db.transaction().map_err(|e| e.to_string())?;
++        if old.is_some() {
++            tx.execute("DELETE FROM sl_monitor_events WHERE source_id=?1 AND file_path=?2", params![id,file_key]).map_err(|e|e.to_string())?;
++        }
++        let reader = BufReader::new(f); let mut consumed = 0u64;
++        for (index, line) in reader.split(b'\n').enumerate() {
++            let Ok(bytes) = line else { invalid += 1; continue; }; consumed += bytes.len() as u64 + 1;
++            if bytes.len() > MAX_LINE { invalid += 1; continue; }
++            let text_line = String::from_utf8_lossy(&bytes);
++            let stamp = text_line.get(..19).filter(|s| s.as_bytes().get(4)==Some(&b'-'));
++            let parsed = if kind == "qoder" {
++                let start = text_line.find('{').unwrap_or(usize::MAX);
++                if start == usize::MAX { None } else { serde_json::from_str::<Value>(&text_line[start..]).ok() }
++            } else { serde_json::from_str::<Value>(&text_line).ok() };
++            let Some(raw) = parsed else { continue; };
++            if let Some(event) = canonical(&raw, kind, path, index as u64, stamp) {
++                let at = event["at"].as_str().unwrap_or(""); let provider = event["provider"].as_str().unwrap_or(""); let model = event["model"].as_str().unwrap_or("");
++                let event_id = event["id"].as_str().unwrap_or("");
++                imported += tx.execute("INSERT INTO sl_monitor_events(source_id,event_id,at,provider,model,file_path,data) VALUES(?1,?2,?3,?4,?5,?6,?7) ON CONFLICT(source_id,event_id) DO UPDATE SET at=excluded.at,provider=excluded.provider,model=excluded.model,file_path=excluded.file_path,data=excluded.data WHERE data<>excluded.data", params![id,event_id,at,provider,model,path.to_string_lossy(),event.to_string()]).unwrap_or(0) as u64;
++            } else {
++                let looks_like_usage = if kind == "codebuddy" {
++                    raw.pointer("/providerData/rawUsage").is_some() || raw.pointer("/message/usage").is_some()
++                } else {
++                    raw.get("usedTokens").is_some() || raw.get("usage").is_some() || raw.pointer("/data/usage").is_some()
++                };
++                if looks_like_usage { invalid += 1; }
++            }
++        }
++        tx.execute("INSERT INTO sl_monitor_files(source_id,path,size,modified) VALUES(?1,?2,?3,?4) ON CONFLICT(source_id,path) DO UPDATE SET size=excluded.size,modified=excluded.modified", params![id,file_key,size as i64,modified]).map_err(|e| e.to_string())?;
++        tx.commit().map_err(|e| e.to_string())?;
++        let _ = consumed;
++    }
++    // Drop events/checkpoints for files the user removed from these source folders.
++    let stored: Vec<String> = { let mut stmt=db.prepare("SELECT path FROM sl_monitor_files WHERE source_id=?1").map_err(|e|e.to_string())?; let rows=stmt.query_map([id],|r|r.get(0)).map_err(|e|e.to_string())?.filter_map(Result::ok).collect(); rows };
++    for old in stored { if !seen.contains(&old) { db.execute("DELETE FROM sl_monitor_files WHERE source_id=?1 AND path=?2",params![id,old]).ok(); db.execute("DELETE FROM sl_monitor_events WHERE source_id=?1 AND file_path=?2",params![id,old]).ok(); } }
++    db.execute("DELETE FROM sl_monitor_events WHERE source_id=?1 AND NOT EXISTS (SELECT 1 FROM sl_monitor_files f WHERE f.source_id=sl_monitor_events.source_id)",params![id]).ok();
++    let _ = unchanged;
++    Ok((imported, invalid, files.len() as u64))
++}
++
++fn ensure_source(db: &Connection, kind: &str, raw_path: &str) -> Result<Value, String> {
++    if !KINDS.contains(&kind) { return Err("仅支持 CodeBuddy 和 Qoder".into()); }
++    let path = fs::canonicalize(raw_path).map_err(|e| format!("无法读取来源目录：{e}"))?;
++    if !path.is_dir() { return Err("来源必须是文件夹".into()); }
++    let id = id_for(kind,&path);
++    db.execute("INSERT OR IGNORE INTO sl_monitor_sources(id,kind,path,enabled,state) VALUES(?1,?2,?3,1,'idle')",params![id,kind,path.to_string_lossy()]).map_err(|e| format!("保存来源失败：{e}"))?;
++    Ok(json!({"id":id,"kind":kind,"path":path,"enabled":true}))
++}
++
++#[tauri::command]
++pub fn sublens_monitor_discover(app: AppHandle) -> Result<Vec<Value>, String> { let (_,db)=app_db(&app)?; discover(&db) }
++
++#[tauri::command(rename_all="camelCase")]
++pub fn sublens_monitor_add_source(app: AppHandle, kind: String, path: String) -> Result<Value,String> {
++    if !KINDS.contains(&kind.as_str()) { return Err("仅支持 CodeBuddy 和 Qoder".into()); }
++    let (_,mut db)=app_db(&app)?; let source=ensure_source(&db,&kind,&path)?;
++    let id=source["id"].as_str().unwrap_or("").to_owned(); let root=PathBuf::from(source["path"].as_str().unwrap_or(""));
++    let (imported,invalid,files)=scan_source(&mut db,&id,&kind,&root)?;
++    db.execute("UPDATE sl_monitor_sources SET state='ready',last_at=?2,invalid=?3,files=?4 WHERE id=?1",params![id,now_iso(),invalid as i64,files as i64]).map_err(|e|e.to_string())?;
++    Ok(json!({"source":source,"imported":imported,"invalid":invalid,"files":files}))
++}
++
++#[tauri::command(rename_all="camelCase")]
++pub fn sublens_monitor_configure(app: AppHandle, id: String, enabled: bool) -> Result<bool,String> {
++    let (_,db)=app_db(&app)?; let changed=db.execute("UPDATE sl_monitor_sources SET enabled=?2 WHERE id=?1",params![id,enabled as i64]).map_err(|e|e.to_string())?;
++    if changed==0 { return Err("来源不存在".into()); } Ok(true)
++}
++
++#[tauri::command(rename_all="camelCase")]
++pub fn sublens_monitor_set_rate(app: AppHandle, provider: String, model: String, rates: Value) -> Result<bool,String> {
++    let (_,db)=app_db(&app)?; let provider=provider.trim(); let model=model.trim();
++    if provider.is_empty()||model.is_empty()||provider.len()>180||model.len()>180 { return Err("供应商和模型不能为空".into()); }
++    let mut normalized=Map::new();
++    for key in ["input","cached","write","output"] { let raw=rates.get(key).and_then(Value::as_str).or_else(||rates.get(key).map(Value::as_f64).map(|_| "0")).unwrap_or("0"); let number=raw.parse::<f64>().map_err(|_|"价格格式无效")?; if !number.is_finite()||number<0.0||number>1_000_000.0{return Err("价格超出范围".into());} normalized.insert(key.into(),json!(raw)); }
++    db.execute("INSERT INTO sl_monitor_rates(provider,model,rates) VALUES(?1,?2,?3) ON CONFLICT(provider,model) DO UPDATE SET rates=excluded.rates",params![provider,model,Value::Object(normalized).to_string()]).map_err(|e|e.to_string())?; Ok(true)
++}
++
++fn rate_amount(event: &Value, rates: Option<&Value>) -> Option<f64> {
++    let rates=rates?; let categories=[("input",event["input"].as_f64()?.max(0.0)-event["cached"].as_f64()?.max(0.0)-event["write"].as_f64()?.max(0.0)),("cached",event["cached"].as_f64()?), ("write",event["write"].as_f64()?), ("output",event["output"].as_f64()?)];
++    Some(categories.iter().map(|(k,n)| n* rates[*k].as_str().and_then(|v|v.parse::<f64>().ok()).unwrap_or(0.0)/1_000_000.0).sum())
++}
++
++fn add_group(map: &mut BTreeMap<String, Value>, key: String, provider: &str, model: &str, tokens: u64, usd: Option<f64>, day: bool) {
++    let g = map.entry(key.clone()).or_insert_with(|| json!({
++        "key":key, "provider":if day { "" } else { provider }, "model":if day { "" } else { model },
++        "tokens":0,"pricedTokens":0,"requests":0,"estimated":0.0,"reported":0.0,
++        "estimatedRecords":0,"reportedRecords":0,"unpriced":0
++    }));
++    g["tokens"] = json!(g["tokens"].as_u64().unwrap_or(0) + tokens);
++    g["requests"] = json!(g["requests"].as_u64().unwrap_or(0) + 1);
++    if let Some(usd) = usd {
++        g["pricedTokens"] = json!(g["pricedTokens"].as_u64().unwrap_or(0) + tokens);
++        g["estimated"] = json!(g["estimated"].as_f64().unwrap_or(0.0) + usd);
++        g["estimatedRecords"] = json!(g["estimatedRecords"].as_u64().unwrap_or(0) + 1);
++    } else { g["unpriced"] = json!(g["unpriced"].as_u64().unwrap_or(0) + 1); }
++}
++
++#[tauri::command(rename_all="camelCase")]
++pub fn sublens_monitor_query(app: AppHandle, from: String, to: String, connection: Option<String>, provider: Option<String>, model: Option<String>, query: Option<String>, day: Option<String>, failed: Option<bool>, overlap: Option<String>, unpriced: Option<bool>, sort: Option<String>, offset: Option<usize>, limit: Option<usize>) -> Result<Value,String> {
++    let (_,mut db)=app_db(&app)?;
++    let sources: Vec<(String,String,String,bool,String,Option<String>,i64,i64)> = {
++        let mut stmt=db.prepare("SELECT id,kind,path,enabled,state,last_at,invalid,files FROM sl_monitor_sources ORDER BY kind,path").map_err(|e|e.to_string())?;
++        let rows=stmt.query_map([],|r|Ok((r.get(0)?,r.get(1)?,r.get(2)?,r.get::<_,i64>(3)?!=0,r.get(4)?,r.get(5)?,r.get(6)?,r.get(7)?))).map_err(|e|e.to_string())?.filter_map(Result::ok).collect(); rows
++    };
++    for (id,kind,path,enabled,_,_,_,_) in &sources { if *enabled { match scan_source(&mut db,id,kind,Path::new(path)) { Ok((_,invalid,files))=>{db.execute("UPDATE sl_monitor_sources SET state='ready',last_at=?2,invalid=?3,files=?4 WHERE id=?1",params![id,now_iso(),invalid as i64,files as i64]).ok();},Err(_)=>{db.execute("UPDATE sl_monitor_sources SET state='error' WHERE id=?1",[id]).ok();} } } }
++    let source_info: Vec<Value> = { let mut stmt=db.prepare("SELECT s.id,s.kind,s.path,s.enabled,s.state,s.last_at,s.invalid,s.files,(SELECT COUNT(*) FROM sl_monitor_events e WHERE e.source_id=s.id) FROM sl_monitor_sources s ORDER BY s.kind,s.path").map_err(|e|e.to_string())?;
++      let rows=stmt.query_map([],|r|Ok(json!({"id":r.get::<_,String>(0)?,"kind":r.get::<_,String>(1)?,"path":r.get::<_,String>(2)?,"enabled":r.get::<_,i64>(3)?!=0,"state":r.get::<_,String>(4)?,"at":r.get::<_,Option<String>>(5)?,"invalid":r.get::<_,i64>(6)?,"files":r.get::<_,i64>(7)?,"records":r.get::<_,i64>(8)?}))).map_err(|e|e.to_string())?.filter_map(Result::ok).collect(); rows };
++    let detected=discover(&db)?;
++    let selected_source=connection.as_deref().filter(|s|*s!="all");
++    let mut stmt=db.prepare("SELECT e.data FROM sl_monitor_events e JOIN sl_monitor_sources s ON s.id=e.source_id WHERE e.at>=?1 AND e.at<?2 AND s.enabled=1 AND (?3 IS NULL OR e.source_id=?3)").map_err(|e|e.to_string())?;
++    let records: Vec<Value>=stmt.query_map(params![from,to,selected_source],|r|Ok((r.get::<_,String>(0)?,r.get::<_,String>(1)?))).map_err(|e|e.to_string())?.filter_map(Result::ok).filter_map(|(data,source)|serde_json::from_str::<Value>(&data).ok().map(|mut e|{e["sourceId"]=json!(source);e})).collect();
++    let rate_values: Vec<Value>={let mut q=db.prepare("SELECT provider,model,rates FROM sl_monitor_rates ORDER BY provider,model").map_err(|e|e.to_string())?;let rows=q.query_map([],|r|Ok((r.get::<_,String>(0)?,r.get::<_,String>(1)?,r.get::<_,String>(2)?))).map_err(|e|e.to_string())?.filter_map(Result::ok).filter_map(|(provider,model,rates)|serde_json::from_str::<Value>(&rates).ok().map(|rates|json!({"provider":provider,"model":model,"rates":rates}))).collect();rows};
++    let rates_map: BTreeMap<(String,String),Value>=rate_values.iter().filter_map(|r|Some(((r["provider"].as_str()?.to_owned(),r["model"].as_str()?.to_owned()),r["rates"].clone()))).collect();
++    let needle=query.unwrap_or_default().to_lowercase(); let provider=provider.unwrap_or_default(); let model=model.unwrap_or_default(); let day=day.unwrap_or_default();
++    let mut rows=Vec::new();
++    for mut e in records { if !provider.is_empty()&&e["provider"]!=provider {continue;} if !model.is_empty()&&e["model"]!=model {continue;} if !day.is_empty()&&e["at"].as_str().unwrap_or("").get(..10)!=Some(day.as_str()){continue;}
++        let hay=format!("{} {} {} {}",e["provider"].as_str().unwrap_or(""),e["model"].as_str().unwrap_or(""),e["session"].as_str().unwrap_or(""),e["project"].as_str().unwrap_or("")).to_lowercase(); if !needle.is_empty()&&!hay.contains(&needle){continue;}
++        if failed==Some(true)&&e["status"].as_i64().is_none_or(|s| (200..400).contains(&s)){continue;}
++        let key=(e["provider"].as_str().unwrap_or("").to_owned(),e["model"].as_str().unwrap_or("").to_owned());
++        let amount=e["usd"].as_f64().or_else(||rate_amount(&e,rates_map.get(&key)));
++        e["usd"]=amount.map(|v|json!(v)).unwrap_or(Value::Null); e["amount"]=amount.map(|v|json!(format!("{v:.12}"))).unwrap_or(Value::Null);
++        e["basis"]=json!("estimate");
++        if unpriced==Some(true)&&amount.is_some(){continue;}
++        rows.push(e);
++    }
++    let mut unique: Vec<Value> = Vec::new();
++    for event in rows {
++        let at = DateTime::parse_from_rfc3339(event["at"].as_str().unwrap_or("")).ok().map(|d|d.timestamp_millis());
++        let similar = unique.iter().position(|prior| {
++            if prior["sourceId"] == event["sourceId"] { return false; }
++            let prior_at=DateTime::parse_from_rfc3339(prior["at"].as_str().unwrap_or("")).ok().map(|d|d.timestamp_millis());
++            if at.zip(prior_at).is_none_or(|(a,b)|(a-b).abs()>30_000) { return false; }
++            ["provider","model","input","cached","write","output","reasoning","total"].iter().all(|key|prior[*key]==event[*key])
++        });
++        if let Some(index)=similar {
++            let exact=unique[index]["id"]==event["id"];
++            let kind=if exact{"exact"}else{"possible"};
++            let source=event["sourceId"].as_str().unwrap_or("").to_owned();
++            let previous_source=unique[index]["sourceId"].as_str().unwrap_or("").to_owned();
++            let overlap=json!({"kind":kind,"count":1,"sources":[previous_source,source]});
++            unique[index]["overlap"]=overlap.clone();
++            if exact { continue; }
++            let mut event=event; event["overlap"]=overlap; unique.push(event);
++        } else { unique.push(event); }
++    }
++    let overlap=overlap.unwrap_or_default();
++    if overlap=="exact"||overlap=="possible" { unique.retain(|e|e["overlap"]["kind"]==overlap); }
++    rows=unique;
++    let mut provider_names=BTreeSet::new();let mut models=BTreeSet::new();for e in &rows{provider_names.insert(e["provider"].as_str().unwrap_or("").to_owned());models.insert(e["model"].as_str().unwrap_or("").to_owned());}
++    if sort.as_deref()==Some("recent"){rows.sort_by(|a,b|b["at"].as_str().cmp(&a["at"].as_str()));}else{rows.sort_by(|a,b|b["usd"].as_f64().unwrap_or(-1.0).partial_cmp(&a["usd"].as_f64().unwrap_or(-1.0)).unwrap_or(std::cmp::Ordering::Equal).then_with(||b["at"].as_str().cmp(&a["at"].as_str())));}
++    let requests=rows.len();let mut tokens=0u64;let mut input=0u64;let mut cached=0u64;let mut output=0u64;let mut priced_tokens=0u64;let mut estimated=0.0;let mut source_credits=0.0;let mut unpriced=0usize;let mut groups:BTreeMap<String,Value>=BTreeMap::new();let mut model_groups:BTreeMap<String,Value>=BTreeMap::new();let mut days:BTreeMap<String,Value>=BTreeMap::new();
++    for e in &rows {let provider=e["provider"].as_str().unwrap_or("");let model=e["model"].as_str().unwrap_or("");let total=e["total"].as_u64().unwrap_or(0);tokens+=total;input+=e["input"].as_u64().unwrap_or(0);cached+=e["cached"].as_u64().unwrap_or(0);output+=e["output"].as_u64().unwrap_or(0);if let Some(v)=e["sourceAmount"].as_str().and_then(|v|v.parse::<f64>().ok()){source_credits+=v/1.0e15;}let usd=e["usd"].as_f64();if let Some(usd)=usd{estimated+=usd;priced_tokens+=total;}else{unpriced+=1;}
++       let date=e["at"].as_str().unwrap_or("").get(..10).unwrap_or("unknown").to_owned();
++       add_group(&mut groups,provider.to_owned(),provider,model,total,usd,false);
++       add_group(&mut model_groups,format!("{provider}:{model}"),provider,model,total,usd,false);
++       add_group(&mut days,date.clone(),provider,model,total,usd,true);
++    }
++    let limit=limit.unwrap_or(50).clamp(1,200);let offset=offset.unwrap_or(0).min(requests);let page=rows.iter().skip(offset).take(limit).cloned().collect::<Vec<_>>();
++    let compatibility=KINDS.iter().map(|kind|json!({"id":kind,"name":if *kind=="qoder"{"Qoder"}else{"CodeBuddy"},"kind":kind,"level":"supported","detailKey":if *kind=="qoder"{"Qoder Quest 本机上下文快照与 stream JSON；Credits 单独保留"}else{"本机项目 JSONL 用量；只读解析，不读取配置密钥"},"connected":source_info.iter().any(|s|s["kind"]==*kind)})).collect::<Vec<_>>();
++    let overlap_records=rows.iter().filter(|r|!r["overlap"].is_null()).count();
++    let overlap_exact=rows.iter().filter(|r|r["overlap"]["kind"]=="exact").count();
++    let overlap_possible=rows.iter().filter(|r|r["overlap"]["kind"]=="possible").count();
++    let overlap_sources: BTreeSet<String>=rows.iter().flat_map(|r|r["overlap"]["sources"].as_array().into_iter().flatten().filter_map(Value::as_str).map(str::to_owned)).collect();
++    Ok(json!({"source":connection.unwrap_or_else(||"all".into()),"sources":source_info,"detected":detected,"compatibility":compatibility,"providers":provider_names,"models":models,"rates":rate_values,"summary":{"estimatedRecords":requests-unpriced,"reportedRecords":0,"sourceCreditRecords":rows.iter().filter(|r|!r["sourceAmount"].is_null()).count(),"sourceCredits":source_credits,"requests":requests,"tokens":tokens,"input":input,"cached":cached,"output":output,"pricedTokens":priced_tokens,"estimated":estimated,"reported":0,"unpriced":unpriced,"overlapRecords":overlap_records,"overlapExact":overlap_exact,"overlapPossible":overlap_possible,"overlapSources":overlap_sources,"knownStatus":0,"failed":0,"successRate":Value::Null,"p50":Value::Null,"p95":Value::Null,"ttft":Value::Null},"groups":groups.into_values().collect::<Vec<_>>(),"modelGroups":model_groups.into_values().collect::<Vec<_>>(),"days":days.into_iter().map(|(key,mut v)|{v["key"]=json!(key);v}).collect::<Vec<_>>(),"rows":page,"offset":offset,"limit":limit,"range":{"from":from,"to":to}}))
++}
++
++#[cfg(test)]
++mod tests {
++    use super::*;
++    #[test]
++    fn codebuddy_parser_keeps_usage_only_and_excludes_chat_body() {
++        let raw=json!({"type":"assistant","timestamp":"2026-01-02T03:04:05Z","sessionId":"s1","message":{"model":"example-model","usage":{"input_tokens":100,"cache_read_input_tokens":20,"output_tokens":30}},"content":"private prompt"});
++        let event=canonical(&raw,"codebuddy",Path::new("/x/projects/p/session.jsonl"),1,None).unwrap();
++        assert_eq!(event["provider"],"CodeBuddy");assert_eq!(event["input"],100);assert_eq!(event["cached"],20);assert_eq!(event["output"],30);assert!(event.get("content").is_none());
++    }
++    #[test]
++    fn qoder_quest_snapshots_are_estimated_and_stable_per_session() {
++        let raw=json!({"usedTokens":900,"sessionId":"session-a"});
++        let event=canonical(&raw,"qoder",Path::new("/x/.qoder/agent.log"),1,Some("2026-02-03 04:05:06")).unwrap();
++        assert_eq!(event["id"],"quest-context:session-a");assert_eq!(event["tokenBasis"],"estimated");assert_eq!(event["total"],900);
++    }
++
++    #[test]
++    fn codebuddy_scan_is_incremental_and_never_persists_log_body() {
++        let temp=tempfile::tempdir().unwrap();
++        let root=temp.path().join(".codebuddy");let project=root.join("projects").join("demo");fs::create_dir_all(&project).unwrap();
++        let file=project.join("turn.jsonl");
++        fs::write(&file, r#"{"type":"assistant","id":"req-1","timestamp":"2026-03-04T05:06:07Z","sessionId":"session-1","message":{"model":"vendor-model","usage":{"input_tokens":40,"cache_read_input_tokens":10,"output_tokens":5}},"content":"do not persist this"}
++"#).unwrap();
++        let mut db=Connection::open_in_memory().unwrap();
++        db.execute_batch("CREATE TABLE sl_monitor_events(source_id TEXT,event_id TEXT,at TEXT,provider TEXT,model TEXT,file_path TEXT,data TEXT,PRIMARY KEY(source_id,event_id)); CREATE TABLE sl_monitor_files(source_id TEXT,path TEXT,size INTEGER,modified INTEGER,PRIMARY KEY(source_id,path));").unwrap();
++        let (imported,invalid,files)=scan_source(&mut db,"device-codebuddy","codebuddy",&root).unwrap();
++        assert_eq!((imported,invalid,files),(1,0,1));
++        let stored:String=db.query_row("SELECT data FROM sl_monitor_events",[],|r|r.get(0)).unwrap();
++        assert!(stored.contains("vendor-model"));assert!(!stored.contains("do not persist this"));
++        let (again,_,_)=scan_source(&mut db,"device-codebuddy","codebuddy",&root).unwrap();
++        assert_eq!(again,0);
++    }
++}

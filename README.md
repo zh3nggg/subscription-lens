@@ -15,7 +15,7 @@ A desktop app for **Codex subscription users** on Windows and Apple Silicon Macs
 | Plan your model mix | Turn the active quota window's model history and average pace into a recommended mix for the next reset, with confidence and suggested changes per model. |
 | Compare usage with your payment | View estimated API-equivalent costs alongside your actual payment for the billing period. |
 | Keep limits within reach | Use a compact pinnable window, the system tray and optional low-quota alerts with quiet hours. |
-| Compare devices privately | Assign local Codex records to a stable device, filter by device, and transfer anonymous device packages without chat content or paths. |
+| Compare devices privately | In the current unreleased Windows Tauri source, sync one privacy-filtered Sublens usage snapshot per device through Cloudflare R2; no source logs, chat content or project paths are uploaded. |
 | Export and share | Export records to CSV or save an aggregate-only HTML report without project names or account identifiers. |
 
 ## Provider monitoring in 1.5
@@ -23,6 +23,10 @@ A desktop app for **Codex subscription users** on Windows and Apple Silicon Macs
 Connect Qwen Code, Kimi Code, CodeBuddy Code, Qoder, CC Switch, Claude Code, Gemini CLI or your own API usage file. Qoder Quest sessions are read from the local IDE agent logs on Windows; context snapshots are labeled as token estimates, while native Credits stay separate. Qoder stream capture keeps native Credits separate from API-equivalent USD and skips cumulative result events, so the same request is never charged twice. Domestic model families are attributed to Alibaba Cloud, Moonshot AI, Zhipu AI, MiniMax and DeepSeek through the same provider → model chart. Recorded estimates and source-reported amounts stay distinct from actual invoices. Installed tools in standard folders are detected automatically and can be connected together; custom locations remain available. [Source setup and cost definitions](docs/PROVIDER-MONITORING.md).
 
 The provider and model charts also show average cost per 1M tokens for the selected period. The denominator includes only priced tokens; unpriced usage remains visible and is excluded from the average. Multi-provider views combine connected sources with exact duplicate suppression and flag possible overlaps instead of silently adding ambiguous records.
+
+In the Tauri 3.x host, native collection currently supports CodeBuddy Code and Qoder only. The other connectors listed above remain available in the Electron monitoring host, not in the Tauri build.
+
+The current unreleased Windows Tauri source also supports opt-in multi-device snapshots through Cloudflare R2. Create a dedicated R2 bucket in the app or enter an existing one; Sublens stores one JSON file per device under a bucket prefix (R2's virtual folder). The access key is stored in Windows Credential Manager. Snapshots include only hashed record/session identifiers, time, model, token categories and available cost metadata. They exclude source logs, chat text, project paths, API keys and login credentials. Synchronization runs on launch and every five minutes while the app remains open. R2 uses the account endpoint and `auto` region, and implements prefix-based `ListObjectsV2` for device discovery ([Cloudflare R2 S3 compatibility](https://developers.cloudflare.com/r2/api/s3/api/)).
 
 ### Codex provider routing in the 3.0 generation
 
@@ -80,7 +84,7 @@ The bundled prices are the **2026-09-16 Standard USD snapshot**. These rates are
 
 API-equivalent cost is an estimate, not a bill or guaranteed savings. Enter your actual payment to compare. Incomplete collection can understate the total value.
 
-Local records and account summaries are shown separately, never added together. Regular ChatGPT chats are not supported. Other devices and cloud task details are not collected automatically. Historical local records are not automatically attributed to the currently connected account; select only your own folders on shared computers.
+Local records and account summaries are shown separately, never added together. Regular ChatGPT chats and cloud task details are not collected. Multi-device totals include only opt-in Sublens snapshots and may lag by up to five minutes while the app is open. Historical local records are not automatically attributed to the currently connected account; select only your own folders on shared computers.
 
 ## Current scope and roadmap
 

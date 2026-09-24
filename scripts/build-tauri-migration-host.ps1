@@ -9,7 +9,8 @@ $projectRoot = Split-Path -Parent $PSScriptRoot
 $hostDir = Join-Path $projectRoot "native\subscription-lens-tauri"
 $runtimeDir = Join-Path $projectRoot "native\cc-switch-runtime"
 $runtimePatches = @(
-  (Join-Path $projectRoot "native\cc-switch-patches\0002-subscription-lens-tauri-host.patch")
+  (Join-Path $projectRoot "native\cc-switch-patches\0002-subscription-lens-tauri-host.patch"),
+  (Join-Path $projectRoot "native\cc-switch-patches\0003-subscription-lens-device-sync.patch")
 )
 $providerBundleDir = Join-Path $hostDir "frontend\ccswitch"
 $rendererDist = Join-Path $runtimeDir "dist"

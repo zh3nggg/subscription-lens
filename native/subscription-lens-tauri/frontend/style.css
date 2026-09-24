@@ -33,3 +33,5 @@ body.font-large{font-size:15px}body.font-xlarge{font-size:17px}body.font-large .
 .provider-grid > .provider-card { display: flex; flex-direction: column; }
 .provider-grid > .provider-card > .row { margin-top: auto; padding-top: 6px; }
 .provider-grid > .provider-card > .row > .button { min-height: 38px; }
+
+.device-scope{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 16px}.device-scope .segments{display:inline-flex}.device-scope-notice{margin:-2px 0 16px}.device-sync-panel,.device-list-panel{padding:20px 22px;margin-bottom:16px}.device-sync-panel .notice{margin:4px 0 18px}.device-sync-panel .grid-2{gap:14px 18px}.device-sync-actions{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:16px;padding-top:15px;border-top:1px solid var(--line)}.device-sync-actions .row{gap:8px}.device-list-panel .panel-head{margin-bottom:8px}@media(max-width:760px){.device-scope,.device-sync-actions{align-items:flex-start;flex-direction:column}.device-sync-actions,.device-sync-actions .row{width:100%}.device-sync-actions .row{flex-wrap:wrap}}

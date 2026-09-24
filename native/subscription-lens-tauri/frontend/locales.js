@@ -1912,6 +1912,54 @@ window.LensLocales = {
     "Devices",
     "Apparaten"
   ],
+  "Cloudflare R2 同步": [
+    "Cloudflare R2 sync",
+    "Cloudflare R2-synchronisatie"
+  ],
+  "每台设备在指定 bucket 前缀下保存一个 Sublens 统计快照。": [
+    "Each device keeps one Sublens usage snapshot under the selected bucket prefix.",
+    "Elk apparaat bewaart één Sublens-gebruikssnapshot onder het gekozen bucketprefix."
+  ],
+  "可在此创建专用于 Sublens 的 R2 bucket；也可以填写已有的专用 bucket。对象前缀相当于逻辑文件夹，不会上传源日志、聊天正文、项目路径或凭据。": [
+    "Create a dedicated R2 bucket for Sublens here, or enter an existing dedicated bucket. The object prefix acts as a virtual folder; source logs, chat text, project paths and credentials are never uploaded.",
+    "Maak hier een aparte R2-bucket voor Sublens aan of voer een bestaande aparte bucket in. Het objectprefix werkt als virtuele map; bronlogs, chattekst, projectpaden en inloggegevens worden nooit geüpload."
+  ],
+  "Cloudflare Account ID": ["Cloudflare Account ID", "Cloudflare-account-ID"],
+  "R2 bucket": ["R2 bucket", "R2-bucket"],
+  "创建 R2 bucket": ["Create R2 bucket", "R2-bucket aanmaken"],
+  "R2 bucket 已创建": ["R2 bucket created", "R2-bucket aangemaakt"],
+  "对象前缀（逻辑文件夹）": ["Object prefix (virtual folder)", "Objectprefix (virtuele map)"],
+  "密钥保存在 Windows 凭据管理器中，不写入统计快照。": [
+    "Keys are stored in Windows Credential Manager and are never included in usage snapshots.",
+    "Sleutels worden opgeslagen in Windows Credential Manager en nooit in gebruikssnapshots opgenomen."
+  ],
+  "保存设置": ["Save settings", "Instellingen opslaan"],
+  "测试连接": ["Test connection", "Verbinding testen"],
+  "立即双向同步": ["Sync both ways now", "Nu in beide richtingen synchroniseren"],
+  "立即同步": ["Sync now", "Nu synchroniseren"],
+  "已配置": ["Configured", "Geconfigureerd"],
+  "未配置": ["Not configured", "Niet geconfigureerd"],
+  "已同步设备": ["Synced devices", "Gesynchroniseerde apparaten"],
+  "每个文件仅包含匿名记录标识、时间、模型、Token 分类和可用计价。": [
+    "Each file contains only anonymous record IDs, timestamps, models, token categories and available pricing.",
+    "Elk bestand bevat alleen anonieme record-ID's, tijdstempels, modellen, tokencategorieën en beschikbare prijzen."
+  ],
+  "尚未同步设备；点击“立即双向同步”。": ["No devices synced yet. Select “Sync both ways now”.", "Nog geen apparaten gesynchroniseerd. Kies ‘Nu in beide richtingen synchroniseren’."],
+  "配置 R2 后，设备会在首次同步时显示在此处。": ["Configure R2 to show devices here after the first sync.", "Configureer R2 om apparaten hier na de eerste synchronisatie te zien."],
+  "多设备": ["All devices", "Alle apparaten"],
+  "{n} 台设备 · 最近同步快照": ["{n} devices · latest synced snapshots", "{n} apparaten · nieuwste gesynchroniseerde snapshots"],
+  "当前设备的本机记录": ["Local records from this device", "Lokale records van dit apparaat"],
+  "暂时没有设备快照，请到“设备”页面执行同步。": ["No device snapshots yet. Run sync on the Devices page.", "Nog geen apparaatsnapshots. Synchroniseer op de pagina Apparaten."],
+  "配置 Cloudflare R2 后即可汇总多台设备的统计快照。": ["Configure Cloudflare R2 to combine usage snapshots from multiple devices.", "Configureer Cloudflare R2 om gebruikssnapshots van meerdere apparaten te combineren."],
+  "配置设备同步": ["Set up device sync", "Apparaatsynchronisatie instellen"],
+  "R2 连接成功": ["R2 connection succeeded", "R2-verbinding geslaagd"],
+  "R2 设置已保存": ["R2 settings saved", "R2-instellingen opgeslagen"],
+  "断开 R2 同步": ["Disconnect R2 sync", "R2-synchronisatie verbreken"],
+  "R2 同步已断开；本机缓存的设备数据仍保留": ["R2 sync disconnected; locally cached device data is kept", "R2-synchronisatie verbroken; lokaal gecachte apparaatgegevens blijven behouden"],
+  "已同步 {n} 台设备": ["Synced {n} devices", "{n} apparaten gesynchroniseerd"],
+  "已保存；留空以保留": ["Saved; leave blank to keep", "Opgeslagen; laat leeg om te behouden"],
+  "粘贴 Access Key ID": ["Paste Access Key ID", "Plak Access Key ID"],
+  "粘贴 Secret Access Key": ["Paste Secret Access Key", "Plak Secret Access Key"],
   "导出设备数据": [
     "Export device data",
     "Apparaatgegevens exporteren"
