@@ -45,6 +45,9 @@
 
 # Unreleased
 
+- 修复双列供应商卡片中“在 CC Switch 中管理”按钮的高度错位：卡片内容改为纵向弹性布局，操作按钮统一贴齐卡片底部并保持相同高度。
+- Aligned the management buttons at the bottom of two-column provider cards and gave them a consistent height.
+
 - 将内嵌 CC Switch 页面中的“返回余量”按钮移到左上角导航栏，避免浮动按钮遮挡页面内容。
 - Moved the return button in the embedded CC Switch page into the upper-left navigation area so it no longer floats over page content.
 
