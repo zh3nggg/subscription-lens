@@ -1,0 +1,132 @@
+.route-provider-list {
+  overflow: hidden;
+  padding: 0;
+}
+
+.route-provider-list-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 19px 22px 16px;
+}
+
+.route-provider-list-head h2 {
+  font-size: 14px;
+}
+
+.route-provider-list-head p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.route-provider-count {
+  color: var(--muted);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.route-provider-row {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr) minmax(120px, .6fr) auto;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+  min-height: 78px;
+  padding: 14px 22px;
+  border-top: 1px solid var(--line);
+  text-align: left;
+}
+
+.route-provider-row:hover {
+  background: var(--subtle);
+}
+
+.route-provider-row:focus-visible {
+  outline-offset: -3px;
+}
+
+.route-provider-row.active {
+  background: color-mix(in srgb, var(--green) 3%, var(--card));
+  box-shadow: inset 3px 0 var(--green);
+}
+
+.route-provider-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 11px;
+  background: var(--subtle);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.route-provider-identity {
+  display: grid;
+  gap: 3px;
+  min-width: 0;
+}
+
+.route-provider-identity strong,
+.route-provider-identity small,
+.route-provider-model {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.route-provider-identity strong {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.route-provider-identity small {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.route-provider-model {
+  color: var(--muted);
+  font-size: 11px;
+  text-align: right;
+}
+
+.route-provider-tail {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  min-width: 34px;
+}
+
+.route-provider-chevron {
+  color: var(--muted);
+  font-size: 22px;
+  line-height: 1;
+}
+
+.route-provider-empty {
+  padding: 22px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 12px;
+}
+
+@media (max-width: 760px) {
+  .route-provider-row {
+    grid-template-columns: 36px minmax(0, 1fr) auto;
+    gap: 10px;
+    padding: 13px 15px;
+  }
+
+  .route-provider-list-head {
+    padding: 16px 15px 13px;
+  }
+
+  .route-provider-model {
+    display: none;
+  }
+}
