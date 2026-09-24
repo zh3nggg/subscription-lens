@@ -4,7 +4,7 @@
 
 [English](../README.md) · [简体中文](README.zh-CN.md) · [Nederlands](README.nl.md)
 
-> **3.0.1：稳定修正版。** 修复 Tauri 版额度可用时间预测始终为空的问题。预测观测保存在本机；同一账号、额度窗口和重置周期至少积累三次、跨度15分钟后开始显示。首个真正稳定可用的多供应商版本为 3.0.0；Windows x64 版迁移至 Tauri 并内嵌 CC Switch 原版供应商管理器和原生路由运行时。Apple Silicon macOS 仍为 Electron 架构的 `3.0.0-beta.2` 预览版。
+> **3.0.2：稳定 Windows 版。** 修复启动时错误打开 CC Switch 界面的问题：嵌入的 CC Switch 运行时现在使用 Subscription Lens 自己的 Tauri 配置。供应商管理和路由仍由内嵌的 CC Switch 运行时提供。首个真正稳定可用的多供应商版本为 3.0.0；Subscription Lens 保留自己的统计界面。Apple Silicon macOS 仍为 Electron 架构的 `3.0.0-beta.2` 预览版，后续另行迁移。
 
 ## 主要功能
 

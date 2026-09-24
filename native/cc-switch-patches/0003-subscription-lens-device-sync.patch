@@ -14,16 +14,6 @@ diff --git a/src-tauri/Cargo.toml b/src-tauri/Cargo.toml
 index 7e005f18..419606c6 100644
 --- a/src-tauri/Cargo.toml
 +++ b/src-tauri/Cargo.toml
-@@ -18,9 +18,6 @@ doctest = false
- [features]
- default = []
- test-hooks = []
--# Build the CC Switch runtime as the Subscription Lens desktop host.  The
--# provider database, OAuth managers, proxy and switching commands stay exactly
--# the same; only the Tauri product configuration and bundled frontend change.
- sublens-host = []
- 
- [build-dependencies]
 @@ -83,6 +80,7 @@ rust_decimal = "1.33"
  uuid = { version = "1.11", features = ["v4"] }
  sha2 = "0.10"
@@ -86,14 +76,6 @@ index 319e8c17..1fba8e4e 100644
              commands::get_providers,
              commands::get_current_provider,
              commands::add_provider,
-@@ -1721,7 +1749,6 @@ pub fn run() {
-     let context = tauri::generate_context!("../../subscription-lens-tauri/tauri.conf.json");
-     #[cfg(not(feature = "sublens-host"))]
-     let context = tauri::generate_context!();
--
-     let app = builder
-         .build(context)
-         .expect("error while running tauri application");
 diff --git a/src-tauri/src/services/s3.rs b/src-tauri/src/services/s3.rs
 index c9d44dd1..72ab2ea8 100644
 --- a/src-tauri/src/services/s3.rs

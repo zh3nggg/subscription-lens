@@ -1,3 +1,11 @@
+# 3.0.2 · 稳定版
+
+- 修复 Tauri 启动时使用 CC Switch 默认窗口配置、导致主窗口直接打开 CC Switch 界面的问题。主程序现在在 Sublens host 中生成并传入自己的 Tauri context；CC Switch 继续提供供应商管理和路由运行时。
+- 修复嵌入构建补丁的上下文错位，并让迁移构建脚本识别已完整就绪的本地 CC Switch runtime，避免对已有修改重复打补丁。
+- Fixed Tauri startup loading CC Switch's default window and frontend. The Subscription Lens host now creates and passes its own Tauri context, while CC Switch continues to provide provider management and routing.
+- Corrected the embedded build patch context and made the migration build script recognize an already prepared local CC Switch runtime.
+- Verholpen dat Tauri bij het starten de standaardweergave van CC Switch opende. De Subscription Lens-host maakt nu zelf de Tauri-context en geeft die door; CC Switch blijft de providerbeheerder en routeringsruntime leveren.
+
 # 3.0.1
 
 - 修复 Tauri 版额度可用时间预测始终不显示的问题。应用现在会在本机保存成功的额度观测，并按账号、额度窗口和重置周期隔离；至少积累三次、跨度15分钟后，显示本周期、近24小时和近2小时预测。

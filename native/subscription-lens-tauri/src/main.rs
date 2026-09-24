@@ -10,5 +10,8 @@
 #![cfg_attr(target_os = "windows", windows_subsystem = "windows")]
 
 fn main() {
-    cc_switch::run();
+    // Generate the Tauri context in the Subscription Lens host crate so its
+    // window configuration and frontend cannot fall back to CC Switch's app.
+    let context = tauri::generate_context!();
+    cc_switch::run_with_context(context);
 }

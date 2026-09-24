@@ -8,6 +8,13 @@ param(
 $ErrorActionPreference = "Stop"
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $hostDir = Join-Path $projectRoot "native\subscription-lens-tauri"
+$hostConfig = Get-Content -LiteralPath (Join-Path $hostDir "tauri.conf.json") -Raw | ConvertFrom-Json
+$hostMain = Get-Content -LiteralPath (Join-Path $hostDir "src\main.rs") -Raw
+if ($hostConfig.productName -ne "Subscription Lens" -or $hostConfig.build.frontendDist -ne "frontend" -or
+    $hostConfig.app.windows[0].title -ne "Subscription Lens" -or
+    $hostMain -notmatch "tauri::generate_context!\(\)" -or $hostMain -notmatch "cc_switch::run_with_context\(context\)") {
+  throw "The Tauri host must pass its Subscription Lens context to the embedded CC Switch runtime."
+}
 $runtimeDir = if ([string]::IsNullOrWhiteSpace($RuntimeDir)) {
   Join-Path $projectRoot "native\cc-switch-runtime"
 } else {
@@ -34,16 +41,24 @@ foreach ($runtimePatch in $runtimePatches) {
 }
 
 $patchesAppliedHere = @()
-foreach ($runtimePatch in $runtimePatches) {
-  $null = & git -C $runtimeDir apply --reverse --check $runtimePatch 2>&1
-  if ($LASTEXITCODE -ne 0) {
-    $null = & git -C $runtimeDir apply --check $runtimePatch 2>&1
+$runtimeReady = (Test-Path -LiteralPath (Join-Path $runtimeDir "src-tauri\src\sublens_monitor.rs")) -and
+  (Test-Path -LiteralPath (Join-Path $runtimeDir "src-tauri\src\sublens_devices.rs")) -and
+  (Select-String -Quiet -Path (Join-Path $runtimeDir "src-tauri\src\lib.rs") -Pattern "pub fn run_with_context\(context:") -and
+  (Select-String -Quiet -Path (Join-Path $runtimeDir "src-tauri\src\services\s3.rs") -Pattern "pub\(crate\) async fn list_objects_v2") -and
+  (Select-String -Quiet -Path (Join-Path $runtimeDir "pnpm-workspace.yaml") -Pattern "allowBuilds:")
+
+if (-not $runtimeReady) {
+  foreach ($runtimePatch in $runtimePatches) {
+    $null = & git -C $runtimeDir apply --reverse --check $runtimePatch 2>&1
     if ($LASTEXITCODE -ne 0) {
-      throw "The pinned CC Switch runtime does not match the Subscription Lens host patch: $runtimePatch"
+      $null = & git -C $runtimeDir apply --check $runtimePatch 2>&1
+      if ($LASTEXITCODE -ne 0) {
+        throw "The pinned CC Switch runtime does not match the Subscription Lens host patch: $runtimePatch"
+      }
+      & git -C $runtimeDir apply $runtimePatch
+      if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      $patchesAppliedHere += $runtimePatch
     }
-    & git -C $runtimeDir apply $runtimePatch
-    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-    $patchesAppliedHere += $runtimePatch
   }
 }
 

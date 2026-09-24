@@ -4,7 +4,7 @@ Een desktopapp voor **Codex-abonnees** op Windows en Apple Silicon Macs die hun 
 
 [English](../README.md) · [简体中文](README.zh-CN.md) · [Nederlands](README.nl.md)
 
-> **3.0.1: stabiele correctieversie.** Herstelt de quota-tijdvoorspelling in de Tauri-app. Waarnemingen worden lokaal bewaard; schattingen verschijnen na minimaal drie observaties verspreid over 15 minuten binnen hetzelfde account, quotavenster en resetmoment. De eerste betrouwbaar bruikbare multi-providerrelease was 3.0.0; de Windows x64-app stapte over op Tauri met de originele CC Switch-providerbeheerder en routeringsruntime. De Apple Silicon-versie voor macOS blijft de Electron-preview `3.0.0-beta.2`.
+> **3.0.2: stabiele Windows-release.** Verhelpt dat bij het starten de CC Switch-interface werd geopend in plaats van Subscription Lens. De ingebedde CC Switch-runtime gebruikt nu de eigen Tauri-configuratie van Subscription Lens; providerbeheer en routering blijven door de meegeleverde CC Switch-runtime verzorgd. De eerste betrouwbaar bruikbare multi-providerrelease was 3.0.0; Subscription Lens behoudt zijn eigen statistiekinterface. De Apple Silicon-versie voor macOS blijft de Electron-preview `3.0.0-beta.2` in afwachting van een aparte Tauri-release.
 
 ## Wat kun je ermee?
 

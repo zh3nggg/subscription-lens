@@ -1,7 +1,7 @@
 {
   "stable": {
-    "version": "3.0.0",
-    "path": "subscription-lens-3.0.0-stable",
+    "version": "3.0.2",
+    "path": "subscription-lens-3.0.2-stable",
     "checksums": "SHA256SUMS.txt"
   },
   "preview": {
@@ -9,8 +9,24 @@
     "path": "subscription-lens-3.0.0-beta.2-preview",
     "checksums": "SHA256SUMS.txt"
   },
+  "localBuilds": [
+    {
+      "version": "3.0.0-beta.3",
+      "channel": "local",
+      "platform": "windows-x64",
+      "path": "subscription-lens-3.0.0-beta.3-local-windows-x64",
+      "checksums": "SHA256SUMS.txt"
+    },
+    {
+      "version": "3.0.2",
+      "channel": "local",
+      "platform": "windows-x64",
+      "path": "subscription-lens-3.0.2-local-windows-x64",
+      "checksums": "SHA256SUMS.txt"
+    }
+  ],
   "fallback": null,
   "policy": "Keep exactly the latest verified stable and preview; retain a fallback only while no preview exists.",
-  "updatedAt": "2026-09-24T08:34:17.945Z",
+  "updatedAt": "2026-09-24T17:44:05.222Z",
   "note": "Stable and preview slots retained."
 }

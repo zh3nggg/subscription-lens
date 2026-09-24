@@ -4,7 +4,7 @@ A desktop app for **Codex subscription users** on Windows and Apple Silicon Macs
 
 [English](README.md) · [简体中文](docs/README.zh-CN.md) · [Nederlands](docs/README.nl.md)
 
-> **3.0.1 · stable Windows release.** This fixes quota-availability forecasts and includes native CodeBuddy/Qoder collection plus optional Cloudflare R2 device sync. It builds on 3.0.0, the first reliably usable multi-provider release, which embeds the pinned CC Switch provider manager and native routing runtime. Subscription Lens retains its monitoring interface. Earlier public Windows and macOS builds used Electron. The macOS Apple Silicon build remains at `3.0.0-beta.2` pending a separate Tauri release.
+> **3.0.2 · stable Windows release.** Fixes startup opening the CC Switch interface instead of Subscription Lens by giving the embedded CC Switch runtime the Subscription Lens Tauri context. Provider management and routing remain supplied by the bundled CC Switch runtime. This builds on 3.0.0, the first reliably usable multi-provider release; Subscription Lens retains its own monitoring interface. The Apple Silicon macOS build remains the Electron preview `3.0.0-beta.2` pending a separate Tauri release.
 
 ## What you can do
 
