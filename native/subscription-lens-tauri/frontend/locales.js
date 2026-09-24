@@ -240,6 +240,22 @@ window.LensLocales = {
     "Connected",
     "Verbonden"
   ],
+  "额度已读取": [
+    "Quota loaded",
+    "Quota opgehaald"
+  ],
+  "额度读取失败": [
+    "Quota query failed",
+    "Quota ophalen mislukt"
+  ],
+  "授权正常，额度读取失败": [
+    "Authorized, but quota could not be loaded",
+    "Geautoriseerd, maar quota kon niet worden opgehaald"
+  ],
+  "授权状态未知": [
+    "Authorization status unknown",
+    "Autorisatiestatus onbekend"
+  ],
   "历史快照": [
     "Last snapshot",
     "Laatste momentopname"
@@ -540,6 +556,22 @@ window.LensLocales = {
     "Plan",
     "Abonnement"
   ],
+  "授权账号": [
+    "Authorized account",
+    "Geautoriseerd account"
+  ],
+  "可用额度窗口": [
+    "Available quota windows",
+    "Beschikbare quota-vensters"
+  ],
+  "接口仅提供额度窗口，不提供账户累计 Tokens。": [
+    "The API returns quota windows, not lifetime account tokens.",
+    "De API retourneert quota-vensters, geen totaal aantal accounttokens."
+  ],
+  "尚未查询": [
+    "Not queried yet",
+    "Nog niet opgevraagd"
+  ],
   "最近查询": [
     "Last checked",
     "Laatst gecontroleerd"
@@ -611,6 +643,18 @@ window.LensLocales = {
   "登录 ChatGPT": [
     "Sign in to ChatGPT",
     "Aanmelden bij ChatGPT"
+  ],
+  "请在已打开的浏览器中输入授权码。完成后此页面会自动更新。": [
+    "Enter the authorization code in the browser window that just opened. This page will update when authorization is complete.",
+    "Voer de autorisatiecode in het zojuist geopende browservenster in. Deze pagina wordt bijgewerkt zodra de autorisatie is voltooid."
+  ],
+  "等待浏览器授权": [
+    "Waiting for browser authorization",
+    "Wachten op browserautorisatie"
+  ],
+  "授权成功": [
+    "Authorization succeeded",
+    "Autorisatie geslaagd"
   ],
   "刷新连接": [
     "Refresh connection",

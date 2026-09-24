@@ -210,7 +210,7 @@ new file mode 100644
 index 00000000..679b8f4b
 --- /dev/null
 +++ b/src-tauri/src/sublens_devices.rs
-@@ -0,0 +1,440 @@
+@@ -0,0 +1,478 @@
 +//! Privacy-filtered per-device Codex usage snapshots synced through Cloudflare R2.
 +//! The bucket contains one Sublens JSON snapshot per device under a fixed prefix;
 +//! no source logs, project paths, chat bodies, credentials or raw request IDs leave this app.
@@ -453,12 +453,25 @@ index 00000000..679b8f4b
 +    let output = row.output_tokens as u64;
 +    let cached = row.cache_read_tokens as u64;
 +    let write = row.cache_creation_tokens as u64;
++    let has_pricing_model = row.pricing_model.as_deref().is_some_and(|model| {
++        let model = model.trim();
++        !model.is_empty() && !matches!(model.to_ascii_lowercase().as_str(), "unknown" | "null" | "none")
++    });
++    let calculated_cost = row.total_cost_usd.parse::<f64>().ok().filter(|value| value.is_finite() && *value >= 0.0);
++    // Codex session rows already contain calculated total_cost_usd, but do not
++    // populate pricing_model. Keep a real calculated amount regardless of that
++    // optional label; keep zero only when a pricing model confirms it was priced.
++    let cost_usd = if row.status_code < 400 {
++        calculated_cost.filter(|value| *value > 0.0 || has_pricing_model)
++    } else {
++        None
++    };
 +    json!({
 +        "id":digest(&row.request_id),
 +        "at":DateTime::<Utc>::from_timestamp(row.created_at,0).unwrap_or_else(Utc::now).to_rfc3339_opts(chrono::SecondsFormat::Millis,true),
 +        "model":row.model.chars().take(200).collect::<String>(),"input":input,"cached":cached,"write":write,
 +        "output":output,"total":input+output,
-+        "costUsd":if row.status_code < 400 && row.pricing_model.as_deref().is_some_and(|p| !p.is_empty()) { row.total_cost_usd.parse::<f64>().ok().filter(|v| v.is_finite() && *v >= 0.0) } else { None },
++        "costUsd":cost_usd,
 +        "session":digest(row.request_id.split(':').nth(2).unwrap_or(&row.request_id))[..24].to_string()
 +    })
 +}
@@ -561,9 +574,14 @@ index 00000000..679b8f4b
 +fn aggregate_device(value: &Value) -> Value {
 +    let records = value["records"].as_array().cloned().unwrap_or_default();
 +    let tokens: u64 = records.iter().map(|r| r["total"].as_u64().unwrap_or(0)).sum();
-+    let usd: f64 = records.iter().map(|r| r["costUsd"].as_f64().unwrap_or(0.0)).sum();
++    let costs: Vec<f64> = records.iter().filter_map(|r| r["costUsd"].as_f64()).collect();
++    let usd = if !records.is_empty() && costs.is_empty() { Value::Null } else { json!(costs.iter().sum::<f64>()) };
 +    let sessions: std::collections::BTreeSet<&str> = records.iter().filter_map(|r| r["session"].as_str()).collect();
 +    json!({"tokens":tokens,"usd":usd,"events":records.len(),"sessions":sessions.len()})
++}
++
++fn total_usd_or_null(events: u64, priced_events: u64, usd: f64) -> Value {
++    if events > 0 && priced_events == 0 { Value::Null } else { json!(usd) }
 +}
 +
 +#[tauri::command(rename_all = "camelCase")]
@@ -575,8 +593,8 @@ index 00000000..679b8f4b
 +    let device_rows: Vec<Value> = all.iter().map(|(value,synced)| json!({"id":value["device"]["id"],"label":value["device"]["label"],"local":value["device"]["id"]==config.device_id,"lastSync":if synced.is_empty(){value["updatedAt"].as_str().unwrap_or("")}else{synced.as_str()},"summary":aggregate_device(value)})).collect();
 +    let mut totals = (0u64,0u64,0u64,0u64,0f64,0u64,0u64);
 +    let mut sessions = std::collections::BTreeSet::new();
-+    let mut models = std::collections::BTreeMap::<String,(u64,f64,u64)>::new();
-+    let mut days = std::collections::BTreeMap::<String,(u64,f64,u64)>::new();
++    let mut models = std::collections::BTreeMap::<String,(u64,f64,u64,u64)>::new();
++    let mut days = std::collections::BTreeMap::<String,(u64,f64,u64,u64)>::new();
 +    let mut recent = Vec::new();
 +    for (device,_) in &all {
 +        if device_id.as_deref().is_some_and(|id| device["device"]["id"].as_str()!=Some(id)) { continue; }
@@ -588,20 +606,20 @@ index 00000000..679b8f4b
 +            let tok=row["total"].as_u64().unwrap_or(0);let output=row["output"].as_u64().unwrap_or(0);let cached=row["cached"].as_u64().unwrap_or(0);let cost=row["costUsd"].as_f64();
 +            totals.0+=tok;totals.1+=cached;totals.2+=output;totals.3+=1;if let Some(cost)=cost{totals.4+=cost;totals.5+=tok;}else{totals.6+=1;}
 +            if let Some(session) = row["session"].as_str() { sessions.insert(format!("{}:{session}",device["device"]["id"].as_str().unwrap_or_default())); }
-+            let model=row["model"].as_str().unwrap_or("Unknown").to_string();let m=models.entry(model.clone()).or_default();m.0+=tok;m.1+=cost.unwrap_or(0.0);m.2+=1;
-+            let day=at.get(..10).unwrap_or("unknown").to_string();let d=days.entry(day).or_default();d.0+=tok;d.1+=cost.unwrap_or(0.0);d.2+=1;
++            let model=row["model"].as_str().unwrap_or("Unknown").to_string();let m=models.entry(model.clone()).or_default();m.0+=tok;m.1+=cost.unwrap_or(0.0);m.2+=1;if cost.is_some(){m.3+=1;}
++            let day=at.get(..10).unwrap_or("unknown").to_string();let d=days.entry(day).or_default();d.0+=tok;d.1+=cost.unwrap_or(0.0);d.2+=1;if cost.is_some(){d.3+=1;}
 +            recent.push(json!({"id":row["id"],"at":at,"project":label,"model":model,"total":tok,"cached":cached,"output":output,"price":{"amount":cost,"usd":cost.unwrap_or(0.0)}}));
 +        }
 +    }
 +    recent.sort_by(|a,b| b["at"].as_str().cmp(&a["at"].as_str()));recent.truncate(100);
-+    Ok(json!({"devices":device_rows,"summary":{"tokens":totals.0,"cached":totals.1,"output":totals.2,"events":totals.3,"sessions":sessions.len(),"usd":totals.4,"pricedTokens":totals.5,"unpriced":totals.6},
-+        "models":models.into_iter().map(|(model,(tokens,usd,events))|json!({"model":model,"tokens":tokens,"usd":usd,"events":events})).collect::<Vec<_>>(),
-+        "days":days.into_iter().map(|(date,(tokens,usd,events))|json!({"date":date,"tokens":tokens,"usd":usd,"events":events})).collect::<Vec<_>>(),"rows":recent}))
++    Ok(json!({"devices":device_rows,"summary":{"tokens":totals.0,"cached":totals.1,"output":totals.2,"events":totals.3,"sessions":sessions.len(),"usd":total_usd_or_null(totals.3, totals.3.saturating_sub(totals.6), totals.4),"pricedTokens":totals.5,"unpriced":totals.6},
++        "models":models.into_iter().map(|(model,(tokens,usd,events,priced))|json!({"model":model,"tokens":tokens,"usd":total_usd_or_null(events,priced,usd),"events":events})).collect::<Vec<_>>(),
++        "days":days.into_iter().map(|(date,(tokens,usd,events,priced))|json!({"date":date,"tokens":tokens,"usd":total_usd_or_null(events,priced,usd),"events":events})).collect::<Vec<_>>(),"rows":recent}))
 +}
 +
 +#[cfg(test)]
 +mod tests {
-+    use super::{usage_record, valid_bucket, validate_snapshot, SNAPSHOT_SCHEMA};
++    use super::{aggregate_device, total_usd_or_null, usage_record, valid_bucket, validate_snapshot, SNAPSHOT_SCHEMA};
 +    use crate::services::usage_stats::RequestLogDetail;
 +    use serde_json::json;
 +
@@ -629,6 +647,26 @@ index 00000000..679b8f4b
 +            assert!(!serialized.contains(forbidden));
 +        }
 +        assert_eq!(value["total"], 150);
++        assert_eq!(value["costUsd"], 0.03);
++    }
++
++    #[test]
++    fn calculated_codex_cost_is_kept_without_pricing_model_label() {
++        let mut row = log();
++        row.pricing_model = None;
++        assert_eq!(usage_record(&row)["costUsd"], 0.03);
++        row.total_cost_usd = "0".into();
++        assert!(usage_record(&row)["costUsd"].is_null());
++    }
++
++    #[test]
++    fn device_aggregates_do_not_report_missing_prices_as_zero() {
++        let unpriced = json!({"records":[{"total":10,"session":"abc","costUsd":null}]});
++        let priced = json!({"records":[{"total":10,"session":"abc","costUsd":0.25}]});
++        assert!(aggregate_device(&unpriced)["usd"].is_null());
++        assert_eq!(aggregate_device(&priced)["usd"], 0.25);
++        assert!(total_usd_or_null(1, 0, 0.0).is_null());
++        assert_eq!(total_usd_or_null(1, 1, 0.0), 0.0);
 +    }
 +
 +    #[test]

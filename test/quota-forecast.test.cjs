@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { recordObservation, quotaOutlook } = require('../native/subscription-lens-tauri/frontend/quota-forecast.js');
+const { mapCodexQuotaResponse, recordObservation, quotaOutlook } = require('../native/subscription-lens-tauri/frontend/quota-forecast.js');
 
 const now = Date.parse('2026-09-24T12:00:00Z');
 const current = {
@@ -9,6 +9,20 @@ const current = {
   resetsAt: Math.floor((now + 3 * 86400000) / 1000), minutes: 7 * 1440,
   observedAt: new Date(now).toISOString(),
 };
+
+test('Codex quota response timestamp reaches each window so live remaining quota is shown', () => {
+  const quota = mapCodexQuotaResponse({
+    success: true,
+    queriedAt: now,
+    tiers: [{ name: 'seven_day', utilization: 40, resetsAt: new Date(current.resetsAt * 1000).toISOString() }],
+  });
+  assert.equal(quota.observedAt, new Date(now).toISOString());
+  assert.equal(quota.windows[0].observedAt, quota.observedAt);
+  const outlook = quotaOutlook(quota.windows[0], [], { now, identity: 'account-a', live: true });
+  assert.equal(outlook.state, 'learning');
+  assert.equal(outlook.remaining, 60);
+  assert.equal(outlook.secondsToReset, 3 * 86400);
+});
 
 test('quota samples are retained, deduplicated by minute, and partitioned by account', () => {
   let history = recordObservation([], { observedAt: new Date(now - 20 * 60000).toISOString(), windows: [{ ...current, observedAt: undefined, used: 20 }] }, 'account-a', now);

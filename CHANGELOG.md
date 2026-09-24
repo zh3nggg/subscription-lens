@@ -1,3 +1,44 @@
+# 3.1.0 · 正式版
+
+- 稳定版汇总此前的 Tauri 迁移后修复：恢复额度预测、修正登录与刷新状态、避免 R2 表单刷新丢失，并完善 CodeBuddy、Qoder 与多设备统计。
+- 修复多设备用量把已计算的 Codex 成本丢弃的问题：同步快照保留已计算金额；没有价格的数据明确显示未计价，不再误报 US$0.00。总览多设备和设备列表共用修复后的汇总。
+- Windows x64 正式版继续内嵌 CC Switch 原版供应商管理与路由运行时；本版本不需要单独安装 CC Switch。macOS Apple Silicon 仍为 3.0.0-beta.2 Electron 预览版。
+- Consolidates the post-migration Tauri fixes for quota forecasts, account refresh and sign-in status, R2 form persistence, CodeBuddy/Qoder collection, and device statistics.
+- Fixes multi-device Codex costs being dropped from snapshots. Calculated amounts are retained, genuinely unpriced usage remains visibly unpriced, and the overview/device list share the corrected totals.
+- Windows x64 stable release with the original CC Switch provider manager and routing runtime embedded. No separate CC Switch installation is required. macOS Apple Silicon remains the 3.0.0-beta.2 Electron preview.
+
+# 3.0.8 · 本地修正版
+
+- 修复多设备用量把已计算的 Codex 成本丢弃的问题：Codex 会话记录未提供 `pricing_model` 标签，但已保存的金额有效；同步快照现在会保留正数计算成本。没有价格的记录保持未计价，设备、模型和日期汇总显示“—”，不再误报 US$0.00。
+- Fixed multi-device usage dropping calculated Codex costs. Codex session rows have no `pricing_model` label even when their saved cost is valid, so snapshots now retain calculated nonzero costs. Truly unpriced records remain unpriced and show “—” in device, model, and date summaries instead of a misleading US$0.00.
+
+# 3.0.7 · 本地修正版
+
+- 修复总览套餐额度始终显示破折号的问题：Codex 接口返回的查询时间原先只挂在整份快照上，未传到单个额度窗口，导致新鲜数据也被预测模块判为过期。现在每个额度窗口都携带查询时间，并显示已读取的剩余额度；过期快照仍会标记为需刷新。
+- Fixed the overview always hiding the remaining quota: the Codex response timestamp was attached to the snapshot but not copied to individual quota windows, so even fresh data was marked stale. Each window now carries the query timestamp and displays its remaining quota; genuinely stale snapshots still require refresh.
+
+# 3.0.6 · 本地修正版
+
+- 修复连接页把“已保存授权”误报成“已连接”，但额度查询实际失败或没有结果的问题。现在分开显示授权与额度读取状态，额度失败时在连接页和总览中展示返回的错误原因。
+- 移除接口从未提供的套餐和账户累计 Tokens 占位行，改为显示授权账号、最后成功查询时间和额度窗口数；明确说明额度接口不返回账户累计 Tokens。
+- Fixed the connection page showing “Connected” merely because OAuth credentials existed, even when quota retrieval had failed or returned no data. Authorization and quota-read status are now shown separately, with the actual query error surfaced on the connection page and dashboard.
+- Removed plan and lifetime-token placeholders that the API never provides. The page now shows the authorized account, last successful query time, and quota-window count, and clarifies that lifetime account tokens are not returned by the quota API.
+
+# 3.0.5 · 本地修正版
+
+- 修复「刷新连接」只检查登录状态、可能命中旧查询缓存的问题。现在会强制查询最新 ChatGPT 套餐额度，成功后刷新总览；查询失败会显示具体原因。未登录时额度卡片直接进入 ChatGPT 登录流程。
+- Fixed Refresh Connection only checking login status and sometimes reusing cached quota. It now forces a fresh ChatGPT quota query, updates the dashboard on success, and displays query errors; signed-out users are directed to ChatGPT sign-in.
+
+# 3.0.4 · 本地修正版
+
+- 修复 ChatGPT 登录：Tauri 返回的设备授权字段为 snake_case，前端却按 camelCase 读取，导致验证链接和设备码为空。现在使用真实的验证 URL 和设备码启动浏览器授权与轮询。
+- Fixed ChatGPT sign-in by reading the snake_case device authorization fields returned by Tauri, so the verification URL opens and account polling uses the returned device code.
+
+# 3.0.3 · 本地修正版
+
+- 修复设备页 R2 设置未保存时被后台刷新覆盖的问题。编辑表单时，周期性数据刷新和后台同步只更新内部数据，不重绘表单；密钥仍仅在输入框与提交期间驻留内存。
+- Fixed the R2 device-sync form being reset by periodic refreshes before saving. Background queries no longer rerender the form while it is being edited; credentials remain out of persistent draft storage.
+
 # 3.0.2 · 稳定版
 
 - 修复 Tauri 启动时使用 CC Switch 默认窗口配置、导致主窗口直接打开 CC Switch 界面的问题。主程序现在在 Sublens host 中生成并传入自己的 Tauri context；CC Switch 继续提供供应商管理和路由运行时。

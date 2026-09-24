@@ -47,7 +47,7 @@
   const safe = (fn) => (...args) => Promise.resolve().then(() => fn(...args)).then(success, failure);
   window.addEventListener('error', (event) => recordFrontendLog('error', event.message || 'renderer error', { source: event.filename, line: event.lineno, column: event.colno }));
   window.addEventListener('unhandledrejection', (event) => recordFrontendLog('error', `unhandled rejection: ${event.reason?.message || event.reason || 'unknown'}`));
-  recordFrontendLog('info', 'renderer initialized', { version: '3.0.1', host: 'tauri' });
+  recordFrontendLog('info', 'renderer initialized', { version: '3.1.0', host: 'tauri' });
 
   const codexHome = () => {
     const home = String(navigator.userAgent || '').includes('Windows') ? '%USERPROFILE%' : '~';
@@ -220,19 +220,7 @@
   }
 
   function mapQuota(raw) {
-    if (!raw?.success || !Array.isArray(raw.tiers) || !raw.tiers.length) return null;
-    return {
-      source: 'account',
-      observedAt: raw.queriedAt ? new Date(raw.queriedAt).toISOString() : new Date().toISOString(),
-      windows: raw.tiers.map((tier) => ({
-        label: tier.name,
-        limit: tier.name,
-        window: tier.name,
-        used: number(tier.utilization),
-        resetsAt: tier.resetsAt ? Math.floor(Date.parse(tier.resetsAt) / 1000) : null,
-        minutes: tier.name.includes('seven') ? 7 * 1440 : 5 * 60,
-      })),
-    };
+    return window.SubscriptionLensQuotaForecast.mapCodexQuotaResponse(raw);
   }
 
   // Tab navigation reuses the same filter set. Keep the assembled snapshot
@@ -241,6 +229,7 @@
   const queryCache = new Map();
   const queryInflight = new Map();
   let queryGeneration = 0;
+  let refreshedQuotaSnapshot = null;
   let deviceSyncInflight = null;
   const QUERY_CACHE_TTL_MS = 15_000;
   function queryCacheKey(filters) {
@@ -328,6 +317,7 @@
       query: filters.query || null, day: filters.day || null, failed: Boolean(filters.failed), overlap: filters.overlap || null,
       unpriced: Boolean(filters.unpriced), sort: filters.sort || 'cost', offset: number(filters.offset), limit: number(filters.limit, 50),
     }).catch((error) => { recordFrontendLog('error', 'multi-provider monitor query failed', { message: error?.message }); return null; });
+    let authStatusError = null;
     const [summary, trends, models, providers, logs, settings, providerInfo, authStatus, scannedSessions, monitor, deviceCloud, deviceSync] = await Promise.all([
       invoke('get_usage_summary', common),
       invoke('get_usage_trends', common),
@@ -339,7 +329,7 @@
       invoke('get_request_logs', { filters: { appType: 'codex', model: modelFilter, startDate, endDate }, page: 0, pageSize: 10000 }),
       invoke('get_settings'),
       providerStatus(),
-      invoke('auth_get_status', { authProvider: 'codex_oauth' }).catch(() => null),
+      invoke('auth_get_status', { authProvider: 'codex_oauth' }).catch((error) => { authStatusError = String(error?.message || error); return null; }),
       // This is CCS's own session scanner. It supplies the authoritative
       // local file and thread count; request logs represent token events,
       // not conversations.
@@ -355,6 +345,8 @@
       project: projectNameFromCwd(entry.projectDir) || '未分类',
     }]));
     let quota = null;
+    let quotaError = null;
+    let quotaCheckedAt = null;
     const quotaIdentity = authStatus?.defaultAccountId || authStatus?.default_account_id
       || authStatus?.accounts?.find((account) => account?.isDefault || account?.is_default)?.id
       || 'default';
@@ -364,14 +356,23 @@
       if (Array.isArray(saved)) quotaHistory = saved;
     } catch { /* Corrupt forecast history should not block the dashboard. */ }
     try {
-      quota = mapQuota(await invoke('get_codex_oauth_quota', { accountId: null }));
+      const refreshedQuota = refreshedQuotaSnapshot;
+      refreshedQuotaSnapshot = null;
+      quotaCheckedAt = refreshedQuota?.observedAt || new Date().toISOString();
+      const rawQuota = refreshedQuota ? null : await invoke('get_codex_oauth_quota', { accountId: null });
+      quota = refreshedQuota || mapQuota(rawQuota);
+      if (!quota && authStatus?.authenticated) {
+        quotaError = rawQuota?.error || rawQuota?.credentialMessage || '额度接口未返回有效窗口';
+      }
       if (quota && authStatus?.authenticated && window.SubscriptionLensQuotaForecast) {
         quotaHistory = window.SubscriptionLensQuotaForecast.recordObservation(
           quotaHistory, quota, quotaIdentity, Date.now(),
         );
         localStorage.setItem(quotaHistoryKey, JSON.stringify(quotaHistory));
       }
-    } catch { /* quota is optional */ }
+    } catch (error) {
+      quotaError = String(error?.message || error || '额度查询失败');
+    }
     const totalTokens = number(summary?.realTotalTokens, number(summary?.totalInputTokens) + number(summary?.totalOutputTokens));
     const usd = moneyNumber(summary?.totalCost);
     const events = number(summary?.totalRequests);
@@ -461,7 +462,17 @@
       outlooks,
       comparison: {},
       cycle: { start: '', end: '', paid: appSettings.paid, extra: appSettings.extra },
-      account: { state: authStatus?.authenticated ? 'connected' : 'signed_out', plan: null, usage: null, updatedAt: null, lastError: null },
+      account: {
+        state: !authStatus ? (authStatusError ? 'error' : 'signed_out') : !authStatus.authenticated ? 'signed_out' : quota ? 'connected' : 'quota_error',
+        login: authStatus?.accounts?.find((account) => account.id === (authStatus.defaultAccountId || authStatus.default_account_id))?.login
+          || authStatus?.accounts?.find((account) => account.isDefault || account.is_default)?.login
+          || authStatus?.accounts?.[0]?.login || null,
+        plan: null,
+        usage: null,
+        quotaWindows: quota?.windows.length || 0,
+        updatedAt: quota?.observedAt || quotaCheckedAt,
+        lastError: authStatusError || quotaError,
+      },
       settings: appSettings,
       scanner: { running: false, processed: 0, files: 0, lastScan: null, errors: 0 },
       stats: { sessions: sourceSessionCount, records: number(logs?.total, allLogRows.length), earliest: startDate ? new Date(startDate * 1000).toISOString() : null, latest: new Date(endDate * 1000).toISOString() },
@@ -473,7 +484,7 @@
       deviceCloud,
       deviceSync,
       currentDevice: null,
-      desktop: { compact: false, pinned: false, version: '3.0.1', detectedMonitors: monitor?.detected || [] },
+      desktop: { compact: false, pinned: false, version: '3.1.0', detectedMonitors: monitor?.detected || [] },
       health: { reasons: [], readErrors: 0, parseErrors: 0, partial: 0 },
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       providers: providerInfo,
@@ -611,13 +622,26 @@
       return path;
     }),
     chooseCodex: safe(() => invoke('open_config_folder', { app: 'codex' })),
-    connect: safe(() => invoke('auth_get_status', { authProvider: 'codex_oauth' })),
+    connect: safe(async () => {
+      const raw = await invoke('get_codex_oauth_quota', { accountId: null });
+      const quota = mapQuota(raw);
+      if (!quota) throw new Error(raw?.error || raw?.credentialMessage || '未能读取 ChatGPT 套餐额度，请检查授权状态后重试');
+      refreshedQuotaSnapshot = quota;
+      invalidateQueryCache();
+      return quota;
+    }),
     login: safe(async () => {
       const device = await invoke('auth_start_login', { authProvider: 'codex_oauth', githubDomain: null, targetAccountId: null });
-      loginDeviceCode = device.deviceCode;
-      await invoke('open_external', { url: device.verificationUri });
+      // Tauri serializes ManagedAuthDeviceCodeResponse using Rust's snake_case
+      // field names. Read those names explicitly so the browser URL and poll
+      // code are not silently sent as undefined.
+      const deviceCode = device.device_code;
+      const verificationUri = device.verification_uri;
+      if (!deviceCode || !verificationUri) throw new Error('登录服务未返回有效的设备码或验证链接');
+      loginDeviceCode = deviceCode;
+      await invoke('open_external', { url: verificationUri });
       const interval = Math.max(Number(device.interval || 5), 2) * 1000;
-      const deadline = Date.now() + Number(device.expiresIn || 600) * 1000;
+      const deadline = Date.now() + Number(device.expires_in || 600) * 1000;
       const poll = async () => {
         if (!loginDeviceCode || Date.now() >= deadline) return;
         try {

@@ -3,7 +3,7 @@
 globalThis.CCSwitchCodexPresets={
   "source": "CC Switch codexProviderPresets",
   "revision": "06082e189d65e6d6dbadc35dacdac1ce6c79d89a",
-  "generatedAt": "2026-09-22T10:11:41.815Z",
+  "generatedAt": "2026-09-24T20:30:26.715Z",
   "presets": [
     {
       "id": "codex",

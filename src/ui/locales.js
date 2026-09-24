@@ -612,6 +612,18 @@ window.LensLocales = {
     "Sign in to ChatGPT",
     "Aanmelden bij ChatGPT"
   ],
+  "请在已打开的浏览器中输入授权码。完成后此页面会自动更新。": [
+    "Enter the authorization code in the browser window that just opened. This page will update when authorization is complete.",
+    "Voer de autorisatiecode in het zojuist geopende browservenster in. Deze pagina wordt bijgewerkt zodra de autorisatie is voltooid."
+  ],
+  "等待浏览器授权": [
+    "Waiting for browser authorization",
+    "Wachten op browserautorisatie"
+  ],
+  "授权成功": [
+    "Authorization succeeded",
+    "Autorisatie geslaagd"
+  ],
   "刷新连接": [
     "Refresh connection",
     "Verbinding vernieuwen"

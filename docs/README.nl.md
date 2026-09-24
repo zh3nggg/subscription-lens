@@ -4,7 +4,7 @@ Een desktopapp voor **Codex-abonnees** op Windows en Apple Silicon Macs die hun 
 
 [English](../README.md) · [简体中文](README.zh-CN.md) · [Nederlands](README.nl.md)
 
-> **3.0.2: stabiele Windows-release.** Verhelpt dat bij het starten de CC Switch-interface werd geopend in plaats van Subscription Lens. De ingebedde CC Switch-runtime gebruikt nu de eigen Tauri-configuratie van Subscription Lens; providerbeheer en routering blijven door de meegeleverde CC Switch-runtime verzorgd. De eerste betrouwbaar bruikbare multi-providerrelease was 3.0.0; Subscription Lens behoudt zijn eigen statistiekinterface. De Apple Silicon-versie voor macOS blijft de Electron-preview `3.0.0-beta.2` in afwachting van een aparte Tauri-release.
+> **3.1.0: stabiele Windows-release.** Bundelt de Tauri-migratiefixes, Codex-quota voorspellingen, CodeBuddy/Qoder-gebruiksregistratie en optionele Cloudflare R2-statistieken voor meerdere apparaten. Berekende kosten blijven in apparaatsnapshots behouden; gebruik zonder bekende prijs wordt als ongeprijsd getoond. De originele CC Switch-providerbeheerder en router-runtime zijn ingebouwd; CC Switch hoeft niet apart te worden geïnstalleerd. De eerste betrouwbaar bruikbare multi-providerrelease was 3.0.0. macOS Apple Silicon blijft de Electron-preview `3.0.0-beta.2`.
 
 ## Wat kun je ermee?
 
@@ -44,7 +44,7 @@ Windows 3.0.0 hergebruikt de originele providerbeheerinterface van [CC Switch](h
 
 ## Downloaden en aan de slag
 
-**Windows 3.0.1 · x64.** Deze stabiele correctieversie herstelt de quota-tijdvoorspelling. Download [Windows 3.0.1](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.1): gebruik `Subscription-Lens-3.0.1-installer-x64.exe` voor installatie of `Subscription-Lens-3.0.1-x64.zip` als draagbare versie. Beide bevatten CC Switch. Sluit de oude app voor de upgrade. Omdat de runtime van Electron naar Tauri verandert, is een back-up van de bestaande gegevens verstandig; installeer in een aparte map als je eenvoudig wilt kunnen terugkeren.
+**Windows 3.1.0 · x64.** Stabiele release met Codex-quota voorspellingen, CodeBuddy- en Qoder-gebruiksregistratie en optionele Cloudflare R2-statistieken voor meerdere apparaten. API-equivalente kosten zijn schattingen, geen factuur; records zonder bekende prijs blijven ongeprijsd. Download [Windows 3.1.0](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.1.0) en installeer met `Subscription-Lens-3.1.0-installer-x64.exe`. Sluit de oude app voor de upgrade. Omdat de runtime van Electron naar Tauri verandert, is een back-up van de bestaande gegevens verstandig; installeer in een aparte map als je eenvoudig wilt kunnen terugkeren. CC Switch is ingebouwd en hoeft niet apart te worden geïnstalleerd.
 
 **macOS Apple Silicon:** `3.0.0-beta.2` hieronder blijft een Electron-preview en gebruikt nog niet de Tauri-runtime van Windows 3.0.0.
 
@@ -59,7 +59,7 @@ Windows 3.0.0 hergebruikt de originele providerbeheerinterface van [CC Switch](h
 3. Als macOS de app nog blokkeert, open je **Systeeminstellingen → Privacy en beveiliging**, zoek je de melding voor Subscription Lens en kies je **Toch openen**. Verifieer je identiteit en bevestig **Open**. Schakel Gatekeeper niet wereldwijd uit.
 4. Je kunt de download vooraf controleren met `SHA256SUMS.txt` uit dezelfde release.
 
-**Windows-gebruikers:** gebruik de [stabiele 3.0.1-release](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.1) hierboven.
+**Windows-gebruikers:** gebruik de [stabiele 3.1.0-release](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.1.0) hierboven.
 
 1. Kies **Monitoring starten** voor de standaardmap van Codex, of **Map kiezen** voor een eigen map met `sessions` of `archived_sessions`.
 2. Open **Verbindingen → Account verbinden** om limieten op te halen via de lokaal geïnstalleerde Codex. Gebruik **Aanmelden bij ChatGPT** als je nog niet bent aangemeld.
@@ -107,7 +107,7 @@ Versie 1.4 voegt read-only connectors voor Qwen Code, Kimi Code en CodeBuddy Cod
 
 ## Zelf bouwen en bijdragen
 
-Voor de Tauri-build van Windows 3.0.1 zijn Node.js 24, Rust, pnpm en de geïnitialiseerde CC Switch-submodule nodig. Het buildscript compileert de originele beheerinterface en Rust-runtime. De Electron-preview voor Apple Silicon macOS vereist daarnaast Rust 1.95 en Xcode Command Line Tools voor de ingebouwde router. Zie [CONTRIBUTING.md](../CONTRIBUTING.md) voor tests en vertalingen. De test met een echt account is uitsluitend handmatig.
+Voor de Tauri-build van Windows 3.1.0 zijn Node.js 24, Rust, pnpm en de geïnitialiseerde CC Switch-submodule nodig. Het buildscript compileert de originele beheerinterface en Rust-runtime. De Electron-preview voor Apple Silicon macOS vereist daarnaast Rust 1.95 en Xcode Command Line Tools voor de ingebouwde router. Zie [CONTRIBUTING.md](../CONTRIBUTING.md) voor tests en vertalingen. De test met een echt account is uitsluitend handmatig.
 
 ```powershell
 npm ci

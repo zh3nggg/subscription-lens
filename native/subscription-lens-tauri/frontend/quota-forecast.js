@@ -9,6 +9,28 @@
   const MAX_SAMPLES = 25000;
   const SAMPLE_INTERVAL_MS = 60000;
 
+  function mapCodexQuotaResponse(raw) {
+    if (!raw?.success || !Array.isArray(raw.tiers) || !raw.tiers.length) return null;
+    const observedDate = raw.queriedAt === null || raw.queriedAt === undefined
+      ? new Date() : new Date(Number(raw.queriedAt));
+    const observedAt = Number.isFinite(observedDate.getTime()) ? observedDate.toISOString() : new Date().toISOString();
+    return {
+      source: 'account',
+      observedAt,
+      windows: raw.tiers.map((tier) => ({
+        label: tier.name,
+        limit: tier.name,
+        window: tier.name,
+        used: Number.isFinite(Number(tier.utilization)) ? Number(tier.utilization) : 0,
+        resetsAt: tier.resetsAt ? Math.floor(Date.parse(tier.resetsAt) / 1000) : null,
+        minutes: tier.name.includes('seven') ? 7 * 1440 : 5 * 60,
+        // quotaOutlook validates freshness per window, so carry the response
+        // timestamp down from the snapshot before calculating remaining quota.
+        observedAt,
+      })),
+    };
+  }
+
   function recordObservation(history, quota, identity, now = Date.now()) {
     const rows = Array.isArray(history) ? history.filter(validSample) : [];
     if (!quota || !Array.isArray(quota.windows)) return rows;
@@ -121,5 +143,5 @@
     };
   }
 
-  return { recordObservation, quotaOutlook };
+  return { mapCodexQuotaResponse, recordObservation, quotaOutlook };
 });
