@@ -756,6 +756,7 @@ dependencies = [
  "rust_decimal",
  "rustls",
  "rustls-native-certs",
+ "security-framework",
  "serde",
  "serde_json",
  "serde_yaml",

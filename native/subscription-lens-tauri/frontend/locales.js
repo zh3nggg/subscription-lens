@@ -1977,6 +1977,10 @@ window.LensLocales = {
     "Keys are stored in Windows Credential Manager and are never included in usage snapshots.",
     "Sleutels worden opgeslagen in Windows Credential Manager en nooit in gebruikssnapshots opgenomen."
   ],
+  "密钥保存在系统凭据库中，不写入统计快照。": [
+    "Keys are stored in the system credential vault and are never included in usage snapshots.",
+    "Sleutels worden opgeslagen in de systeemreferentiekluis en nooit in gebruikssnapshots opgenomen."
+  ],
   "保存设置": ["Save settings", "Instellingen opslaan"],
   "测试连接": ["Test connection", "Verbinding testen"],
   "立即双向同步": ["Sync both ways now", "Nu in beide richtingen synchroniseren"],

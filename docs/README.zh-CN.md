@@ -4,7 +4,7 @@
 
 [English](../README.md) · [简体中文](README.zh-CN.md) · [Nederlands](README.nl.md)
 
-> **3.1.1：Windows 稳定版。** 修复总览切换到多设备后扇形统计仍显示本机数据的问题。包含 Tauri 迁移后的修复、额度预测、CodeBuddy/Qoder 采集和 Cloudflare R2 多设备统计；多设备成本与未计价状态保持正确。内嵌 CC Switch 原版供应商管理与路由运行时，无需单独安装 CC Switch。首个真正稳定可用的多供应商版本为 3.0.0。Apple Silicon macOS 仍为 Electron 架构的 `3.0.0-beta.2` 预览版。
+> **3.1.1：Windows 与 Apple Silicon Tauri 稳定版。** 修复总览切换到多设备后扇形统计仍显示本机数据的问题。包含 Tauri 迁移后的修复、额度预测、CodeBuddy/Qoder 采集和 Cloudflare R2 多设备统计；多设备成本与未计价状态保持正确。内嵌 CC Switch 原版供应商管理与路由运行时，无需单独安装 CC Switch。
 
 ## 主要功能
 
@@ -15,7 +15,7 @@
 | 规划模型使用配比 | 根据当前额度窗口的模型历史和平均速度，推荐下次重置前的模型比例、各模型应增减的方向及建议可信度。 |
 | 比较用量价值与套餐实付 | 将 API 等价成本与当期实际付款并列展示，支持自动月度账期。 |
 | 工作时随手看额度 | 使用可置顶专注窗口、托盘和可选额度提醒，支持免打扰时段。 |
-| 区分多台设备 | Windows Tauri 版可选通过 Cloudflare R2 同步每台设备的脱敏统计快照；不上传原始日志、正文或项目路径。 |
+| 区分多台设备 | Windows 与 Apple Silicon Tauri 版可选通过 Cloudflare R2 同步每台设备的脱敏统计快照；不上传原始日志、正文或项目路径。 |
 | 导出明细或分享汇总 | 导出 CSV，或生成不含项目名和账户标识的 HTML 汇总报告。 |
 
 ## 1.5 多供应商监控
@@ -24,7 +24,7 @@
 
 Tauri 3.x 版目前原生采集 CodeBuddy Code 与 Qoder；上方列出的其他来源仍由 Electron 版提供，尚未接入 Tauri。
 
-Windows Tauri 版提供可选 R2 多设备同步。可在应用内创建专用 bucket，或指定已有 bucket；Sublens 在 bucket 前缀（R2 的逻辑文件夹）下为每台设备维护一个 JSON 快照。Access Key 保存在 Windows 凭据管理器中。快照只含哈希化记录/会话标识、时间、模型、Token 分类和可用计价，不含源日志、聊天正文、项目路径、API Key 或登录凭据。应用启动时及运行期间每 5 分钟自动双向同步；多设备视图展示各快照汇总，因此可能延迟最多 5 分钟。
+Tauri 版提供可选 R2 多设备同步。可在应用内创建专用 bucket，或指定已有 bucket；Sublens 在 bucket 前缀（R2 的逻辑文件夹）下为每台设备维护一个 JSON 快照。Access Key 在 Windows 保存到凭据管理器，在 macOS 保存到登录钥匙串。快照只含哈希化记录/会话标识、时间、模型、Token 分类和可用计价，不含源日志、聊天正文、项目路径、API Key 或登录凭据。应用启动时及运行期间每 5 分钟自动双向同步。升级到 3.1.1 后，请在每台设备上各执行一次“双向同步”，重新发布修正后的成本数据。
 
 供应商和模型饼图还会显示所选时间段的平均每百万 Tokens 成本。分母只包含已计价 Tokens；未计价用量仍会显示，但不会被纳入平均值。
 
@@ -46,18 +46,14 @@ Windows 3.0.0 复用了 [CC Switch](https://github.com/farion1231/cc-switch) 的
 
 **Windows 3.1.1 · x64。** 修复总览多设备 tab 的扇形统计。正式版包含 Codex 额度预测、CodeBuddy 与 Qoder 用量采集，以及可选的 Cloudflare R2 多设备统计。API 等价成本是估算值，不是账单；没有匹配价格的数据仍标记为未计价。下载 [Windows 3.1.1](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.1.1)，使用 `Subscription-Lens-3.1.1-installer-x64.exe` 安装。升级前请关闭旧程序；从 Electron 改为 Tauri，建议备份原有数据，需要方便回退时安装到独立目录。安装包已内嵌 CC Switch，无需单独安装。
 
-**macOS Apple Silicon：** 以下 `3.0.0-beta.2` 仍为 Electron 预览版，与 Windows 3.0.0 的 Tauri 运行时不同。
-
-**3.0.0-beta.2 预览版 · macOS Apple Silicon。** 需要 M 系列 Mac 与 macOS 13 或更高版本。当前采集器尚未完整适配所有客户端记录格式，汇总可能偏高或偏低；费用是估算值，不是账单或保证节省的金额。暂不支持自动更新。
-
-[下载 3.0.0-beta.2](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0-beta.2)
+**3.1.1 正式版 · macOS Apple Silicon。** 使用与 Windows 3.1.1 相同的 Tauri 代码基线，需要 M 系列 Mac 与 macOS 13 或更高版本。请从 [3.1.1 Release](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.1.1) 下载 `Subscription-Lens-3.1.1-tauri-arm64.dmg`；ZIP 内是同一个应用。本版没有自动更新。
 
 ### 在 macOS 上安装
 
-1. 下载 `Subscription-Lens-3.0.0-beta.2-arm64.dmg`，打开后将 **Subscription Lens** 拖入“应用程序”。ZIP 中是同一个应用，适合希望直接解压使用的用户。
-2. 本预览版使用本机临时签名，尚未经过 Apple 公证，因此 macOS 可能提示“无法验证开发者”。请在“应用程序”中按住 Control 点击 **Subscription Lens**，选择“打开”，然后再次确认“打开”；通常只需在首次启动时确认一次。
+1. 打开 `Subscription-Lens-3.1.1-tauri-arm64.dmg`，将 **Subscription Lens** 拖入“应用程序”。ZIP 中是同一个应用，适合希望直接解压使用的用户。
+2. 本地包使用 ad-hoc 签名，尚未经过 Apple 公证，因此 macOS 可能提示“无法验证开发者”。请在“应用程序”中按住 Control 点击 **Subscription Lens**，选择“打开”，然后再次确认“打开”；通常只需在首次启动时确认一次。
 3. 如果仍被阻止，请打开“系统设置 → 隐私与安全性”，向下找到 Subscription Lens 的安全提示，点击“仍要打开”，完成认证后再次确认。不要全局关闭 Gatekeeper。
-4. 打开前可使用同一 Release 中的 `SHA256SUMS.txt` 核对下载文件。
+4. 打开前使用 `SHA256SUMS-3.1.1-tauri-macos.txt` 核对 DMG 或 ZIP。
 
 **Windows 用户：**请使用上方的 [3.1.1 正式版](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.1.1)。
 
@@ -91,7 +87,7 @@ Windows 3.0.0 复用了 [CC Switch](https://github.com/farion1231/cc-switch) 的
 - 使用记录只读；保存时间、模型、项目名、Token 与来源元数据，不保存聊天正文，不直接读取认证文件。
 - 每 15 秒检查新增记录。已连接账户默认每 60 秒查询额度；账户 Token 汇总约每 10 分钟更新。
 - 同一记录重复扫描或归档不会重复入账。原记录被删除后，已经采集到的历史仍保留。
-- API 等价成本按价格页 **2026-09-16 的 Standard 价格快照**重估已采集用量，包含输入、缓存与输出；推理 Token 已含在输出时不重复收费。
+- API 等价成本按价格页 **2026-09-22 的 Standard 价格快照**重估已采集用量，包含 GPT-6 Astra、Sol、Luna 的精确模型身份，以及输入、缓存、写入和输出分类；推理 Token 已含在输出时不重复收费。
 - 此数值不是实际账单。不匹配 Fast/Batch、地区附加费或工具调用费用；不是按事件发生时的历史价格结算。
 - “价格”页可导出 JSON 模板、编辑后导入；导入会重估已有记录。未识别模型或缺少价格的记录显示未计价。内置价格不会悄悄在线变化。
 - 本机明细和账户汇总分别展示；不把两者相加。多设备汇总只含用户主动同步的 Sublens 快照。不保证覆盖云端任务、普通 ChatGPT 网页或手机聊天。
@@ -123,7 +119,7 @@ Windows 默认保存于 `%APPDATA%\Subscription Lens`，macOS 默认保存于 `~
 
 ## 源码构建与参与贡献
 
-Windows 3.1.1 的 Tauri 构建需要 Node.js 24、Rust 和 pnpm，并需初始化 CC Switch 子模块；构建脚本会编译内嵌的原版管理界面与 Rust 运行时。Apple Silicon macOS 的 Electron 预览版另需 Rust 1.95 与 Xcode Command Line Tools，用于编译内嵌 Router。界面测试、翻译维护及实验性统计引擎说明见[贡献指南](../CONTRIBUTING.md)。真实账户测试仅供手动运行。
+Windows 3.1.1 的 Tauri 构建需要 Node.js 24、Rust 和 pnpm；macOS 还需要 Apple Silicon Mac、macOS 13+ 与 Xcode Command Line Tools。两种平台均需初始化 CC Switch 子模块；构建脚本会应用 Subscription Lens 主机、GPT-6 计价与安全凭据补丁，并编译原版管理界面和 Rust 运行时。界面测试、翻译维护及实验性统计引擎说明见[贡献指南](../CONTRIBUTING.md)。真实账户测试仅供手动运行。
 
 ```powershell
 npm ci
@@ -135,7 +131,7 @@ cd ../..
 .\scripts\build-tauri-migration-host.ps1 -Action release
 ```
 
-在 Apple Silicon Mac 上先执行 `git submodule update --init --recursive`，再运行 `npm run dist`，会生成本机临时签名的 arm64 DMG 与 ZIP；Windows 仍生成现有的 x64 NSIS 与 ZIP。
+在 Apple Silicon Mac 上安装子模块依赖后运行 `npm run dist:tauri:mac`，会生成 ad-hoc 签名的 arm64 DMG、ZIP 与版本化 SHA256 清单；Windows 仍生成 x64 NSIS。
 
 ## 开发与致谢
 

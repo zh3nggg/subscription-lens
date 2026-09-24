@@ -1,0 +1,206 @@
+diff --git a/src-tauri/src/database/schema.rs b/src-tauri/src/database/schema.rs
+index fddd8bf0..f0b7025f 100644
+--- a/src-tauri/src/database/schema.rs
++++ b/src-tauri/src/database/schema.rs
+@@ -1790,6 +1790,8 @@ impl Database {
+             // effort 档 low/medium/high/xhigh 由查价剥后缀回落到本行；max 不在剥离列表
+             //（会与 *-max 真 id 撞名），不另加后缀行。
+             ("gpt-6-astra", "GPT-6 Astra", "10", "50", "1", "12.5"),
++            ("gpt-6-sol", "GPT-6 Sol", "2", "10", "0.20", "2.50"),
++            ("gpt-6-luna", "GPT-6 Luna", "0.10", "0.50", "0.01", "0.125"),
+             // GPT-5.6 系列（Sol / Terra / Luna，2026-06 发布）
+             // 5.6 家族起 cache write 收 1.25× 输入价（此前 GPT 模型写缓存免费，勿回填旧系列）
+             // 2026-09-06 审计：Sol 改促销价 4/20/0.40/5（OpenAI 价页原文"至少持续到 2026-11-21"），
+diff --git a/src-tauri/src/database/tests.rs b/src-tauri/src/database/tests.rs
+index 6dc7c823..6e379b72 100644
+--- a/src-tauri/src/database/tests.rs
++++ b/src-tauri/src/database/tests.rs
+@@ -1101,6 +1101,35 @@ fn model_pricing_seed_includes_gpt_6_astra() {
+     );
+ }
+ 
++#[test]
++fn model_pricing_seed_includes_gpt_6_sol_and_luna() {
++    let db = Database::memory().expect("create memory db");
++    let conn = db.conn.lock().expect("lock conn");
++    for (model, expected) in [
++        ("gpt-6-sol", ("2", "10", "0.20", "2.50")),
++        ("gpt-6-luna", ("0.10", "0.50", "0.01", "0.125")),
++    ] {
++        let price: (String, String, String, String) = conn
++            .query_row(
++                "SELECT input_cost_per_million, output_cost_per_million,
++                        cache_read_cost_per_million, cache_creation_cost_per_million
++                 FROM model_pricing WHERE model_id = ?1",
++                [model],
++                |row| Ok((row.get(0)?, row.get(1)?, row.get(2)?, row.get(3)?)),
++            )
++            .expect("query GPT-6 price");
++        assert_eq!(
++            price,
++            (
++                expected.0.into(),
++                expected.1.into(),
++                expected.2.into(),
++                expected.3.into()
++            )
++        );
++    }
++}
++
+ #[test]
+ fn model_pricing_seed_includes_glm_5_3_flash() {
+     let db = Database::memory().expect("create memory db");
+diff --git a/src-tauri/src/proxy/usage/calculator.rs b/src-tauri/src/proxy/usage/calculator.rs
+index 0defaeda..c35c4c9c 100644
+--- a/src-tauri/src/proxy/usage/calculator.rs
++++ b/src-tauri/src/proxy/usage/calculator.rs
+@@ -76,6 +76,9 @@ impl CostCalculator {
+         input_includes_cache_read: bool,
+     ) -> CostBreakdown {
+         let million = Decimal::from(1_000_000);
++        let contextual_pricing =
++            pricing.for_context(usage.model.as_deref(), u64::from(usage.input_tokens));
++        let pricing = &contextual_pricing;
+ 
+         // OpenAI/Gemini 风格的 input_tokens 包含缓存读取和写入，需要扣除后再按输入价计费；
+         // Claude/Anthropic 风格的 input_tokens 已经是 fresh input，不能再次扣减。
+@@ -137,6 +140,47 @@ impl ModelPricing {
+             cache_creation_cost_per_million: Decimal::from_str(cache_creation)?,
+         })
+     }
++
++    /// OpenAI applies the long-context tier to the entire request once input
++    /// exceeds 272K tokens. Preserve user overrides by switching tiers only
++    /// when the stored row still equals the bundled Standard short-context row.
++    pub fn for_context(&self, model: Option<&str>, input_tokens: u64) -> Self {
++        if input_tokens <= 272_000 {
++            return self.clone();
++        }
++        let mut id = model.unwrap_or_default().trim().to_ascii_lowercase();
++        if let Some(last) = id.rsplit('/').next() {
++            id = last.split('@').next().unwrap_or(last).to_string();
++        }
++        for suffix in ["-minimal", "-low", "-medium", "-high", "-xhigh"] {
++            if let Some(base) = id.strip_suffix(suffix) {
++                id = base.to_string();
++                break;
++            }
++        }
++        let tiers = match id.as_str() {
++            "gpt-6-astra" => Some((("10", "50", "1", "12.5"), ("20", "75", "2", "25"))),
++            "gpt-6-sol" => Some((("2", "10", "0.2", "2.5"), ("4", "15", "0.4", "5"))),
++            "gpt-6-luna" => Some((
++                ("0.1", "0.5", "0.01", "0.125"),
++                ("0.2", "0.75", "0.02", "0.25"),
++            )),
++            _ => None,
++        };
++        let Some((short, long)) = tiers else {
++            return self.clone();
++        };
++        let short =
++            Self::from_strings(short.0, short.1, short.2, short.3).expect("valid bundled pricing");
++        if self.input_cost_per_million != short.input_cost_per_million
++            || self.output_cost_per_million != short.output_cost_per_million
++            || self.cache_read_cost_per_million != short.cache_read_cost_per_million
++            || self.cache_creation_cost_per_million != short.cache_creation_cost_per_million
++        {
++            return self.clone();
++        }
++        Self::from_strings(long.0, long.1, long.2, long.3).expect("valid bundled pricing")
++    }
+ }
+ 
+ #[cfg(test)]
+@@ -202,6 +246,30 @@ mod tests {
+         assert_eq!(cost.total_cost, Decimal::from_str("0.010035").unwrap());
+     }
+ 
++    #[test]
++    fn gpt_6_sol_and_luna_use_long_context_tiers() {
++        let usage = TokenUsage {
++            input_tokens: 300_000,
++            output_tokens: 10_000,
++            cache_read_tokens: 200_000,
++            cache_creation_tokens: 50_000,
++            model: Some("gpt-6-sol".to_string()),
++            message_id: None,
++        };
++        let sol = ModelPricing::from_strings("2", "10", "0.2", "2.5").unwrap();
++        let sol_cost = CostCalculator::calculate_for_app("codex", &usage, &sol, Decimal::ONE);
++        assert_eq!(sol_cost.total_cost, Decimal::from_str("0.68").unwrap());
++
++        let luna = ModelPricing::from_strings("0.1", "0.5", "0.01", "0.125").unwrap();
++        let luna_usage = TokenUsage {
++            model: Some("gpt-6-luna".to_string()),
++            ..usage
++        };
++        let luna_cost =
++            CostCalculator::calculate_for_app("codex", &luna_usage, &luna, Decimal::ONE);
++        assert_eq!(luna_cost.total_cost, Decimal::from_str("0.034").unwrap());
++    }
++
+     #[test]
+     fn grokbuild_does_not_double_bill_cached_input() {
+         let usage = TokenUsage {
+diff --git a/src-tauri/src/proxy/usage/logger.rs b/src-tauri/src/proxy/usage/logger.rs
+index 7b6362ff..4def419d 100644
+--- a/src-tauri/src/proxy/usage/logger.rs
++++ b/src-tauri/src/proxy/usage/logger.rs
+@@ -471,10 +471,13 @@ impl<'a> UsageLogger<'a> {
+             log::warn!("[USG-002] 模型定价未找到，成本将记录为 0: {pricing_model}");
+         }
+ 
++        let contextual_pricing = pricing
++            .as_ref()
++            .map(|value| value.for_context(Some(&pricing_model), u64::from(usage.input_tokens)));
+         let cost = CostCalculator::try_calculate_for_app(
+             &app_type,
+             &usage,
+-            pricing.as_ref(),
++            contextual_pricing.as_ref(),
+             cost_multiplier,
+         );
+ 
+diff --git a/src-tauri/src/services/usage_stats.rs b/src-tauri/src/services/usage_stats.rs
+index 222217c3..b798eafb 100644
+--- a/src-tauri/src/services/usage_stats.rs
++++ b/src-tauri/src/services/usage_stats.rs
+@@ -1921,15 +1921,30 @@ impl Database {
+                 // v12 and earlier: input included cache reads but excluded cache writes.
+                 (log.input_tokens as u64).saturating_sub(log.cache_read_tokens as u64)
+             };
+-        let input_cost =
+-            rust_decimal::Decimal::from(billable_input_tokens) * pricing.input / million;
+-        let output_cost =
+-            rust_decimal::Decimal::from(log.output_tokens as u64) * pricing.output / million;
++        let pricing_identity = log
++            .pricing_model
++            .as_deref()
++            .filter(|value| !is_placeholder_pricing_model(value))
++            .or_else(|| (!is_placeholder_pricing_model(&log.model)).then_some(log.model.as_str()))
++            .or(log.request_model.as_deref());
++        let contextual_pricing = ModelPricing {
++            input_cost_per_million: pricing.input,
++            output_cost_per_million: pricing.output,
++            cache_read_cost_per_million: pricing.cache_read,
++            cache_creation_cost_per_million: pricing.cache_creation,
++        }
++        .for_context(pricing_identity, log.input_tokens as u64);
++        let input_cost = rust_decimal::Decimal::from(billable_input_tokens)
++            * contextual_pricing.input_cost_per_million
++            / million;
++        let output_cost = rust_decimal::Decimal::from(log.output_tokens as u64)
++            * contextual_pricing.output_cost_per_million
++            / million;
+         let cache_read_cost = rust_decimal::Decimal::from(log.cache_read_tokens as u64)
+-            * pricing.cache_read
++            * contextual_pricing.cache_read_cost_per_million
+             / million;
+         let cache_creation_cost = rust_decimal::Decimal::from(log.cache_creation_tokens as u64)
+-            * pricing.cache_creation
++            * contextual_pricing.cache_creation_cost_per_million
+             / million;
+         // 总成本 = 基础成本之和 × 倍率
+         let base_total = input_cost + output_cost + cache_read_cost + cache_creation_cost;

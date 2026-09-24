@@ -12,6 +12,7 @@ const base={model:'gpt-6-astra',input:100000,cached:80000,write:0,output:10000,r
 test('cache and reasoning are not double counted',()=>assert.equal(dollars(price(base).amount),.78));
 test('long context tier applies to full request',()=>assert.equal(dollars(price({...base,input:300000,cached:200000,output:10000}).amount),3.15));
 test('write cache is a disjoint input category',()=>assert.equal(dollars(price({...base,write:10000}).amount),.805));
+test('GPT-6 Sol and Luna use their exact standard rates',()=>{assert.equal(dollars(price({...base,model:'gpt-6-sol',input:100000,cached:80000,output:10000}).amount),.156);assert.equal(dollars(price({...base,model:'gpt-6-luna',input:100000,cached:80000,output:10000}).amount),.0078);});
 test('unknown model stays null',()=>assert.equal(price({...base,model:'future'}).amount,null));
 test('missing category is not zero',()=>assert.equal(price({...base,write:null}).reason,'tokens'));
 test('unknown counter range is not priced',()=>assert.equal(price({...base,quality:'ambiguous'}).reason,'counter'));

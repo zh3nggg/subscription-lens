@@ -1,0 +1,150 @@
+diff --git a/src-tauri/Cargo.lock b/src-tauri/Cargo.lock
+--- a/src-tauri/Cargo.lock
++++ b/src-tauri/Cargo.lock
+@@ -796,6 +796,7 @@ dependencies = [
+  "rust_decimal",
+  "rustls",
+  "rustls-native-certs",
++ "security-framework",
+  "serde",
+  "serde_json",
+  "serde_yaml",
+diff --git a/src-tauri/Cargo.toml b/src-tauri/Cargo.toml
+--- a/src-tauri/Cargo.toml
++++ b/src-tauri/Cargo.toml
+@@ -109,6 +109,7 @@ windows-sys = { version = "0.61", features = [
+ [target.'cfg(target_os = "macos")'.dependencies]
+ objc2 = "0.5"
+ objc2-app-kit = { version = "0.2", features = ["NSColor"] }
++security-framework = "3.7.0"
+ 
+ # Optimize release binary size to help reduce AppImage footprint
+ [profile.release]
+diff --git a/src-tauri/src/sublens_devices.rs b/src-tauri/src/sublens_devices.rs
+--- a/src-tauri/src/sublens_devices.rs
++++ b/src-tauri/src/sublens_devices.rs
+@@ -80,15 +80,30 @@ fn save_config(app: &AppHandle, config: &DeviceConfig) -> Result<(), String> {
+ }
+ 
+ const CREDENTIAL_TARGET: &str = "Subscription Lens / Cloudflare R2 device sync";
++const CREDENTIAL_ACCOUNT: &str = "Cloudflare R2";
+ 
++fn credential_payload(access: &str, secret: &str) -> Result<Vec<u8>, String> {
++    let payload = serde_json::to_vec(&json!({"accessKeyId":access,"secretAccessKey":secret}))
++        .map_err(|e| e.to_string())?;
++    if payload.len() > 5_000 { return Err("R2 凭据长度超出系统凭据库限制".into()); }
++    Ok(payload)
++}
++
++fn parse_credential_payload(payload: &[u8]) -> Result<(String, String), String> {
++    let value: Value = serde_json::from_slice(payload).map_err(|e| format!("读取 R2 凭据失败：{e}"))?;
++    Ok((
++        value["accessKeyId"].as_str().unwrap_or_default().to_string(),
++        value["secretAccessKey"].as_str().unwrap_or_default().to_string(),
++    ))
++}
++
+ #[cfg(windows)]
+ fn save_credentials(access: &str, secret: &str) -> Result<(), String> {
+     use std::mem;
+     use windows_sys::Win32::Security::Credentials::{CredWriteW, CREDENTIALW, CRED_PERSIST_LOCAL_MACHINE, CRED_TYPE_GENERIC};
+-    let payload = serde_json::to_vec(&json!({"accessKeyId":access,"secretAccessKey":secret})).map_err(|e| e.to_string())?;
+-    if payload.len() > 5_000 { return Err("R2 凭据长度超出系统凭据库限制".into()); }
++    let payload = credential_payload(access, secret)?;
+     let target: Vec<u16> = CREDENTIAL_TARGET.encode_utf16().chain(Some(0)).collect();
+-    let username: Vec<u16> = "Cloudflare R2".encode_utf16().chain(Some(0)).collect();
++    let username: Vec<u16> = CREDENTIAL_ACCOUNT.encode_utf16().chain(Some(0)).collect();
+     let credential = CREDENTIALW {
+         Type: CRED_TYPE_GENERIC,
+         TargetName: target.as_ptr() as *mut _,
+@@ -113,11 +128,10 @@ fn load_credentials() -> Result<(String, String), String> {
+     let result = unsafe {
+         let item = &*pointer;
+         let bytes = std::slice::from_raw_parts(item.CredentialBlob, item.CredentialBlobSize as usize);
+-        serde_json::from_slice::<Value>(bytes).map_err(|e| e.to_string())
++        parse_credential_payload(bytes)
+     };
+     unsafe { CredFree(pointer as *const _); }
+-    let value = result?;
+-    Ok((value["accessKeyId"].as_str().unwrap_or_default().to_string(), value["secretAccessKey"].as_str().unwrap_or_default().to_string()))
++    result
+ }
+ 
+ #[cfg(windows)]
+@@ -128,11 +142,36 @@ fn delete_credentials() -> Result<(), String> {
+     Ok(())
+ }
+ 
+-#[cfg(not(windows))]
+-fn save_credentials(_: &str, _: &str) -> Result<(), String> { Err("当前平台尚未提供系统凭据库适配".into()) }
+-#[cfg(not(windows))]
++#[cfg(target_os = "macos")]
++fn save_credentials(access: &str, secret: &str) -> Result<(), String> {
++    let payload = credential_payload(access, secret)?;
++    security_framework::passwords::set_generic_password(CREDENTIAL_TARGET, CREDENTIAL_ACCOUNT, &payload)
++        .map_err(|e| format!("写入 macOS 钥匙串失败：{e}"))
++}
++
++#[cfg(target_os = "macos")]
++fn load_credentials() -> Result<(String, String), String> {
++    match security_framework::passwords::get_generic_password(CREDENTIAL_TARGET, CREDENTIAL_ACCOUNT) {
++        Ok(payload) => parse_credential_payload(&payload),
++        Err(error) if error.code() == -25_300 => Ok((String::new(), String::new())),
++        Err(error) => Err(format!("读取 macOS 钥匙串失败：{error}")),
++    }
++}
++
++#[cfg(target_os = "macos")]
++fn delete_credentials() -> Result<(), String> {
++    match security_framework::passwords::delete_generic_password(CREDENTIAL_TARGET, CREDENTIAL_ACCOUNT) {
++        Ok(()) => Ok(()),
++        Err(error) if error.code() == -25_300 => Ok(()),
++        Err(error) => Err(format!("删除 macOS 钥匙串凭据失败：{error}")),
++    }
++}
++
++#[cfg(not(any(windows, target_os = "macos")))]
++fn save_credentials(_: &str, _: &str) -> Result<(), String> { Err("当前平台尚未提供系统凭据库适配".into()) }
++#[cfg(not(any(windows, target_os = "macos")))]
+ fn load_credentials() -> Result<(String, String), String> { Ok((String::new(), String::new())) }
+-#[cfg(not(windows))]
++#[cfg(not(any(windows, target_os = "macos")))]
+ fn delete_credentials() -> Result<(), String> { Ok(()) }
+ 
+ fn credentials(config: &DeviceConfig) -> Result<S3Credentials, String> {
+@@ -406,7 +445,7 @@ pub fn sublens_device_query(app: AppHandle, from: i64, to: i64, device_id: Opti
+ 
+ #[cfg(test)]
+ mod tests {
+-    use super::{aggregate_device, total_usd_or_null, usage_record, valid_bucket, validate_snapshot, SNAPSHOT_SCHEMA};
++    use super::{aggregate_device, credential_payload, parse_credential_payload, total_usd_or_null, usage_record, valid_bucket, validate_snapshot, CREDENTIAL_TARGET, SNAPSHOT_SCHEMA};
+     use crate::services::usage_stats::RequestLogDetail;
+     use serde_json::json;
+ 
+@@ -474,5 +513,26 @@ mod tests {
+         assert!(!valid_bucket("-sublens"));
+         assert!(!valid_bucket("Sublens"));
+         assert!(!valid_bucket("sub/lens"));
++    }
++
++    #[test]
++    fn r2_credentials_round_trip_without_plaintext_config_storage() {
++        let payload = credential_payload("access-id", "private-secret").expect("serialize credentials");
++        assert_eq!(parse_credential_payload(&payload).expect("parse credentials"), ("access-id".into(), "private-secret".into()));
++        assert!(!String::from_utf8_lossy(&payload).contains(CREDENTIAL_TARGET));
+     }
++
++    #[cfg(target_os = "macos")]
++    #[test]
++    fn macos_keychain_stores_and_removes_a_test_credential() {
++        let service = format!("{CREDENTIAL_TARGET} test {}", uuid::Uuid::new_v4());
++        let account = "Cloudflare R2 test";
++        let payload = credential_payload("test-access", "test-secret").expect("serialize test credential");
++        let written = security_framework::passwords::set_generic_password(&service, account, &payload);
++        let loaded = security_framework::passwords::get_generic_password(&service, account);
++        let removed = security_framework::passwords::delete_generic_password(&service, account);
++        written.expect("write temporary macOS Keychain credential");
++        removed.expect("remove temporary macOS Keychain credential");
++        assert_eq!(loaded.expect("read temporary macOS Keychain credential"), payload);
++    }
+ }
