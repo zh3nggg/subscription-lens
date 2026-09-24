@@ -45,9 +45,6 @@
 
 # Unreleased
 
-- 路由概览去掉重复的 CC Switch 说明卡与每张卡片上的管理按钮，改为一个清楚的管理入口和紧凑的供应商列表；当前供应商保留醒目标识，点击条目仍进入内嵌 CCS。
-- Simplified the routing overview to one management entry and a compact provider list, removing repeated CC Switch explanation cards and per-card buttons while keeping the active provider visible.
-
 - 将内嵌 CC Switch 页面中的“返回余量”按钮移到左上角导航栏，避免浮动按钮遮挡页面内容。
 - Moved the return button in the embedded CC Switch page into the upper-left navigation area so it no longer floats over page content.
 

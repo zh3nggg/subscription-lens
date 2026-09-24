@@ -85,14 +85,13 @@ function providerPresetSelector(selected='custom'){
 }
 function providers(){
   const p=state.data.providers||{providers:[],activeId:null};
-  const rows=p.providers.map(item=>{
-    const name=item.name||t('供应商');
-    const detail=item.baseUrl||((item.authMode==='codex_oauth')?t('CC Switch 已保存的 ChatGPT 授权'):'');
-    const initial=name.trim().slice(0,1).toUpperCase();
-    return `<button type="button" class="route-provider-row ${item.active?'active':''}" data-provider-action="edit" data-provider-id="${esc(item.id)}" aria-label="${t('管理供应商')}: ${esc(name)}"><span class="route-provider-icon" aria-hidden="true">${esc(initial)}</span><span class="route-provider-identity"><strong title="${esc(name)}">${esc(name)}</strong>${detail?`<small title="${esc(detail)}">${esc(detail)}</small>`:''}</span><span class="route-provider-model" title="${esc(item.model||'')}">${esc(item.model||'—')}</span><span class="route-provider-tail">${item.active?`<span class="pill green">${t('当前')}</span>`:''}<span class="route-provider-chevron" aria-hidden="true">›</span></span></button>`;
+  const cards=p.providers.map(item=>{
+    const auth=item.authMode==='codex_oauth'?t('CC Switch 已保存的 ChatGPT 授权'):item.credentialSource==='app'?t('应用内密钥已保存'):item.secretConfigured?t('凭据已配置'):t('等待在 CC Switch 中配置');
+    const protocol=item.protocol==='responses'?t('Responses API'):t('Chat Completions（需代理或兼容层）');
+    return `<article class="panel provider-card ${item.active?'active':''}"><div class="provider-card-head"><div><h2>${esc(item.name)}</h2><p class="caption">${esc(item.baseUrl)}</p></div>${item.active?`<span class="pill green">${t('当前')}</span>`:''}</div><div class="provider-meta"><span>${esc(item.model)||'—'}</span><span>${protocol}</span></div><div class="provider-meta"><span>${auth}</span>${item.authMode==='codex_oauth'?'':`<code>${esc(item.envKey||'')}</code>`}</div><div class="row"><button class="button primary" data-provider-action="edit" data-provider-id="${esc(item.id)}">${item.builtIn?t('授权与管理'):t('在 CC Switch 中管理')}</button></div></article>`;
   }).join('');
-  return head(t('路由'),`<button class="button primary" data-provider-action="new">${t('管理供应商')} <span aria-hidden="true">↗</span></button>`,t('管理 Codex 的模型路由'))+
-    `<section class="panel route-provider-list"><div class="route-provider-list-head"><div><h2>${t('供应商')}</h2><p>${t('在 CC Switch 中新增、授权和切换。')}</p></div><span class="route-provider-count">${fmt.format(p.providers.length)}</span></div>${rows||`<div class="route-provider-empty">${t('在 CC Switch 中新增、授权和切换。')}</div>`}</section>`;
+  return head(t('路由'),`<button class="button primary" data-provider-action="new">${t('添加供应商')}</button>`,t('管理 Codex 的模型路由'))+
+    `<div class="provider-action-grid"><section class="provider-action-card"><div><h2>${t('使用原版 CC Switch 供应商管理器')}</h2><p>${t('新增、编辑、授权、测试与切换均由内嵌的 CC Switch 完成；其保存、回滚和本地代理逻辑与 CC Switch 一致。')}</p></div><button class="button" data-provider-action="new">${t('打开供应商管理器')}</button></section><section class="provider-action-card provider-route-guide"><div><h2>${t('OpenAI Official')}</h2><p>${t('在供应商管理器中单独登录 ChatGPT。授权由 CC Switch 保存，切换第三方供应商后仍可恢复。')}</p></div></section></div><section class="provider-grid">${cards}</section>`;
 }
 function providerEditor(){
   const saved=(state.data.providers?.providers||[]).find(item=>item.id===state.providerEditorId);
