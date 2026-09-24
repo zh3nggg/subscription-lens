@@ -1,13 +1,18 @@
 param(
   [ValidateSet("check", "build", "release")]
   [string]$Action = "check",
-  [string]$TargetDir = "$env:TEMP\subscription-lens-tauri-target"
+  [string]$TargetDir = "$env:TEMP\subscription-lens-tauri-target",
+  [string]$RuntimeDir = ""
 )
 
 $ErrorActionPreference = "Stop"
 $projectRoot = Split-Path -Parent $PSScriptRoot
 $hostDir = Join-Path $projectRoot "native\subscription-lens-tauri"
-$runtimeDir = Join-Path $projectRoot "native\cc-switch-runtime"
+$runtimeDir = if ([string]::IsNullOrWhiteSpace($RuntimeDir)) {
+  Join-Path $projectRoot "native\cc-switch-runtime"
+} else {
+  [System.IO.Path]::GetFullPath($RuntimeDir)
+}
 $runtimePatches = @(
   (Join-Path $projectRoot "native\cc-switch-patches\0002-subscription-lens-tauri-host.patch"),
   (Join-Path $projectRoot "native\cc-switch-patches\0003-subscription-lens-device-sync.patch")
@@ -81,12 +86,16 @@ try {
         throw "The pinned CC Switch Tauri CLI is missing. Run pnpm install in native/cc-switch-runtime."
       }
       $previousTargetDir = $env:CARGO_TARGET_DIR
+      $previousPath = $env:PATH
       $env:CARGO_TARGET_DIR = $TargetDir
       try {
-        & node $tauriCli build --bundles nsis --ci --runner $cargo
+        $cargoBinDir = Split-Path -Parent $cargo
+        $env:PATH = "$cargoBinDir;$env:PATH"
+        & node $tauriCli build --bundles nsis --ci
       } finally {
         if ($null -eq $previousTargetDir) { Remove-Item Env:CARGO_TARGET_DIR -ErrorAction SilentlyContinue }
         else { $env:CARGO_TARGET_DIR = $previousTargetDir }
+        $env:PATH = $previousPath
       }
     } else {
       & $cargo @args

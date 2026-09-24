@@ -1,3 +1,12 @@
+# 3.0.1
+
+- 修复 Tauri 版额度可用时间预测始终不显示的问题。应用现在会在本机保存成功的额度观测，并按账号、额度窗口和重置周期隔离；至少积累三次、跨度15分钟后，显示本周期、近24小时和近2小时预测。
+- Fixed quota availability forecasts always appearing empty in the Tauri app. Successful quota observations are stored locally and isolated by account, quota window and reset. Current-window, 24-hour and 2-hour estimates appear after at least three observations spanning 15 minutes.
+- De Tauri-app toonde de resterende quotatijd nooit. Succesvolle quota-observaties worden nu lokaal opgeslagen en gescheiden per account, venster en resetmoment. Schattingen voor het huidige venster, 24 uur en 2 uur verschijnen na minimaal drie observaties verspreid over 15 minuten.
+- 正式版加入 CodeBuddy / Qoder 本地用量采集和可选 Cloudflare R2 多设备统计同步；R2 只传 Sublens 匿名统计快照，不上传源日志、正文、项目路径或凭据。
+- Includes local CodeBuddy and Qoder usage collection and optional Cloudflare R2 multi-device statistics sync. R2 transfers only anonymized Sublens usage snapshots, never source logs, chat text, project paths or credentials.
+- Bevat lokale gebruiksverzameling voor CodeBuddy en Qoder en optionele statistieksynchronisatie tussen apparaten via Cloudflare R2. R2 verzendt alleen geanonimiseerde Sublens-snapshots, nooit bronlogs, chattekst, projectpaden of inloggegevens.
+
 # 3.0.0-beta.3 · 本地预览（未发布）
 
 Windows 本地测试安装包包含本节所列的多设备 R2 同步、设备总览及近期 Tauri 修复。安装包保存在本机，未创建 GitHub Release；源码随项目更新提交。

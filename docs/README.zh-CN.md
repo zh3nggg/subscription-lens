@@ -4,7 +4,7 @@
 
 [English](../README.md) · [简体中文](README.zh-CN.md) · [Nederlands](README.nl.md)
 
-> **3.0.0：首个真正稳定可用的多供应商版本。** Windows x64 版已迁移到 Tauri，并内嵌固定版本的 CC Switch 原版供应商管理器和原生路由运行时，无需单独安装 CC Switch。此前公开版本使用 Electron；Apple Silicon macOS 目前仍为 Electron 架构的 `3.0.0-beta.2` 预览版。
+> **3.0.1：稳定修正版。** 修复 Tauri 版额度可用时间预测始终为空的问题。预测观测保存在本机；同一账号、额度窗口和重置周期至少积累三次、跨度15分钟后开始显示。首个真正稳定可用的多供应商版本为 3.0.0；Windows x64 版迁移至 Tauri 并内嵌 CC Switch 原版供应商管理器和原生路由运行时。Apple Silicon macOS 仍为 Electron 架构的 `3.0.0-beta.2` 预览版。
 
 ## 主要功能
 
@@ -15,7 +15,7 @@
 | 规划模型使用配比 | 根据当前额度窗口的模型历史和平均速度，推荐下次重置前的模型比例、各模型应增减的方向及建议可信度。 |
 | 比较用量价值与套餐实付 | 将 API 等价成本与当期实际付款并列展示，支持自动月度账期。 |
 | 工作时随手看额度 | 使用可置顶专注窗口、托盘和可选额度提醒，支持免打扰时段。 |
-| 区分多台设备 | 当前未发布的 Windows Tauri 源码支持通过 Cloudflare R2 同步每台设备的脱敏统计快照；不上传原始日志、正文或项目路径。 |
+| 区分多台设备 | Windows Tauri 版可选通过 Cloudflare R2 同步每台设备的脱敏统计快照；不上传原始日志、正文或项目路径。 |
 | 导出明细或分享汇总 | 导出 CSV，或生成不含项目名和账户标识的 HTML 汇总报告。 |
 
 ## 1.5 多供应商监控
@@ -24,7 +24,7 @@
 
 Tauri 3.x 版目前原生采集 CodeBuddy Code 与 Qoder；上方列出的其他来源仍由 Electron 版提供，尚未接入 Tauri。
 
-当前未发布的 Windows Tauri 源码另提供可选 R2 多设备同步。可在应用内创建专用 bucket，或指定已有 bucket；Sublens 在 bucket 前缀（R2 的逻辑文件夹）下为每台设备维护一个 JSON 快照。Access Key 保存在 Windows 凭据管理器中。快照只含哈希化记录/会话标识、时间、模型、Token 分类和可用计价，不含源日志、聊天正文、项目路径、API Key 或登录凭据。应用启动时及运行期间每 5 分钟自动双向同步；多设备视图展示各快照汇总，因此可能延迟最多 5 分钟。
+Windows Tauri 版提供可选 R2 多设备同步。可在应用内创建专用 bucket，或指定已有 bucket；Sublens 在 bucket 前缀（R2 的逻辑文件夹）下为每台设备维护一个 JSON 快照。Access Key 保存在 Windows 凭据管理器中。快照只含哈希化记录/会话标识、时间、模型、Token 分类和可用计价，不含源日志、聊天正文、项目路径、API Key 或登录凭据。应用启动时及运行期间每 5 分钟自动双向同步；多设备视图展示各快照汇总，因此可能延迟最多 5 分钟。
 
 供应商和模型饼图还会显示所选时间段的平均每百万 Tokens 成本。分母只包含已计价 Tokens；未计价用量仍会显示，但不会被纳入平均值。
 
@@ -44,7 +44,7 @@ Windows 3.0.0 复用了 [CC Switch](https://github.com/farion1231/cc-switch) 的
 
 ## 下载与快速开始
 
-**Windows 3.0.0 · x64。** 这是首个供应商管理与切换流程真正稳定可用的多供应商版本。下载 [Windows 3.0.0](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0)：常规安装使用 `Subscription-Lens-3.0.0-installer-x64.exe`；便携版使用 `Subscription-Lens-3.0.0-x64.zip`。两者都内嵌 CC Switch。升级前请关闭旧程序；从 Electron 改为 Tauri，建议备份原有数据，需要方便回退时安装到独立目录。
+**Windows 3.0.1 · x64。** 稳定修正版恢复了额度可用时间预测。下载 [Windows 3.0.1](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.1)：常规安装使用 `Subscription-Lens-3.0.1-installer-x64.exe`；便携版使用 `Subscription-Lens-3.0.1-x64.zip`。两者都内嵌 CC Switch。升级前请关闭旧程序；从 Electron 改为 Tauri，建议备份原有数据，需要方便回退时安装到独立目录。
 
 **macOS Apple Silicon：** 以下 `3.0.0-beta.2` 仍为 Electron 预览版，与 Windows 3.0.0 的 Tauri 运行时不同。
 
@@ -59,7 +59,7 @@ Windows 3.0.0 复用了 [CC Switch](https://github.com/farion1231/cc-switch) 的
 3. 如果仍被阻止，请打开“系统设置 → 隐私与安全性”，向下找到 Subscription Lens 的安全提示，点击“仍要打开”，完成认证后再次确认。不要全局关闭 Gatekeeper。
 4. 打开前可使用同一 Release 中的 `SHA256SUMS.txt` 核对下载文件。
 
-**Windows 用户：**请使用上方的 [3.0.0 正式版](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0)。
+**Windows 用户：**请使用上方的 [3.0.1 正式版](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.1)。
 
 1. 首次打开点击“开始监测”；自定义 Codex Home 可点“选择目录”。目录应包含 `sessions` 或 `archived_sessions`。
 2. 在“连接”中点击“连接账户”。应用使用本机 Codex 的官方登录；未登录时按按钮打开浏览器登录。
@@ -123,7 +123,7 @@ Windows 默认保存于 `%APPDATA%\Subscription Lens`，macOS 默认保存于 `~
 
 ## 源码构建与参与贡献
 
-Windows 3.0.0 的 Tauri 构建需要 Node.js 24、Rust 和 pnpm，并需初始化 CC Switch 子模块；构建脚本会编译内嵌的原版管理界面与 Rust 运行时。Apple Silicon macOS 的 Electron 预览版另需 Rust 1.95 与 Xcode Command Line Tools，用于编译内嵌 Router。界面测试、翻译维护及实验性统计引擎说明见[贡献指南](../CONTRIBUTING.md)。真实账户测试仅供手动运行。
+Windows 3.0.1 的 Tauri 构建需要 Node.js 24、Rust 和 pnpm，并需初始化 CC Switch 子模块；构建脚本会编译内嵌的原版管理界面与 Rust 运行时。Apple Silicon macOS 的 Electron 预览版另需 Rust 1.95 与 Xcode Command Line Tools，用于编译内嵌 Router。界面测试、翻译维护及实验性统计引擎说明见[贡献指南](../CONTRIBUTING.md)。真实账户测试仅供手动运行。
 
 ```powershell
 npm ci

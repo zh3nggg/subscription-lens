@@ -47,13 +47,14 @@
   const safe = (fn) => (...args) => Promise.resolve().then(() => fn(...args)).then(success, failure);
   window.addEventListener('error', (event) => recordFrontendLog('error', event.message || 'renderer error', { source: event.filename, line: event.lineno, column: event.colno }));
   window.addEventListener('unhandledrejection', (event) => recordFrontendLog('error', `unhandled rejection: ${event.reason?.message || event.reason || 'unknown'}`));
-  recordFrontendLog('info', 'renderer initialized', { version: '3.0.0-beta.3', host: 'tauri' });
+  recordFrontendLog('info', 'renderer initialized', { version: '3.0.1', host: 'tauri' });
 
   const codexHome = () => {
     const home = String(navigator.userAgent || '').includes('Windows') ? '%USERPROFILE%' : '~';
     return `${home}\\.codex`;
   };
   const prefKey = 'subscription-lens.preferences';
+  const quotaHistoryKey = 'subscription-lens.quota-observations.v1';
   const readPrefs = () => {
     try { return JSON.parse(localStorage.getItem(prefKey) || '{}') || {}; } catch { return {}; }
   };
@@ -226,6 +227,7 @@
       windows: raw.tiers.map((tier) => ({
         label: tier.name,
         limit: tier.name,
+        window: tier.name,
         used: number(tier.utilization),
         resetsAt: tier.resetsAt ? Math.floor(Date.parse(tier.resetsAt) / 1000) : null,
         minutes: tier.name.includes('seven') ? 7 * 1440 : 5 * 60,
@@ -353,7 +355,23 @@
       project: projectNameFromCwd(entry.projectDir) || '未分类',
     }]));
     let quota = null;
-    try { quota = mapQuota(await invoke('get_codex_oauth_quota', { accountId: null })); } catch { /* quota is optional */ }
+    const quotaIdentity = authStatus?.defaultAccountId || authStatus?.default_account_id
+      || authStatus?.accounts?.find((account) => account?.isDefault || account?.is_default)?.id
+      || 'default';
+    let quotaHistory = [];
+    try {
+      const saved = JSON.parse(localStorage.getItem(quotaHistoryKey) || '[]');
+      if (Array.isArray(saved)) quotaHistory = saved;
+    } catch { /* Corrupt forecast history should not block the dashboard. */ }
+    try {
+      quota = mapQuota(await invoke('get_codex_oauth_quota', { accountId: null }));
+      if (quota && authStatus?.authenticated && window.SubscriptionLensQuotaForecast) {
+        quotaHistory = window.SubscriptionLensQuotaForecast.recordObservation(
+          quotaHistory, quota, quotaIdentity, Date.now(),
+        );
+        localStorage.setItem(quotaHistoryKey, JSON.stringify(quotaHistory));
+      }
+    } catch { /* quota is optional */ }
     const totalTokens = number(summary?.realTotalTokens, number(summary?.totalInputTokens) + number(summary?.totalOutputTokens));
     const usd = moneyNumber(summary?.totalCost);
     const events = number(summary?.totalRequests);
@@ -400,14 +418,13 @@
     const baseSummary = hasHierarchyFilter
       ? hierarchy.summary
       : { tokens: totalTokens, usd, events, unpriced: 0 };
-    const outlooks = quota ? quota.windows.map((window) => ({
-      ...window,
-      remaining: Math.max(0, 100 - number(window.used)),
-      state: 'on_track',
-      secondsToReset: window.resetsAt ? Math.max(0, window.resetsAt - Math.floor(Date.now() / 1000)) : null,
-      forecast: null,
-      forecasts: {},
-    })) : [];
+    const outlooks = quota && window.SubscriptionLensQuotaForecast
+      ? quota.windows.map((item) => window.SubscriptionLensQuotaForecast.quotaOutlook(
+        item,
+        quotaHistory,
+        { now: Date.now(), identity: quotaIdentity, live: Boolean(authStatus?.authenticated) },
+      ))
+      : [];
     const root = settings?.codexConfigDir || settings?.codexPath || codexHome();
     const prefs = readPrefs();
     const appSettings = {
@@ -456,7 +473,7 @@
       deviceCloud,
       deviceSync,
       currentDevice: null,
-      desktop: { compact: false, pinned: false, version: '3.0.0-beta.3', detectedMonitors: monitor?.detected || [] },
+      desktop: { compact: false, pinned: false, version: '3.0.1', detectedMonitors: monitor?.detected || [] },
       health: { reasons: [], readErrors: 0, parseErrors: 0, partial: 0 },
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       providers: providerInfo,
