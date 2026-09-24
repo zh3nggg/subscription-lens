@@ -498,7 +498,11 @@
   const api = {
     query: safe(buildQuery),
     providerList: safe(providerStatus),
-    providerManager: safe(() => invoke('open_sublens_provider_manager')),
+    providerManager: safe(() => {
+      localStorage.setItem('cc-switch-last-app', 'codex');
+      localStorage.setItem('cc-switch-last-view', 'providers');
+      window.location.assign(new URL('ccswitch/index.html', window.location.href).href);
+    }),
     providerDelete: safe(async (id) => { const result = await invoke('delete_provider', { app: 'codex', id }); invalidateQueryCache(); return result; }),
     providerImportCurrent: safe(async () => { const result = await invoke('import_default_config', { app: 'codex' }); invalidateQueryCache(); return result; }),
     providerActivate: safe(async (id) => { const result = await invoke('switch_provider', { app: 'codex', id }); invalidateQueryCache(); return result; }),

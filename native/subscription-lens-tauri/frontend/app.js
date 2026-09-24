@@ -143,7 +143,7 @@ function resetProviderForm(){
   state.providerPresetQuery='';state.providerPresetSort='original';state.providerEditorId=null;state.providerModels=[];state.providerDraft={id:'',preset:'custom',name:'',model:'',baseUrl:'',apiKey:'',envKey:'OPENAI_API_KEY',protocol:'responses',storedCredential:false,credentialSource:null,availableModels:[],modelMappings:[{alias:codexCompatibleAliases[0],upstream:''}]};render();
 }
 function openProviderEditor(){
-  action(()=>api('providerManager'),t('已打开 CC Switch 供应商管理器'));
+  api('providerManager').catch(error=>toast(error.message));
 }
 function closeProviderEditor(){state.providerEditorId=null;state.providerDraft=null;state.providerModels=[];state.page='providers';render();window.scrollTo(0,0);}
 function discoverProviderModels(button){

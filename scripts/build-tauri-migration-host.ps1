@@ -9,8 +9,7 @@ $projectRoot = Split-Path -Parent $PSScriptRoot
 $hostDir = Join-Path $projectRoot "native\subscription-lens-tauri"
 $runtimeDir = Join-Path $projectRoot "native\cc-switch-runtime"
 $runtimePatches = @(
-  (Join-Path $projectRoot "native\cc-switch-patches\0002-subscription-lens-tauri-host.patch"),
-  (Join-Path $projectRoot "native\cc-switch-patches\0003-subscription-lens-provider-manager.patch")
+  (Join-Path $projectRoot "native\cc-switch-patches\0002-subscription-lens-tauri-host.patch")
 )
 $providerBundleDir = Join-Path $hostDir "frontend\ccswitch"
 $rendererDist = Join-Path $runtimeDir "dist"
@@ -64,9 +63,15 @@ try {
     Remove-Item -LiteralPath $providerBundleDir -Recurse -Force
   }
   New-Item -ItemType Directory -Path $providerBundleDir -Force | Out-Null
-  Copy-Item -Path (Join-Path $rendererDist '*') -Destination $providerBundleDir -Recurse -Force
   $bundlePrepared = $true
-
+  Copy-Item -Path (Join-Path $rendererDist '*') -Destination $providerBundleDir -Recurse -Force
+  $providerIndex = Join-Path $providerBundleDir "index.html"
+  $providerHtml = Get-Content -LiteralPath $providerIndex -Raw -Encoding UTF8
+  if (-not $providerHtml.Contains('</head>')) {
+    throw "CC Switch renderer entry point is missing its closing head tag."
+  }
+  $providerHtml = $providerHtml.Replace('</head>', '    <script defer src="../ccswitch-host.js"></script>' + "`n  </head>")
+  Set-Content -LiteralPath $providerIndex -Value $providerHtml -Encoding UTF8 -NoNewline
   Push-Location $hostDir
   try {
     & $cargo @args
