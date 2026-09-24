@@ -45,6 +45,9 @@
 
 # Unreleased
 
+- 将内嵌 CC Switch 页面中的“返回余量”按钮移到左上角导航栏，避免浮动按钮遮挡页面内容。
+- Moved the return button in the embedded CC Switch page into the upper-left navigation area so it no longer floats over page content.
+
 - “在 CC Switch 中管理”现在在已工作的 Tauri 主窗口中直接打开内嵌的原版 CCS 页面，并提供“返回余量”按钮。去掉独立子窗口及其额外权限配置，保留 CCS 自身的授权、保存和切换流程。
 - “Manage in CC Switch” now navigates the working Tauri main window to the bundled original CCS page with a return button. The separate child window and its extra permissions are removed while CCS retains its own authorization, persistence and switching flow.
 

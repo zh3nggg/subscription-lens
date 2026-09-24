@@ -15,8 +15,8 @@ usage importers still come from the CC Switch runtime and database.
 The checked-in `frontend/` and `tauri-bridge.js` are the active Tauri renderer.
 They preserve the established Subscription Lens visual language for monitoring.
 The Route page navigates the main Tauri window to the bundled, original CC
-Switch provider manager for every provider operation. A small host button
-returns to Subscription Lens. The manager is generated into
+Switch provider manager for every provider operation. A back button in the
+upper-left header returns to Subscription Lens. The manager is generated into
 `frontend/ccswitch/` during the build and is deliberately not checked in. The
 Electron application remains a fallback build during the transition; it is not
 part of the Tauri provider path.
