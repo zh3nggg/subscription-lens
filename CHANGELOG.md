@@ -1,3 +1,10 @@
+# 3.0.0-beta.2
+
+- 新增 Apple Silicon macOS 构建：Electron 主应用、内嵌 CC Switch Router、Codex 自动发现、菜单栏与托盘均已适配 arm64 macOS；发布流程生成临时签名的 DMG、ZIP 与 SHA256 清单。
+- 修复无头 CC Switch Rust 核心在 macOS 下的模块路径和 Windows-only 依赖边界；接管、热切换与恢复已通过 arm64 原生集成测试。
+- Added an Apple Silicon macOS build with a native arm64 CC Switch router, Codex discovery, macOS menus and tray behavior, ad-hoc-signed DMG/ZIP artifacts, and SHA256 manifests.
+- Fixed the headless CC Switch Rust module path and target-scoped Windows dependencies; takeover, hot switching, and official restore now pass native arm64 integration tests.
+
 # 3.0.0-beta.1
 
 - 3.0 是从 1.6.x 稳定版本线跳到的新一代预览版；此前公开版本使用 Electron，本版本继续沿用 Electron 界面，并将兼容 CC Switch 的路由运行时打包进应用。
@@ -76,3 +83,4 @@
 - 修复额度窗口读取：同时保留默认额度和分类额度，并使用分类键识别窗口；单个额度通知不再覆盖其他额度，保留各窗口原始观测时间。
 - Fix quota window ingestion: combine default and indexed limits, preserve map identities, and merge single-limit notifications without refreshing unrelated observations.
 - Herstel quotavensters: combineer standaardlimieten en limieten per categorie, behoud hun identiteit en voeg meldingen samen zonder andere waarnemingen te vernieuwen.
+

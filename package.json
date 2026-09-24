@@ -1,6 +1,6 @@
 {
   "name": "subscription-lens",
-  "version": "3.0.0-beta.1",
+  "version": "3.0.0-beta.2",
   "description": "Local Codex subscription usage monitor",
   "main": "src/main.cjs",
   "author": "Subscription Lens contributors",
@@ -11,7 +11,10 @@
     "verify:cc-switch-runtime": "node scripts/verify-cc-switch-runtime.cjs",
     "build:router": "node scripts/build-router-sidecar.cjs",
     "test": "node --test test/*.test.cjs",
-    "dist": "electron-builder --win nsis zip --x64",
+    "dist": "node scripts/build-desktop.cjs",
+    "dist:win": "electron-builder --win nsis zip --x64",
+    "dist:mac": "node scripts/build-desktop.cjs",
+    "postdist": "node scripts/write-sha256.cjs",
     "prestart": "node scripts/sync-cc-switch-codex-presets.cjs && node scripts/build-locales.cjs",
     "pretest": "node scripts/sync-cc-switch-codex-presets.cjs && node scripts/build-locales.cjs",
     "verify:router-sidecar": "node scripts/verify-router-sidecar.cjs",
@@ -29,7 +32,7 @@
     "productName": "Subscription Lens",
     "asar": true,
     "asarUnpack": [
-      "assets/router/subscription-lens-router.exe"
+      "assets/router/**"
     ],
     "files": [
       "src/**/*",
@@ -45,6 +48,7 @@
       "output": "dist",
       "buildResources": "assets"
     },
+    "afterPack": "scripts/after-pack.cjs",
     "win": {
       "icon": "assets/icon.ico",
       "target": [
@@ -52,6 +56,26 @@
         "zip"
       ],
       "signExecutable": false
+    },
+    "mac": {
+      "icon": "assets/icon.icns",
+      "category": "public.app-category.utilities",
+      "identity": "-",
+      "hardenedRuntime": false,
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64"
+          ]
+        },
+        {
+          "target": "zip",
+          "arch": [
+            "arm64"
+          ]
+        }
+      ]
     },
     "nsis": {
       "oneClick": false,

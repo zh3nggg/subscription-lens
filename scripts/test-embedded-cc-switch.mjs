@@ -20,7 +20,8 @@ await fs.writeFile(path.join(codex, 'auth.json'), officialAuth);
 await fs.mkdir(path.join(root, '.cc-switch'), { recursive: true });
 await fs.writeFile(path.join(root, '.cc-switch', 'settings.json'), JSON.stringify({ codexConfigDir: codex }));
 
-const child = spawn(path.resolve('assets/router/subscription-lens-router.exe'), [], {
+const executable = `subscription-lens-router${process.platform === 'win32' ? '.exe' : ''}`;
+const child = spawn(path.resolve('assets/router', executable), [], {
   env: { ...process.env, CC_SWITCH_TEST_HOME: root, SUBSCRIPTION_LENS_ROUTER_DATA: path.join(root, '.cc-switch') },
   stdio: ['pipe', 'pipe', 'pipe'], windowsHide: true,
 });
@@ -62,4 +63,3 @@ try {
   await new Promise(resolve => child.once('exit', resolve));
   await fs.rm(root, { recursive: true, force: true });
 }
-

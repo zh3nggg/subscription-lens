@@ -1,0 +1,72 @@
+name: Publish macOS Apple Silicon release
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to build and upload
+        required: true
+        default: v3.0.0-beta.2
+
+permissions:
+  contents: write
+
+concurrency:
+  group: macos-release-${{ inputs.tag }}
+  cancel-in-progress: false
+
+jobs:
+  macos-arm64:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag }}
+          submodules: recursive
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Verify native runner
+        run: test "$(uname -m)" = arm64
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Test
+        run: npm test
+
+      - name: Build DMG and ZIP
+        run: |
+          npm run predist
+          npx --no-install electron-builder --mac dmg zip --arm64 --publish never
+          npm run postdist
+
+      - name: Verify packages
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(node -p "require('./package.json').version")"
+          (cd dist && shasum -a 256 -c SHA256SUMS.txt)
+          verify_dir="$(mktemp -d)"
+          ditto -x -k "dist/Subscription-Lens-${version}-arm64.zip" "$verify_dir"
+          app="$verify_dir/Subscription Lens.app"
+          codesign --verify --deep --strict --verbose=2 "$app"
+          test "$(lipo -archs "$app/Contents/MacOS/Subscription Lens")" = arm64
+          test "$(lipo -archs "$app/Contents/Resources/app.asar.unpacked/assets/router/subscription-lens-router")" = arm64
+
+      - name: Upload to existing prerelease
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          version="$(node -p "require('./package.json').version")"
+          test "${{ inputs.tag }}" = "v${version}"
+          gh release upload "${{ inputs.tag }}" \
+            "dist/Subscription-Lens-${version}-arm64.dmg" \
+            "dist/Subscription-Lens-${version}-arm64.zip" \
+            dist/SHA256SUMS.txt \
+            --clobber

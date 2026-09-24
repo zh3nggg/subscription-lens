@@ -1,5 +1,6 @@
 node_modules/
 dist/
+.DS_Store
 .cache/
 native/subscription-lens-tauri/frontend/ccswitch/
 test-results/
@@ -15,3 +16,4 @@ auth.json
 outputs/subscription-lens-*/
 *.exe
 *.zip
+/assets/router/subscription-lens-router

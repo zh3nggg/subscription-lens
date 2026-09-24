@@ -1,8 +1,8 @@
-# Subscription Lens 3.0.0-beta.1
+# Subscription Lens 3.0.0-beta.2
 
-Windows x64 preview release · 中文 / English / Nederlands
+Apple Silicon macOS preview release · 中文 / English / Nederlands
 
-3.0.0-beta.1 is a new-generation preview after the 1.6.x stable line. Earlier public releases used Electron; this preview keeps the Electron application shell and embeds the CC Switch-compatible routing runtime. It is not a Tauri migration. Keep 1.6.5 available as the stable fallback while evaluating the preview.
+3.0.0-beta.2 adds an Apple Silicon macOS build to the new-generation Electron preview after the 1.6.x stable line. It embeds the CC Switch-compatible routing runtime and is not a Tauri migration. Keep 1.6.5 available as the stable fallback while evaluating the preview. Windows x64 users remain on 3.0.0-beta.1 for this release.
 
 ## Release boundary
 
@@ -11,8 +11,8 @@ Windows x64 preview release · 中文 / English / Nederlands
 - Provider and model rings use a distinct color palette with synchronized hover and keyboard focus between slices and legend entries.
 - Average cost per 1M tokens, Tokens/cost switching, model drill-down, Qoder local records and Codex quota/model-mix features remain available.
 - Costs are API-equivalent estimates or source-reported amounts, not invoices. Qoder Credits remain separate from USD. Regular ChatGPT conversations and other-device usage are not collected automatically.
-- The Windows installer preserves the application identity, settings and local usage history during in-place upgrades. The build is unsigned and does not auto-update.
-- The release includes an Electron NSIS installer and a separate Electron portable ZIP. The previous 1.6.x stable installation can remain available as a fallback during this major-generation jump.
+- The release includes ad-hoc-signed arm64 DMG and ZIP packages for M-series Macs running macOS 13 or later. It is not Apple-notarized and does not auto-update.
+- The macOS app discovers Codex from PATH, ChatGPT.app or Codex.app, uses Keychain-backed Electron secure storage, and bundles the native arm64 CC Switch router.
 
 ## 发布边界
 
@@ -21,13 +21,12 @@ Windows x64 preview release · 中文 / English / Nederlands
 - 供应商和模型环形图使用区分度更高的配色，扇区与右侧图例支持悬停和键盘聚焦联动高亮。
 - 平均每百万 Tokens 成本、Tokens／费用切换、模型下钻、Qoder 本地记录以及 Codex 额度／模型组合功能继续可用。
 - 费用是 API 等价估算或来源报告值，不是账单；Qoder Credits 与美元分开。普通 ChatGPT 对话和其他设备用量不会自动采集。
-- Windows 安装器支持原位覆盖升级并保留程序身份、设置和本机用量历史。安装包未签名，也不自动更新。
-- 本版本提供 Electron NSIS 安装包和独立的 Electron 便携 ZIP；这是代际跳跃版本，测试期间可保留 1.6.x 稳定版作为回退。
+- 本版本为运行 macOS 13 或更高版本的 M 系列 Mac 提供本机临时签名的 arm64 DMG 与 ZIP；尚未经过 Apple 公证，也不自动更新。
+- macOS 版可从 PATH、ChatGPT.app 或 Codex.app 自动发现 Codex，使用由钥匙串支持的 Electron 安全存储，并内嵌原生 arm64 CC Switch Router。
 
 See [release notes](../RELEASE-NOTES.md), [source setup](PROVIDER-MONITORING.md), [validation](VALIDATION.md) and [third-party notices](../THIRD-PARTY-NOTICES.md).
 
 Developed with assistance from **GPT-6 Astra**.
-
 
 
 

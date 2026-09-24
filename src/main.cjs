@@ -3,7 +3,7 @@ const {app,BrowserWindow,ipcMain,dialog,shell,Menu,Tray,nativeImage,nativeTheme,
 const path=require('node:path');const fs=require('node:fs/promises');const {pathToFileURL}=require('node:url');
 const APP_USER_MODEL_ID='net.subscriptionlens.desktop';
 app.setName('Subscription Lens');
-app.setAppUserModelId(APP_USER_MODEL_ID);
+if(process.platform==='win32')app.setAppUserModelId(APP_USER_MODEL_ID);
 const {resolveLanguage,translate}=require('./i18n.js');
 const {reportData,reportHtml}=require('./core/report.cjs');
 const {Service}=require('./core/service.cjs');const {dollars}=require('./core/pricing.cjs');
@@ -49,7 +49,7 @@ const iconPng=path.join(__dirname,'../assets/icon.png');
 const icon=process.platform==='win32'?path.join(__dirname,'../assets/icon.ico'):iconPng;
 function changed(){clearTimeout(changeTimer);changeTimer=setTimeout(()=>{if(win&&!win.isDestroyed())win.webContents.send('lens:changed');updateTray();},250);}
 function show(){if(win){if(win.isMinimized())win.restore();win.show();win.focus();}}
-function configureDesktop(){nativeTheme.themeSource=service.settings.theme;if(win)win.setBackgroundColor(nativeTheme.shouldUseDarkColors?'#212121':'#ffffff');if(tray){tray.destroy();tray=null;}if(service.settings.tray&&!tray){tray=new Tray(nativeImage.createFromPath(icon));tray.setToolTip(t("余量"));tray.on('double-click',show);tray.on('click',()=>{setCompact(true);show();});updateTray();}if(!service.settings.tray&&tray){tray.destroy();tray=null;}}
+function configureDesktop(){nativeTheme.themeSource=service.settings.theme;if(win)win.setBackgroundColor(nativeTheme.shouldUseDarkColors?'#212121':'#ffffff');if(tray){tray.destroy();tray=null;}if(service.settings.tray&&!tray){let trayIcon=nativeImage.createFromPath(icon);if(process.platform==='darwin'){trayIcon=trayIcon.resize({width:18,height:18});trayIcon.setTemplateImage(true);}tray=new Tray(trayIcon);tray.setToolTip(t("余量"));tray.on('double-click',show);tray.on('click',()=>{setCompact(true);show();});updateTray();}if(!service.settings.tray&&tray){tray.destroy();tray=null;}}
 
 function setCompact(value){if(!win||compactMode===value)return;if(value){normalBounds=win.getBounds();win.setMinimumSize(360,400);win.setSize(420,560);}else{win.setMinimumSize(760,560);if(normalBounds)win.setBounds(normalBounds);if(pinned){pinned=false;win.setAlwaysOnTop(false);}}compactMode=value;changed();}
 function updateTray(){if(!tray||!service)return;const account=service.account.status;const fresh=account.state==='connected'&&account.quota&&Date.now()-Date.parse(account.quota.observedAt)<180000;const windows=fresh?account.quota.windows.filter(w=>w.resetsAt*1000>Date.now()):[];const primary=(windows.filter(w=>w.limit==='codex').length?windows.filter(w=>w.limit==='codex'):windows).sort((a,b)=>b.used-a.used)[0];const status=primary?Math.max(0,100-primary.used).toFixed(0)+t('% 剩余'):t('未连接');const providers=service.providers?.list?.()||[];tray.setToolTip('Subscription Lens · '+status);tray.setContextMenu(Menu.buildFromTemplate([{label:status,enabled:false},{label:t('打开余量'),click:()=>{setCompact(false);show();}},{label:t('专注窗口'),click:()=>{setCompact(true);show();}},{label:t('刷新用量'),click:()=>{service.scan();if(service.settings.accountEnabled)service.account.refresh(service.settings.codexPath);}},{type:'separator'},{label:t('Codex 供应商'),submenu:providers.length?providers.map(p=>({label:p.name,type:'radio',checked:p.active,click:()=>{const switcher=service.router?.server&&!p.builtIn?service.providerSwitch(p.id):service.providerActivate(p.id);switcher.catch(error=>new Notification({title:t('切换失败'),body:t(error.message)}).show());}})):[{label:t('请先添加供应商'),enabled:false}]},{type:'separator'},{label:t('退出'),click:()=>app.quit()}]));}
@@ -105,7 +105,7 @@ function register(){
   handler('saveSettings',s=>{const before=service.settings.startup;const result=service.saveSettings(s||{});configureDesktop();if(app.isPackaged&&before!==result.startup)app.setLoginItemSettings({openAtLogin:result.startup,path:app.getPath('exe')});return result;});
   handler('chooseRoot',async()=>{const r=await dialog.showOpenDialog(win,{title:t("选择 Codex 目录"),defaultPath:service.detectedRoot,properties:['openDirectory']});if(r.canceled)return null;return service.addRoot(r.filePaths[0]);});
   handler('useDetectedRoot',()=>service.addRoot(service.detectedRoot));
-  handler('chooseCodex',async()=>{const r=await dialog.showOpenDialog(win,{title:t("选择 codex.exe"),filters:[{name:'Codex',extensions:['exe']}],properties:['openFile']});if(r.canceled)return null;const exe=r.filePaths[0];if(path.basename(exe).toLowerCase()!=='codex.exe')throw new Error('请选择 codex.exe');service.setCodexPath(exe);return exe;});
+  handler('chooseCodex',async()=>{const expected=process.platform==='win32'?'codex.exe':'codex',options={title:t("选择 Codex 程序"),properties:['openFile']};if(process.platform==='win32')options.filters=[{name:'Codex',extensions:['exe']}];const r=await dialog.showOpenDialog(win,options);if(r.canceled)return null;const exe=r.filePaths[0];if(path.basename(exe).toLowerCase()!==expected)throw new Error(t("请选择 Codex 程序"));service.setCodexPath(exe);return exe;});
   handler('connect',()=>service.enableAccount());
   handler('login',async()=>{service.settings.accountEnabled=true;service.store.set('settings',service.settings);const url=await service.account.login(service.settings.codexPath);const u=new URL(url);if(u.protocol!=='https:'||!['auth.openai.com','chatgpt.com','auth0.openai.com'].includes(u.hostname))throw new Error('登录地址未通过校验');await shell.openExternal(url);return true;});
   handler('cancelLogin',()=>service.account.cancelLogin());handler('disconnect',()=>service.disableAccount());
@@ -131,7 +131,7 @@ async function create(){
     try{win.setIcon(nativeImage.createFromPath(icon));}catch{/* Keep startup usable if a shell icon API is unavailable. */}
     if(typeof win.setAppDetails==='function')win.setAppDetails({appId:APP_USER_MODEL_ID,appIconPath:icon,appIconIndex:0,relaunchDisplayName:'Subscription Lens',relaunchIcon:icon});
   }
-  Menu.setApplicationMenu(null);win.webContents.setWindowOpenHandler(()=>({action:'deny'}));win.webContents.on('will-navigate',e=>e.preventDefault());win.webContents.session.setPermissionRequestHandler((_,__,callback)=>callback(false));win.webContents.session.setPermissionCheckHandler(()=>false);
+  Menu.setApplicationMenu(process.platform==='darwin'?Menu.buildFromTemplate([{role:'appMenu'},{role:'editMenu'},{role:'windowMenu'}]):null);win.webContents.setWindowOpenHandler(()=>({action:'deny'}));win.webContents.on('will-navigate',e=>e.preventDefault());win.webContents.session.setPermissionRequestHandler((_,__,callback)=>callback(false));win.webContents.session.setPermissionCheckHandler(()=>false);
   win.on('close',e=>{if(service.settings.tray&&!quitting){e.preventDefault();win.hide();}});
   register();configureDesktop();await win.loadURL(ui);if(process.env.LENS_TEST_HIDDEN!=='1')win.show();service.start();
 }

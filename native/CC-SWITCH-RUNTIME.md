@@ -10,8 +10,9 @@ upstream implementation, revision and license can be audited independently.
 
 ## Embedded design
 
-`subscription-lens-router.exe` is a windowless host for the upstream CC Switch
-runtime. It compiles the following upstream paths directly: provider service,
+`subscription-lens-router.exe` on Windows and `subscription-lens-router` on
+Apple Silicon macOS are windowless hosts for the upstream CC Switch runtime.
+They compile the following upstream paths directly: provider service,
 proxy service, configuration takeover and recovery, response forwarding,
 protocol conversion and switch locks. The Tauri/WebView window layer is not
 included; Electron owns the user interface and talks to the sidecar through a
@@ -48,4 +49,3 @@ never edits Codex conversation databases or session state.
 status reply. `node scripts/test-embedded-cc-switch.mjs` verifies takeover, hot switch
 and restore against a disposable fake Codex directory; it never reads the
 user's credentials or configuration.
-

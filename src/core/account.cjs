@@ -8,7 +8,17 @@ const {mergeQuota}=require('./quota.cjs');
 async function exists(p){try{return (await fs.stat(p)).isFile();}catch{return false;}}
 async function discoverCodex(preferred){
   if(preferred&&await exists(preferred))return preferred;
-  for(const dir of (process.env.PATH||'').split(path.delimiter)){const p=path.join(dir,'codex.exe');if(await exists(p))return p;}
+  const executable=process.platform==='win32'?'codex.exe':'codex';
+  for(const dir of (process.env.PATH||'').split(path.delimiter)){if(!dir)continue;const p=path.join(dir,executable);if(await exists(p))return p;}
+  if(process.platform==='darwin'){
+    const applications=['/Applications',path.join(os.homedir(),'Applications')];
+    for(const root of applications)for(const app of ['ChatGPT.app','Codex.app']){
+      const p=path.join(root,app,'Contents','Resources','codex');if(await exists(p))return p;
+    }
+    for(const p of ['/opt/homebrew/bin/codex','/usr/local/bin/codex',path.join(os.homedir(),'.local','bin','codex')])if(await exists(p))return p;
+    return null;
+  }
+  if(process.platform!=='win32')return null;
   const base=path.join(process.env.LOCALAPPDATA||path.join(os.homedir(),'AppData','Local'),'OpenAI','Codex','bin');
   try{const dirs=await fs.readdir(base,{withFileTypes:true});const list=[];for(const d of dirs){if(!d.isDirectory())continue;const p=path.join(base,d.name,'codex.exe');if(await exists(p))list.push({p,mtime:(await fs.stat(p)).mtimeMs});}list.sort((a,b)=>b.mtime-a.mtime);if(list.length)return list[0].p;}catch{}
   const npm=path.join(process.env.APPDATA||path.join(os.homedir(),'AppData','Roaming'),'npm','node_modules','@openai');

@@ -1,10 +1,10 @@
 # 余量 · Subscription Lens
 
-面向 **Codex 套餐用户**的 Windows 桌面应用：查看还剩多少额度、哪些项目消耗了 Tokens，并推荐一套能将额度用到下次重置前的模型使用配比；同时比较已记录用量按 API 价格估算后与套餐实付的差额。无需 API Key。
+面向 Windows 与 Apple Silicon Mac 上 **Codex 套餐用户**的桌面应用：查看还剩多少额度、哪些项目消耗了 Tokens，并推荐一套能将额度用到下次重置前的模型使用配比；同时比较已记录用量按 API 价格估算后与套餐实付的差额。无需 API Key。
 
 [English](../README.md) · [简体中文](README.zh-CN.md) · [Nederlands](README.nl.md)
 
-> **3.0 代际预览版。** `3.0.0-beta.1` 是从 1.6.x 稳定版本线跳到的新一代版本。此前公开版本使用 Electron 桌面应用；本版本继续沿用 Electron 界面，并把兼容 CC Switch 的路由运行时直接打包进应用。这不是从 Tauri 迁移而来的版本。测试预览版时请保留 1.6.5 作为回退版本。
+> **3.0 代际预览版。** `3.0.0-beta.2` 为基于 Electron 的 3.0 预览版新增 Apple Silicon macOS 构建，并内嵌兼容 CC Switch 的路由运行时。这不是从 Tauri 迁移而来的版本。测试预览版时请保留 1.6.5 作为回退版本。
 
 ## 主要功能
 
@@ -26,7 +26,7 @@
 
 ### 3.0 预览版：Codex 供应商路由
 
-3.0 预览版新增“路由”页面：可导入当前 Codex 配置并识别登录态，也可通过 DeepSeek、Qwen、Moonshot／Kimi、OpenRouter 模板自动填充地址、模型和环境变量。API Key 可以直接在应用内填写，并由 Windows 安全存储加密；高级协议设置按需展开，支持编辑、地址即时校验和保存并测试。内嵌的 CC Switch 运行时负责本机代理接管、恢复、供应商热切换，以及 Responses／Chat 协议转换。首次接入本机 Router 需要重启一次 Codex，之后可在应用内一键切换供应商，不再重启 Codex GUI／CLI。停止路由、切回 OpenAI Official 或退出程序时，Subscription Lens 会恢复接管前快照。已有 ChatGPT 登录态的旧会话继续使用官方模型标识，代理在转发时映射到选定的兼容上游模型。
+3.0 预览版新增“路由”页面：可导入当前 Codex 配置并识别登录态，也可通过 DeepSeek、Qwen、Moonshot／Kimi、OpenRouter 模板自动填充地址、模型和环境变量。API Key 可以直接在应用内填写，并由操作系统安全存储加密；高级协议设置按需展开，支持编辑、地址即时校验和保存并测试。内嵌的 CC Switch 运行时负责本机代理接管、恢复、供应商热切换，以及 Responses／Chat 协议转换。首次接入本机 Router 需要重启一次 Codex，之后可在应用内一键切换供应商，不再重启 Codex GUI／CLI。停止路由、切回 OpenAI Official 或退出程序时，Subscription Lens 会恢复接管前快照。已有 ChatGPT 登录态的旧会话继续使用官方模型标识，代理在转发时映射到选定的兼容上游模型。
 
 Codex 总览会结合当前额度窗口内的模型历史与平均额度速度，推荐下个重置前的模型使用比例，并标注可信度。由于 OpenAI 未公布各模型对应套餐额度的精确权重，该建议使用 API 等价强度持续校准，不承诺精确耗尽额度。
 
@@ -40,29 +40,35 @@ Codex 总览会结合当前额度窗口内的模型历史与平均额度速度�
 
 ## 下载与快速开始
 
-**3.0.0-beta.1 预览版 · Windows x64。** 这是继 1.6.x 稳定版本线之后的首个 3.0 代际版本。当前采集器尚未完整适配所有客户端记录格式，汇总可能偏高或偏低；费用是估算值，不是账单或保证节省的金额。安装包未做代码签名，暂不支持自动更新。
+**3.0.0-beta.2 预览版 · macOS Apple Silicon。** 需要 M 系列 Mac 与 macOS 13 或更高版本。当前采集器尚未完整适配所有客户端记录格式，汇总可能偏高或偏低；费用是估算值，不是账单或保证节省的金额。暂不支持自动更新。
 
-[下载 3.0.0-beta.1](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0-beta.1)
+[下载 3.0.0-beta.2](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0-beta.2)
 
-常规安装请下载 `Subscription-Lens-3.0.0-beta.1-installer-x64.exe`。先关闭 Subscription Lens，运行安装器；如果是覆盖升级，请保留原安装目录（例如 `D:\SubLens`）。因为这是代际跳跃版本，请在确认预览版稳定前保留 1.6.5 或备份其数据。免安装副本请使用 `Subscription-Lens-3.0.0-beta.1-electron-x64.zip`，解压到单独目录后运行 `Subscription Lens.exe`，它不会更新已安装版本。
+### 在 macOS 上安装
 
-1. 从 GitHub Releases 下载安装包；首次安装或升级均运行 `Subscription-Lens-3.0.0-beta.1-installer-x64.exe`。
-2. 首次打开点击“开始监测”；自定义 Codex Home 可点“选择目录”。目录应包含 `sessions` 或 `archived_sessions`。
-3. 在“连接”中点击“连接账户”。应用使用本机 Codex 的官方登录；未登录时按按钮打开浏览器登录。
-4. 在“设置”中填写账期起止、套餐实付与额外额度（USD）。结束日期不含当天；可选手动日期或按续费日自动滚动。
-5. 托盘运行、开机启动、深浅主题均在“设置”中配置。
-6. 在“设置 → 语言”选择简体中文、English 或 Nederlands，点击“保存”立即应用。默认跟随系统，其他系统语言使用英语；重启后保留选择。
+1. 下载 `Subscription-Lens-3.0.0-beta.2-arm64.dmg`，打开后将 **Subscription Lens** 拖入“应用程序”。ZIP 中是同一个应用，适合希望直接解压使用的用户。
+2. 本预览版使用本机临时签名，尚未经过 Apple 公证，因此 macOS 可能提示“无法验证开发者”。请在“应用程序”中按住 Control 点击 **Subscription Lens**，选择“打开”，然后再次确认“打开”；通常只需在首次启动时确认一次。
+3. 如果仍被阻止，请打开“系统设置 → 隐私与安全性”，向下找到 Subscription Lens 的安全提示，点击“仍要打开”，完成认证后再次确认。不要全局关闭 Gatekeeper。
+4. 打开前可使用同一 Release 中的 `SHA256SUMS.txt` 核对下载文件。
+
+**Windows 用户：**当前 x64 安装包和便携 ZIP 请继续使用 [3.0.0-beta.1](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0-beta.1)。确认 3.0 预览版稳定前，请保留 1.6.5 或备份其数据。
+
+1. 首次打开点击“开始监测”；自定义 Codex Home 可点“选择目录”。目录应包含 `sessions` 或 `archived_sessions`。
+2. 在“连接”中点击“连接账户”。应用使用本机 Codex 的官方登录；未登录时按按钮打开浏览器登录。
+3. 在“设置”中填写账期起止、套餐实付与额外额度（USD）。结束日期不含当天；可选手动日期或按续费日自动滚动。
+4. 托盘运行、开机启动、深浅主题均在“设置”中配置。
+5. 在“设置 → 语言”选择简体中文、English 或 Nederlands，点击“保存”立即应用。默认跟随系统，其他系统语言使用英语；重启后保留选择。
 
 主工作台从 760×560 窗口起即可完整使用。Codex 首屏同时显示套餐状态、账期对比和供应商／模型分布；中等窗口用标签收纳趋势和项目，高窗口会自动展开更多内容，并保留当前来源和时间范围。
 
-不需要 API Key、Node、Python 或 Docker。查询账户额度需要本机安装 Codex；找不到程序时可选择 `codex.exe`。仅查看本地 Token 明细不依赖账户查询。
+不需要 API Key、Node、Python 或 Docker。查询账户额度需要本机安装 Codex；找不到程序时可手动选择 Codex 可执行程序（Windows 为 `codex.exe`，macOS 通常为 `codex`）。仅查看本地 Token 明细不依赖账户查询。
 
 <details>
 <summary>使用细节与快捷键</summary>
 
 - **工作前看额度。** 首页优先显示账户余量与距重置时间。预测至少需要同一账户、同一窗口、同一重置周期的 3 次观测、15 分钟及可测量变化；会使用当前额度窗口内已保留的全部观测，按整个窗口的平均速度推算，不再局限于最近两小时。超过三分钟的旧数据、重置或计数回退不会沿用旧预测。预测假设本窗口平均速度持续，不是保证；不会用本机 Tokens 猜套餐额度。
 - **工作中用专注窗口。** Ctrl+Shift+M 切换小窗口，可选置顶；Esc 返回。启用托盘后单击托盘图标打开小窗口。
-- **按需开启额度提醒。** 剩余20%、5%及观测到额度恢复时提醒；同一账户窗口去重。默认免打扰为本地22:00–08:00。需保持应用运行，Windows 通知设置可能抑制系统提示。
+- **按需开启额度提醒。** 剩余20%、5%及观测到额度恢复时提醒；同一账户窗口去重。默认免打扰为本地22:00–08:00。需保持应用运行，操作系统的通知设置可能抑制系统提示。
 - **工作后定位任务。** 点击项目或图表日期进入会话，按费用或最近活动排序，再查看具体记录。Ctrl+K 搜索。子任务标记只表示关系，其费用仅为本任务用量，不重复合入父任务。
 - **续费日自动滚动。** 设置每月续费日，短月份使用最后一天而不改变原续费日。套餐实付按月沿用；额外实付仅用于当期。旧用户默认保留手动账期，需主动开启自动续期。
 - **核对数据质量。** 查看未计价原因、解析异常、价格日期，并直接进入对应明细或来源。计价覆盖率不等于账户历史完整率；对比时段为前一等长连续区间，不是月末预测。
@@ -86,13 +92,13 @@ Codex 总览会结合当前额度窗口内的模型历史与平均额度速度�
 
 ## 本地存储
 
-默认保存于 `%APPDATA%\Subscription Lens`，包含本应用的 SQLite 账本及设置。卸载默认保留此数据。不会删除或改写 Codex 记录。
+Windows 默认保存于 `%APPDATA%\Subscription Lens`，macOS 默认保存于 `~/Library/Application Support/Subscription Lens`，包含本应用的 SQLite 账本及设置。移除应用默认保留此数据。不会删除或改写 Codex 记录。
 
 高级部署可设置 `LENS_DATA_DIR` 指向自己的数据目录；便携 ZIP 默认仍使用标准用户数据目录。不要把同一正在运行的数据库放在同步盘上供多设备同时写入。
 
 ## 常见问题
 
-- **未找到 Codex**：安装官方 Codex，或在“连接”页选择已有 `codex.exe`。
+- **未找到 Codex**：安装官方 Codex，或在“连接”页选择已有的 Codex 可执行程序。
 - **未登录**：点击“登录 ChatGPT”。登录由官方 Codex 管理，本应用不要求粘贴 Cookie 或令牌。
 - **历史快照**：未连接账户或最新查询不可用；显示记录中的最近额度。到达重置时间后显示待刷新。
 - **断开**：只停止本应用查询，不退出你的 Codex 账户。
@@ -101,7 +107,7 @@ Codex 总览会结合当前额度窗口内的模型历史与平均额度速度�
 
 ## 当前范围与下一版计划
 
-当前支持 Windows 上的 Codex 套餐与多供应商本地记录；普通 ChatGPT 聊天和其他设备用量不自动采集。尚未完整覆盖 CodexBar 与 codex-usage 的 Codex 功能。
+当前支持 Windows 与 Apple Silicon macOS 上的 Codex 套餐与多供应商本地记录；普通 ChatGPT 聊天和其他设备用量不自动采集。尚未完整覆盖 CodexBar 与 codex-usage 的 Codex 功能。
 
 1.4 已加入 Qwen Code、Kimi Code、CodeBuddy Code 的只读连接器，并识别经 Claude Code、CC Switch 或兼容网关使用的 GLM、通义、Kimi、MiniMax、DeepSeek。旧版格式、套餐额度／积分接口及更多国产工具继续按[验收范围](DOMESTIC-COMPATIBILITY.md)推进。
 
@@ -109,7 +115,7 @@ Codex 总览会结合当前额度窗口内的模型历史与平均额度速度�
 
 ## 源码构建与参与贡献
 
-使用 Windows x64 和 Node.js 24，依赖版本固定在 package-lock.json。界面测试、翻译维护及实验性统计引擎说明见[贡献指南](../CONTRIBUTING.md)。真实账户测试仅供手动运行。
+使用 Node.js 24；Apple Silicon macOS 构建还需要 Rust 1.95 与 Xcode Command Line Tools，用于编译内嵌的 CC Switch Router。依赖版本固定在 package-lock.json。界面测试、翻译维护及实验性统计引擎说明见[贡献指南](../CONTRIBUTING.md)。真实账户测试仅供手动运行。
 
 ```powershell
 npm ci
@@ -117,6 +123,8 @@ npm test
 npm start
 npm run dist
 ```
+
+在 Apple Silicon Mac 上先执行 `git submodule update --init --recursive`，再运行 `npm run dist`，会生成本机临时签名的 arm64 DMG 与 ZIP；Windows 仍生成现有的 x64 NSIS 与 ZIP。
 
 ## 开发与致谢
 

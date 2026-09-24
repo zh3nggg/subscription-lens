@@ -5,12 +5,12 @@
     "checksums": "SHA256SUMS.txt"
   },
   "preview": {
-    "version": "3.0.0-beta.1",
-    "path": "subscription-lens-3.0.0-beta.1-preview",
+    "version": "3.0.0-beta.2",
+    "path": "subscription-lens-3.0.0-beta.2-preview",
     "checksums": "SHA256SUMS.txt"
   },
   "fallback": null,
   "policy": "Keep exactly the latest verified stable and preview; retain a fallback only while no preview exists.",
-  "updatedAt": "2026-09-22T00:49:05.333Z",
+  "updatedAt": "2026-09-22T14:35:26.398Z",
   "note": "Stable and preview slots retained."
 }
