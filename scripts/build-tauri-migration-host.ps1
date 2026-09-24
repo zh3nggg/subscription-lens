@@ -1,5 +1,5 @@
 param(
-  [ValidateSet("check", "build")]
+  [ValidateSet("check", "build", "release")]
   [string]$Action = "check",
   [string]$TargetDir = "$env:TEMP\subscription-lens-tauri-target"
 )
@@ -74,7 +74,22 @@ try {
   Set-Content -LiteralPath $providerIndex -Value $providerHtml -Encoding UTF8 -NoNewline
   Push-Location $hostDir
   try {
-    & $cargo @args
+    if ($Action -eq "release") {
+      $tauriCli = Join-Path $runtimeDir "node_modules\@tauri-apps\cli\tauri.js"
+      if (-not (Test-Path -LiteralPath $tauriCli)) {
+        throw "The pinned CC Switch Tauri CLI is missing. Run pnpm install in native/cc-switch-runtime."
+      }
+      $previousTargetDir = $env:CARGO_TARGET_DIR
+      $env:CARGO_TARGET_DIR = $TargetDir
+      try {
+        & node $tauriCli build --bundles nsis --ci --runner $cargo
+      } finally {
+        if ($null -eq $previousTargetDir) { Remove-Item Env:CARGO_TARGET_DIR -ErrorAction SilentlyContinue }
+        else { $env:CARGO_TARGET_DIR = $previousTargetDir }
+      }
+    } else {
+      & $cargo @args
+    }
     if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
   } finally {
     Pop-Location

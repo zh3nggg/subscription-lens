@@ -1,10 +1,10 @@
 # 余量 · Subscription Lens
 
-面向 Windows 与 Apple Silicon Mac 上 **Codex 套餐用户**的桌面应用：查看还剩多少额度、哪些项目消耗了 Tokens，并推荐一套能将额度用到下次重置前的模型使用配比；同时比较已记录用量按 API 价格估算后与套餐实付的差额。无需 API Key。
+面向 Windows 与 Apple Silicon Mac 上 **Codex 套餐用户**的桌面应用：查看还剩多少额度、哪些项目消耗了 Tokens，并推荐一套能将额度用到下次重置前的模型使用配比；同时比较已记录用量按 API 价格估算后与套餐实付的差额。本地统计无需 API Key；使用第三方路由时需提供所选供应商的凭据。
 
 [English](../README.md) · [简体中文](README.zh-CN.md) · [Nederlands](README.nl.md)
 
-> **3.0 代际预览版。** `3.0.0-beta.2` 为基于 Electron 的 3.0 预览版新增 Apple Silicon macOS 构建，并内嵌兼容 CC Switch 的路由运行时。这不是从 Tauri 迁移而来的版本。测试预览版时请保留 1.6.5 作为回退版本。
+> **3.0.0：首个真正稳定可用的多供应商版本。** Windows x64 版已迁移到 Tauri，并内嵌固定版本的 CC Switch 原版供应商管理器和原生路由运行时，无需单独安装 CC Switch。此前公开版本使用 Electron；Apple Silicon macOS 目前仍为 Electron 架构的 `3.0.0-beta.2` 预览版。
 
 ## 主要功能
 
@@ -24,21 +24,25 @@
 
 供应商和模型饼图还会显示所选时间段的平均每百万 Tokens 成本。分母只包含已计价 Tokens；未计价用量仍会显示，但不会被纳入平均值。
 
-### 3.0 预览版：Codex 供应商路由
+### 3.0.0：Codex 供应商路由
 
-3.0 预览版新增“路由”页面：可导入当前 Codex 配置并识别登录态，也可通过 DeepSeek、Qwen、Moonshot／Kimi、OpenRouter 模板自动填充地址、模型和环境变量。API Key 可以直接在应用内填写，并由操作系统安全存储加密；高级协议设置按需展开，支持编辑、地址即时校验和保存并测试。内嵌的 CC Switch 运行时负责本机代理接管、恢复、供应商热切换，以及 Responses／Chat 协议转换。首次接入本机 Router 需要重启一次 Codex，之后可在应用内一键切换供应商，不再重启 Codex GUI／CLI。停止路由、切回 OpenAI Official 或退出程序时，Subscription Lens 会恢复接管前快照。已有 ChatGPT 登录态的旧会话继续使用官方模型标识，代理在转发时映射到选定的兼容上游模型。
+Windows 3.0.0 的“路由”页面直接打开内嵌的 CC Switch 原版供应商管理器。新增和编辑供应商、高级选项、模型映射、连接测试、切换，以及 OpenAI Official 的独立授权，均通过 CC Switch 自己的界面、命令和数据库完成。本机代理接管、恢复、回滚及 Responses／Chat 协议转换也沿用其原有实现；任务和回复仍在 Codex GUI／CLI 中进行。切换供应商后，已打开的 Codex 会话可能保留旧模型或认证状态，请新建会话使用新路由。
 
 Codex 总览会结合当前额度窗口内的模型历史与平均额度速度，推荐下个重置前的模型使用比例，并标注可信度。由于 OpenAI 未公布各模型对应套餐额度的精确权重，该建议使用 API 等价强度持续校准，不承诺精确耗尽额度。
 
 ### CC Switch 版权与来源
 
-3.0 路由功能嵌入了 [CC Switch](https://github.com/farion1231/cc-switch) 的部分组件，固定使用提交 `06082e189d65e6d6dbadc35dacdac1ce6c79d89a`。供应商、代理接管、恢复、协议转换运行时，以及 Codex 供应商预设目录和预设选择交互，均源自 CC Switch，并继续遵循其 MIT 许可。版权所有 © 2025 Jason Young。完整来源和许可边界见[第三方开源说明](../THIRD-PARTY-NOTICES.md)。
+Windows 3.0.0 复用了 [CC Switch](https://github.com/farion1231/cc-switch) 的原版供应商管理界面，以及供应商配置、OAuth、代理接管、恢复和协议转换等原生运行时，固定使用提交 `06082e189d65e6d6dbadc35dacdac1ce6c79d89a`。这些组件继续遵循 MIT 许可；版权所有 © 2025 Jason Young。发行包附带上游许可和[第三方开源说明](../THIRD-PARTY-NOTICES.md)。双方项目没有隶属关系。
 
 ![Subscription Lens 中文多供应商总览](images/providers.zh-CN.png)
 
 *界面截图使用合成数据，不含真实账户或对话信息。*
 
 ## 下载与快速开始
+
+**Windows 3.0.0 · x64。** 这是首个供应商管理与切换流程真正稳定可用的多供应商版本。下载 [Windows 3.0.0](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0)：常规安装使用 `Subscription-Lens-3.0.0-installer-x64.exe`；便携版使用 `Subscription-Lens-3.0.0-x64.zip`。两者都内嵌 CC Switch。升级前请关闭旧程序；从 Electron 改为 Tauri，建议备份原有数据，需要方便回退时安装到独立目录。
+
+**macOS Apple Silicon：** 以下 `3.0.0-beta.2` 仍为 Electron 预览版，与 Windows 3.0.0 的 Tauri 运行时不同。
 
 **3.0.0-beta.2 预览版 · macOS Apple Silicon。** 需要 M 系列 Mac 与 macOS 13 或更高版本。当前采集器尚未完整适配所有客户端记录格式，汇总可能偏高或偏低；费用是估算值，不是账单或保证节省的金额。暂不支持自动更新。
 
@@ -51,7 +55,7 @@ Codex 总览会结合当前额度窗口内的模型历史与平均额度速度�
 3. 如果仍被阻止，请打开“系统设置 → 隐私与安全性”，向下找到 Subscription Lens 的安全提示，点击“仍要打开”，完成认证后再次确认。不要全局关闭 Gatekeeper。
 4. 打开前可使用同一 Release 中的 `SHA256SUMS.txt` 核对下载文件。
 
-**Windows 用户：**当前 x64 安装包和便携 ZIP 请继续使用 [3.0.0-beta.1](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0-beta.1)。确认 3.0 预览版稳定前，请保留 1.6.5 或备份其数据。
+**Windows 用户：**请使用上方的 [3.0.0 正式版](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0)。
 
 1. 首次打开点击“开始监测”；自定义 Codex Home 可点“选择目录”。目录应包含 `sessions` 或 `archived_sessions`。
 2. 在“连接”中点击“连接账户”。应用使用本机 Codex 的官方登录；未登录时按按钮打开浏览器登录。
@@ -115,13 +119,16 @@ Windows 默认保存于 `%APPDATA%\Subscription Lens`，macOS 默认保存于 `~
 
 ## 源码构建与参与贡献
 
-使用 Node.js 24；Apple Silicon macOS 构建还需要 Rust 1.95 与 Xcode Command Line Tools，用于编译内嵌的 CC Switch Router。依赖版本固定在 package-lock.json。界面测试、翻译维护及实验性统计引擎说明见[贡献指南](../CONTRIBUTING.md)。真实账户测试仅供手动运行。
+Windows 3.0.0 的 Tauri 构建需要 Node.js 24、Rust 和 pnpm，并需初始化 CC Switch 子模块；构建脚本会编译内嵌的原版管理界面与 Rust 运行时。Apple Silicon macOS 的 Electron 预览版另需 Rust 1.95 与 Xcode Command Line Tools，用于编译内嵌 Router。界面测试、翻译维护及实验性统计引擎说明见[贡献指南](../CONTRIBUTING.md)。真实账户测试仅供手动运行。
 
 ```powershell
 npm ci
 npm test
-npm start
-npm run dist
+git submodule update --init --recursive
+cd native/cc-switch-runtime
+pnpm install --frozen-lockfile
+cd ../..
+.\scripts\build-tauri-migration-host.ps1 -Action release
 ```
 
 在 Apple Silicon Mac 上先执行 `git submodule update --init --recursive`，再运行 `npm run dist`，会生成本机临时签名的 arm64 DMG 与 ZIP；Windows 仍生成现有的 x64 NSIS 与 ZIP。

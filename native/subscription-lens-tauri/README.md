@@ -49,5 +49,6 @@ From the repository root, the same check can be run with
 when a local executable is needed.
 
 The verified debug executable is written to the selected target directory as
-`debug/subscription-lens-tauri.exe`; it is not an installer and is not yet the
-release artifact.
+`debug/subscription-lens-tauri.exe`. For a Windows NSIS release build, run
+`scripts/build-tauri-migration-host.ps1 -Action release -TargetDir <target>`.
+The release bundle contains the CC Switch MIT license and third-party notice.

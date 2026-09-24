@@ -1,7 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Subscription Lens",
-  "version": "3.0.0-beta.2",
+  "version": "3.0.0",
   "identifier": "com.subscriptionlens.desktop",
   "build": {
     "frontendDist": "frontend"
@@ -17,8 +17,7 @@
         "minHeight": 640,
         "visible": true,
         "resizable": true,
-        "center": true,
-        "dataDirectory": "webview"
+        "center": true
       }
     ],
     "security": {
@@ -37,7 +36,12 @@
     }
   },
   "bundle": {
-    "active": false,
+    "active": true,
+    "targets": ["nsis"],
+    "resources": {
+      "../../THIRD-PARTY-NOTICES.md": "THIRD-PARTY-NOTICES.md",
+      "../cc-switch-runtime/LICENSE": "licenses/CC-Switch-MIT.txt"
+    },
     "icon": [
       "icons/32x32.png",
       "icons/128x128.png",

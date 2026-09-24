@@ -1,10 +1,10 @@
 # Subscription Lens
 
-Een desktopapp voor **Codex-abonnees** op Windows en Apple Silicon Macs die hun resterende limieten willen bekijken, willen zien welke projecten tokens gebruiken en een modelmix willen kiezen die de limiet tot de volgende reset laat meegaan. De app vergelijkt ook vastgelegd gebruik tegen API-tarieven met de abonnementsbetaling. Geen API-sleutel nodig.
+Een desktopapp voor **Codex-abonnees** op Windows en Apple Silicon Macs die hun resterende limieten willen bekijken, willen zien welke projecten tokens gebruiken en een modelmix willen kiezen die de limiet tot de volgende reset laat meegaan. De app vergelijkt ook vastgelegd gebruik tegen API-tarieven met de abonnementsbetaling. Voor lokale statistieken is geen API-sleutel nodig; routering via een externe provider gebruikt diens inloggegevens.
 
 [English](../README.md) · [简体中文](README.zh-CN.md) · [Nederlands](README.nl.md)
 
-> **3.0-generatie-preview.** `3.0.0-beta.2` voegt een Apple Silicon macOS-build toe aan de Electron-gebaseerde 3.0-preview en bundelt de CC Switch-compatibele routeringsruntime. Dit is geen migratie vanaf Tauri. Houd 1.6.5 beschikbaar als terugval tijdens het testen.
+> **3.0.0: de eerste betrouwbaar bruikbare versie met meerdere providers.** De Windows x64-app gebruikt nu Tauri en bevat de originele CC Switch-providerbeheerder en routeringsruntime; een afzonderlijke CC Switch-installatie is niet nodig. Eerdere publieke versies gebruikten Electron. De Apple Silicon-versie voor macOS blijft voorlopig de Electron-preview `3.0.0-beta.2`.
 
 ## Wat kun je ermee?
 
@@ -24,21 +24,25 @@ Verbind Qwen Code, Kimi Code, CodeBuddy Code, Qoder, CC Switch, Claude Code, Gem
 
 De diagrammen per aanbieder en model tonen ook de gemiddelde kosten per 1M tokens voor de geselecteerde periode. Alleen tokens met een prijs vormen de noemer; ongeprijsd gebruik blijft zichtbaar maar telt niet mee in het gemiddelde.
 
-### Codex-providerroutering in de 3.0-preview
+### Codex-providerroutering in 3.0.0
 
-De 3.0-preview voegt een pagina **Leveranciers** toe: importeer de huidige Codex-configuratie en herken de inlogsessie, of kies een DeepSeek-, Qwen-, Moonshot/Kimi- of OpenRouter-sjabloon om endpoint, model en omgevingsvariabele automatisch in te vullen. API-sleutels kunnen direct in de app worden ingevoerd en worden versleuteld opgeslagen met de beveiligde opslag van het besturingssysteem. Geavanceerde protocolinstellingen verschijnen alleen wanneer nodig; bewerken, directe endpointvalidatie en opslaan en testen zijn beschikbaar. Voor het wisselen wordt automatisch een back-up gemaakt en Codex kan via een lokale router worden gestuurd. Taken en antwoorden blijven in Codex GUI/CLI; Subscription Lens beheert de route en gebruiksregistratie. Providers met Responses API kunnen rechtstreeks worden gebruikt; alleen Chat Completions vereist nog een protocoladapter.
+In Windows 3.0.0 opent de pagina **Route** de originele, ingebouwde CC Switch-providerbeheerder. Providers toevoegen en bewerken, geavanceerde opties, modeltoewijzingen, verbindingstests, wisselen en afzonderlijke autorisatie voor OpenAI Official verlopen via de eigen interface, opdrachten en database van CC Switch. Ook de lokale proxy, herstel, terugdraaien en omzetting tussen Responses en Chat gebruiken de oorspronkelijke implementatie. Taken en antwoorden blijven in Codex GUI/CLI. Een al geopend Codex-gesprek kan het vorige model of de vorige autorisatie behouden; begin na het wisselen een nieuw gesprek.
 
 Geïnstalleerde tools in standaardmappen worden automatisch gevonden en kunnen samen worden verbonden; aangepaste locaties blijven beschikbaar. Het Codex-overzicht adviseert een modelmix op basis van de modelhistorie en het gemiddelde quotatempo in het actieve venster. Omdat OpenAI geen exacte quotagewichten per model publiceert, toont het advies de betrouwbaarheid en blijft het zichzelf kalibreren.
 
 ### CC Switch: bron en copyright
 
-De routeringsfunctie van versie 3.0 bundelt geselecteerde componenten uit [CC Switch](https://github.com/farion1231/cc-switch), vastgezet op commit `06082e189d65e6d6dbadc35dacdac1ce6c79d89a`. De provider-, proxy-, takeover-, herstel- en protocolconversieruntime, plus de Codex-providerpresets en presetkiezer, zijn hiervan afgeleid en blijven onder de MIT-licentie vallen. Copyright © 2025 Jason Young. Zie de [meldingen van derden](../THIRD-PARTY-NOTICES.md) voor de volledige bron- en licentiegrenzen.
+Windows 3.0.0 hergebruikt de originele providerbeheerinterface van [CC Switch](https://github.com/farion1231/cc-switch), evenals de native runtime voor providerconfiguratie, OAuth, proxy-overname, herstel en protocolconversie, vastgezet op commit `06082e189d65e6d6dbadc35dacdac1ce6c79d89a`. Deze componenten blijven onder de MIT-licentie vallen; copyright © 2025 Jason Young. De distributie bevat de upstreamlicentie en [meldingen van derden](../THIRD-PARTY-NOTICES.md). De projecten zijn niet aan elkaar verbonden.
 
 ![Subscription Lens-overzicht in het Nederlands](images/providers.nl-NL.png)
 
 *Het overzicht toont synthetische gegevens, geen echte account- of gespreksgegevens.*
 
 ## Downloaden en aan de slag
+
+**Windows 3.0.0 · x64.** Dit is de eerste versie waarin providerbeheer en wisselen betrouwbaar bruikbaar zijn. Download [Windows 3.0.0](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0): gebruik `Subscription-Lens-3.0.0-installer-x64.exe` voor installatie of `Subscription-Lens-3.0.0-x64.zip` als draagbare versie. Beide bevatten CC Switch. Sluit de oude app voor de upgrade. Omdat de runtime van Electron naar Tauri verandert, is een back-up van de bestaande gegevens verstandig; installeer in een aparte map als je eenvoudig wilt kunnen terugkeren.
+
+**macOS Apple Silicon:** `3.0.0-beta.2` hieronder blijft een Electron-preview en gebruikt nog niet de Tauri-runtime van Windows 3.0.0.
 
 **3.0.0-beta.2 Preview · macOS Apple Silicon.** Vereist een Mac met M-chip en macOS 13 of nieuwer. De collector verwerkt nog niet alle recordformaten volledig; totalen kunnen te hoog of te laag zijn. Kosten zijn schattingen, geen factuur of gegarandeerde besparing. Automatische updates zijn niet beschikbaar.
 
@@ -51,7 +55,7 @@ De routeringsfunctie van versie 3.0 bundelt geselecteerde componenten uit [CC Sw
 3. Als macOS de app nog blokkeert, open je **Systeeminstellingen → Privacy en beveiliging**, zoek je de melding voor Subscription Lens en kies je **Toch openen**. Verifieer je identiteit en bevestig **Open**. Schakel Gatekeeper niet wereldwijd uit.
 4. Je kunt de download vooraf controleren met `SHA256SUMS.txt` uit dezelfde release.
 
-**Windows-gebruikers:** gebruik voor het huidige x64-installatiebestand en de draagbare ZIP nog [3.0.0-beta.1](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0-beta.1). Bewaar 1.6.5 of een gegevensback-up totdat de 3.0-preview is gecontroleerd.
+**Windows-gebruikers:** gebruik de [stabiele 3.0.0-release](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0) hierboven.
 
 1. Kies **Monitoring starten** voor de standaardmap van Codex, of **Map kiezen** voor een eigen map met `sessions` of `archived_sessions`.
 2. Open **Verbindingen → Account verbinden** om limieten op te halen via de lokaal geïnstalleerde Codex. Gebruik **Aanmelden bij ChatGPT** als je nog niet bent aangemeld.
@@ -99,16 +103,19 @@ Versie 1.4 voegt read-only connectors voor Qwen Code, Kimi Code en CodeBuddy Cod
 
 ## Zelf bouwen en bijdragen
 
-Gebruik Node.js 24. Voor de Apple Silicon macOS-build zijn ook Rust 1.95 en de Xcode Command Line Tools nodig om de ingebouwde CC Switch-router te compileren. Afhankelijkheden zijn vastgelegd in package-lock.json. Zie [CONTRIBUTING.md](../CONTRIBUTING.md) voor synthetische interfacetests, vertalingen en de experimentele engine. De test met een echt account is uitsluitend voor handmatig gebruik.
+Voor de Tauri-build van Windows 3.0.0 zijn Node.js 24, Rust, pnpm en de geïnitialiseerde CC Switch-submodule nodig. Het buildscript compileert de originele beheerinterface en Rust-runtime. De Electron-preview voor Apple Silicon macOS vereist daarnaast Rust 1.95 en Xcode Command Line Tools voor de ingebouwde router. Zie [CONTRIBUTING.md](../CONTRIBUTING.md) voor tests en vertalingen. De test met een echt account is uitsluitend handmatig.
 
 ```powershell
 npm ci
 npm test
-npm start
-npm run dist
+git submodule update --init --recursive
+cd native/cc-switch-runtime
+pnpm install --frozen-lockfile
+cd ../..
+.\scripts\build-tauri-migration-host.ps1 -Action release
 ```
 
-Voer op een Apple Silicon Mac eerst `git submodule update --init --recursive` uit. Daarna maakt `npm run dist` lokaal ad-hoc ondertekende arm64 DMG- en ZIP-pakketten. Windows behoudt de bestaande x64 NSIS- en ZIP-doelen.
+Op een Apple Silicon Mac maakt `npm run dist` voorlopig nog de ad-hoc ondertekende Electron DMG- en ZIP-pakketten. De bovenstaande PowerShell-opdracht bouwt de Windows Tauri-versie.
 
 ## Ontwikkeling en dankwoord
 

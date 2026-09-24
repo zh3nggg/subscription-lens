@@ -19,7 +19,7 @@ This source is included for the next accounting-engine integration. Version 1.4.
 
 ## Desktop runtime
 
-Electron and Chromium license notices are included in the Windows binary distribution as `LICENSE.electron.txt` and `LICENSES.chromium.html`. Development dependencies and versions are recorded in package-lock.json. The application itself is licensed under MIT; upstream code retains its own notices.
+The Windows 3.0.0 app uses Tauri and WebView2. Earlier Electron distributions include Electron and Chromium license notices as `LICENSE.electron.txt` and `LICENSES.chromium.html`. Development dependencies and versions are recorded in package-lock.json. The application itself is licensed under MIT; upstream code retains its own notices.
 
 ## CC Switch — provider manager and routing runtime
 

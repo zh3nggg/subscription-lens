@@ -1,7 +1,7 @@
 {
   "stable": {
-    "version": "2.0.0",
-    "path": "subscription-lens-2.0.0-stable",
+    "version": "3.0.0",
+    "path": "subscription-lens-3.0.0-stable",
     "checksums": "SHA256SUMS.txt"
   },
   "preview": {
@@ -11,6 +11,6 @@
   },
   "fallback": null,
   "policy": "Keep exactly the latest verified stable and preview; retain a fallback only while no preview exists.",
-  "updatedAt": "2026-09-22T14:35:26.398Z",
+  "updatedAt": "2026-09-24T08:34:17.945Z",
   "note": "Stable and preview slots retained."
 }

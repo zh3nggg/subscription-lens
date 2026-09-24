@@ -1,10 +1,10 @@
 # Subscription Lens
 
-A Windows desktop app for **Codex subscription users** who want to see their remaining quota, understand which projects use their tokens, and choose a model mix that carries their quota to the next reset. It also compares recorded usage at API rates with the subscription payment. No API key is required.
+A desktop app for **Codex subscription users** on Windows and Apple Silicon Macs who want to see their remaining quota, understand which projects use their tokens, and choose a model mix that carries their quota to the next reset. It also compares recorded usage at API rates with the subscription payment. Monitoring needs no API key; third-party routing uses the chosen provider's credentials.
 
 [English](README.md) · [简体中文](docs/README.zh-CN.md) · [Nederlands](docs/README.nl.md)
 
-> **3.0 generation preview.** The published `3.0.0-beta.1` installer still uses the Electron desktop app. Development after beta.1 moves the runtime to Tauri and the pinned CC Switch backend, while retaining Subscription Lens's own sidebar, overview, quota, charts and project/session usage interface. CCS remains the single owner of provider accounts, switching, rollback and the local proxy. Keep 1.6.5 available as a fallback while evaluating previews.
+> **3.0.0 · first reliably usable multi-provider release.** The Windows x64 app now runs on Tauri and embeds the pinned CC Switch provider manager and native routing runtime. Provider accounts, authorization, switching, recovery and the local proxy use CC Switch's own implementation; Subscription Lens retains its monitoring interface. Earlier public Windows and macOS builds used Electron. The macOS Apple Silicon build remains at `3.0.0-beta.2` pending a separate Tauri release.
 
 ## What you can do
 
@@ -26,7 +26,7 @@ The provider and model charts also show average cost per 1M tokens for the selec
 
 ### Codex provider routing in the 3.0 generation
 
-The published beta.1 adds a **Providers** page for Codex routing. The next Tauri build keeps the Subscription Lens route page visually, while every provider operation opens the original CC Switch provider manager bundled in the same executable. OpenAI Official login uses the separately saved CCS Codex OAuth account; provider credentials, model catalogs, advanced settings, takeover, recovery, hot switching, rollback and Responses/Chat conversion all use the original CCS UI, command boundary and database. Subscription Lens does not keep a second provider store or overwrite CCS switch state. Codex GUI and CLI remain the task interface.
+In 3.0.0, the **Route** page opens the original CC Switch provider manager bundled in the same executable. Create and edit providers, configure advanced options and model mappings, authorize an OpenAI Official account separately through CC Switch, test connections and switch routes there. Provider credentials, model catalogs, takeover, recovery, local proxy, rollback and Responses/Chat conversion use the original CC Switch UI, commands and database. No separate CC Switch installation is required. Codex GUI and CLI remain the task interface. An already running Codex conversation may retain its previous model and authorization context; start a new conversation after switching providers.
 
 The Codex overview can recommend a model mix from the last 14 days of model usage and the current quota pace. It targets the next reset and shows its confidence. Because OpenAI does not publish an exact subscription-quota weight for each model, this is an adaptive recommendation based on API-equivalent intensity, not a guarantee.
 
@@ -40,11 +40,11 @@ The 3.0 routing feature embeds the original provider-manager renderer and select
 
 ## Download and get started
 
-**3.0.0-beta.1 Preview · Windows x64.** This is the first 3.0-generation preview after the 1.6.x stable line. The collector does not yet handle all client record formats; totals may be too high or too low. Costs are estimates, not a bill or guaranteed savings. The build is unsigned and has no automatic updater.
+**3.0.0 · Windows x64.** This is the first multi-provider version with a stable, usable provider management and switching path. The collector does not yet handle every client record format; totals may be too high or too low. Costs are estimates, not a bill or guaranteed savings. The build is unsigned and has no automatic updater.
 
-[Download 3.0.0-beta.1](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0-beta.1)
+[Download 3.0.0 for Windows](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0) · [macOS Apple Silicon preview](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0-beta.2)
 
-For a normal installation, use `Subscription-Lens-3.0.0-beta.1-installer-x64.exe`. Close Subscription Lens, run the installer, and keep the existing installation folder (for example, `D:\SubLens`) if you are upgrading. Because this is a major-generation jump, keep the 1.6.5 installation or its data backup until you have verified the preview. Use `Subscription-Lens-3.0.0-beta.1-electron-x64.zip` for a separate, no-install copy: extract it to its own folder and run `Subscription Lens.exe`; it does not update an installed copy.
+For a normal installation, use `Subscription-Lens-3.0.0-installer-x64.exe`. Close Subscription Lens before running it. This release replaces the Electron runtime with Tauri; keep a copy of your existing app data and install the new build in its own directory if you want an easy rollback. The portable `Subscription-Lens-3.0.0-x64.zip` includes the executable and third-party license notices; extract it before running. Neither package needs a separately installed CC Switch.
 
 1. Select **Start monitoring** to read the default Codex folder, or **Choose folder** for a custom folder containing `sessions` or `archived_sessions`.
 2. Open **Connections → Connect account** to query limits through your locally installed Codex. If signed out, use **Sign in to ChatGPT**.
@@ -53,7 +53,7 @@ For a normal installation, use `Subscription-Lens-3.0.0-beta.1-installer-x64.exe
 
 The main workspace is designed for windows from 760×560 upward. The Codex first view combines plan status, billing comparison and provider/model distribution. Medium windows place trends and projects in tabs; tall windows reveal them automatically without changing the current source or period.
 
-No API key, Node.js, Python or Docker is needed to run the app. Account queries require an installed Codex executable; local usage monitoring works without an account connection.
+No API key, Node.js, Python or Docker is needed for local usage monitoring. Third-party routing requires credentials from the chosen provider. Account queries require an installed Codex executable; local usage monitoring works without an account connection.
 
 <details>
 <summary>Usage details and shortcuts</summary>
@@ -72,9 +72,9 @@ Quota observations are stored locally while their quota window is active and for
 
 ## Data and estimates
 
-The app reads Codex records without changing them. It stores usage metadata, including project names, but not chat bodies. Authentication is managed by Codex; the app does not ask you to paste cookies or tokens.
+The app reads Codex records without changing them. It stores usage metadata, including project names, but not chat bodies. The monitoring connection uses Codex authentication. The embedded CC Switch manager separately stores provider credentials and OpenAI Official authorization added for routing; it does not ask for ChatGPT cookies.
 
-Data is saved in `%APPDATA%\Subscription Lens`. Uninstalling retains data by default. The portable ZIP uses the same user data location. Set `LENS_DATA_DIR` for a custom location. Do not share a live database between devices.
+Monitoring data is saved in `%APPDATA%\Subscription Lens`; the embedded CC Switch runtime also maintains its own local provider database. Uninstalling retains user data by default. Do not share a live database between devices.
 
 The bundled prices are the **2026-09-16 Standard USD snapshot**. These rates are applied to collected history, not historical prices at each event's time. Fast/Batch, regional surcharges and tool fees are not included. Unknown models or incomplete pricing remain unpriced. Updating the catalog recalculates existing records.
 
@@ -84,7 +84,7 @@ Local records and account summaries are shown separately, never added together. 
 
 ## Current scope and roadmap
 
-Supports Codex subscriptions and selected local multi-provider records on Windows. Regular ChatGPT conversations and other-device usage are not collected automatically. Full Codex feature parity with CodexBar and codex-usage is not complete.
+Supports Codex subscriptions and selected local multi-provider records on Windows, with a separate Apple Silicon macOS preview. Regular ChatGPT conversations and other-device usage are not collected automatically. Full Codex feature parity with CodexBar and codex-usage is not complete.
 
 Version 1.4 adds read-only Qwen Code, Kimi Code and CodeBuddy Code connectors, plus GLM, Qwen, Kimi, MiniMax and DeepSeek attribution through Claude Code, CC Switch or compatible gateways. Legacy formats, quota/credit interfaces and more domestic tools remain on the [acceptance roadmap](docs/DOMESTIC-COMPATIBILITY.md).
 
@@ -92,17 +92,17 @@ Version 1.4 adds read-only Qwen Code, Kimi Code and CodeBuddy Code connectors, p
 
 ## Build and contribute
 
-Use Windows x64 and Node.js 24. Electron dependencies are pinned in package-lock.json. The Tauri host also requires Rust and pnpm; its reproducible build applies the checked-in Subscription Lens host patch to the pinned CC Switch submodule, builds the native React renderer, then compiles the same CCS Rust runtime. See [CONTRIBUTING.md](CONTRIBUTING.md) for validation details. The real-account smoke test is manual-only.
+For the Windows 3.0.0 build, use Windows x64, Node.js 24, Rust and pnpm. Initialize the pinned CC Switch submodule, then run the Tauri build script: it applies the checked-in Subscription Lens host patch, builds the original CC Switch React renderer and compiles its Rust runtime into one app. The NSIS package includes upstream notices. The Electron `npm run dist` command remains for the older Electron releases and the macOS preview. See [CONTRIBUTING.md](CONTRIBUTING.md) for validation details. The real-account smoke test is manual-only.
 
 ```powershell
 npm ci
 npm test
-npm start
-npm run dist
-
-# Tauri development host
+git submodule update --init --recursive
+cd native/cc-switch-runtime
+pnpm install --frozen-lockfile
+cd ../..
 .\scripts\build-tauri-migration-host.ps1 -Action check
-.\scripts\build-tauri-migration-host.ps1 -Action build
+.\scripts\build-tauri-migration-host.ps1 -Action release
 ```
 
 ## Development and acknowledgements

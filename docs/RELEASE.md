@@ -1,4 +1,18 @@
-# Subscription Lens 3.0.0-beta.2
+# Subscription Lens 3.0.0
+
+Windows x64 stable release · 中文 / English / Nederlands
+
+This is the first reliably usable multi-provider release. The Windows app moves from Electron to Tauri while retaining Subscription Lens's monitoring layout. The original CC Switch provider manager and native routing runtime are embedded in the executable, including separate OpenAI Official OAuth authorization, provider editing, model mappings, local proxy, switching and recovery. No separate CC Switch installation is needed. Its MIT license and third-party notice are included in the distribution. Already-open Codex conversations may retain their previous model and authorization context; start a new conversation after a provider switch.
+
+这是首个多供应商功能真正稳定可用的版本。Windows 应用从 Electron 迁移至 Tauri，保留 Subscription Lens 的统计界面，同时内嵌 CC Switch 原版供应商管理器与原生路由运行时，包括 OpenAI Official 独立授权、供应商编辑、模型映射、本机代理、切换与恢复。无需另装 CC Switch。发行文件附带其 MIT 许可和第三方说明。切换供应商后，已打开的 Codex 会话可能保留旧状态，请新建会话。
+
+The Windows release includes an unsigned NSIS installer and portable ZIP with SHA256 checksums. Usage costs remain estimates, not invoices. The separate Apple Silicon macOS `3.0.0-beta.2` build below remains an Electron preview.
+
+Windows 发行文件包括未签名的 NSIS 安装包、便携 ZIP 和 SHA256 校验文件。用量费用仍是估算值，不是账单。下方 Apple Silicon macOS `3.0.0-beta.2` 仍为 Electron 预览版。
+
+Dit is de eerste versie waarin meerdere providers betrouwbaar bruikbaar zijn. De Windows x64-app gebruikt nu Tauri en bevat de originele CC Switch-providerbeheerder en routeringsruntime. CC Switch beheert afzonderlijke OpenAI Official-autorisatie, providerinstellingen, modeltoewijzingen, de lokale proxy, wisselen en herstel. Een aparte installatie is niet nodig. De distributie bevat de MIT-licentie en auteursrechtvermelding van CC Switch. Begin na een providerwissel een nieuw Codex-gesprek; bestaande gesprekken kunnen de vorige context behouden. De Apple Silicon-versie `3.0.0-beta.2` hieronder blijft een Electron-preview.
+
+## Previous macOS preview: 3.0.0-beta.2
 
 Apple Silicon macOS preview release · 中文 / English / Nederlands
 

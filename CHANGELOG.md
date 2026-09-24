@@ -5,6 +5,15 @@
 - Added an Apple Silicon macOS build with a native arm64 CC Switch router, Codex discovery, macOS menus and tray behavior, ad-hoc-signed DMG/ZIP artifacts, and SHA256 manifests.
 - Fixed the headless CC Switch Rust module path and target-scoped Windows dependencies; takeover, hot switching, and official restore now pass native arm64 integration tests.
 
+# 3.0.0
+
+- 首个多供应商功能真正稳定可用的 Windows 版本：Tauri 主程序内嵌原版 CC Switch 供应商管理界面和原生路由运行时，统一使用 CC Switch 的授权、保存、切换、回滚和本机代理流程，无需另装 CC Switch。
+- 保留 Subscription Lens 的侧栏、总览、额度、分布饼图与项目／会话／记录用量界面；修复路由页管理入口和双列卡片按钮高度错位。
+- Windows 发行文件包含 CC Switch MIT 许可与第三方说明；macOS Apple Silicon 3.0.0-beta.2 仍为 Electron 预览版。
+- First reliably usable Windows multi-provider release: the Tauri app embeds the original CC Switch provider manager and native routing runtime. Authorization, persistence, switching, rollback and the local proxy use CC Switch's own flows, with no separate installation.
+- Retains the Subscription Lens monitoring interface and aligns provider-card actions. Windows packages include the CC Switch MIT license and third-party notice; the macOS beta.2 remains an Electron preview.
+- Eerste betrouwbaar bruikbare Windows-versie met meerdere providers: de Tauri-app bevat de originele CC Switch-providerbeheerder en routeringsruntime. Autorisatie, instellingen, wisselen, herstel en lokale proxy gebruiken de CC Switch-implementatie; licentie en bronvermelding zijn opgenomen. De macOS beta.2 blijft een Electron-preview.
+
 # 3.0.0-beta.1
 
 - 3.0 是从 1.6.x 稳定版本线跳到的新一代预览版；此前公开版本使用 Electron，本版本继续沿用 Electron 界面，并将兼容 CC Switch 的路由运行时打包进应用。
@@ -50,7 +59,7 @@
 - First 2.0 beta: provider settings now include a generic Codex-compatible model mapping table for DeepSeek, Qwen, Kimi, OpenRouter and custom compatible endpoints.
 - Eerste 2.0 beta: providerinstellingen bevatten nu een algemene tabel voor Codex-compatibele modeltoewijzingen voor DeepSeek, Qwen, Kimi, OpenRouter en aangepaste compatibele endpoints.
 
-# Unreleased
+# 3.0.0 development history
 
 - 修复双列供应商卡片中“在 CC Switch 中管理”按钮的高度错位：卡片内容改为纵向弹性布局，操作按钮统一贴齐卡片底部并保持相同高度。
 - Aligned the management buttons at the bottom of two-column provider cards and gave them a consistent height.
