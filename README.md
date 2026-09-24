@@ -4,7 +4,7 @@ A desktop app for **Codex subscription users** on Windows and Apple Silicon Macs
 
 [English](README.md) · [简体中文](docs/README.zh-CN.md) · [Nederlands](docs/README.nl.md)
 
-> **3.1.0 · stable Windows release.** Consolidates the Tauri migration fixes, CodeBuddy/Qoder collection, quota forecasts, and Cloudflare R2 multi-device statistics. Device snapshots retain calculated API-equivalent costs and keep genuinely unpriced records distinct from zero-cost usage. The original CC Switch provider manager and routing runtime are embedded; no separate CC Switch installation is required. The first reliably usable multi-provider release was 3.0.0. Apple Silicon macOS remains the Electron preview `3.0.0-beta.2`.
+> **3.1.1 · stable Windows release.** Fixes the overview distribution chart so it follows the selected local or multi-device view. Includes the Tauri migration fixes, CodeBuddy/Qoder collection, quota forecasts, and Cloudflare R2 multi-device statistics. Device snapshots retain calculated API-equivalent costs and keep genuinely unpriced records distinct from zero-cost usage. The original CC Switch provider manager and routing runtime are embedded; no separate CC Switch installation is required. The first reliably usable multi-provider release was 3.0.0. Apple Silicon macOS remains the Electron preview `3.0.0-beta.2`.
 
 ## What you can do
 
@@ -44,11 +44,11 @@ The 3.0 routing feature embeds the original provider-manager renderer and select
 
 ## Download and get started
 
-**3.1.0 · Windows x64.** Stable release with Codex quota forecasts, CodeBuddy and Qoder usage collection, and optional Cloudflare R2 multi-device statistics. API-equivalent cost is an estimate, not a bill or guaranteed savings; records without a matching price remain unpriced. The installer is unsigned and has no automatic updater.
+**3.1.1 · Windows x64.** Fixes the overview distribution chart in multi-device view. Stable release with Codex quota forecasts, CodeBuddy and Qoder usage collection, and optional Cloudflare R2 multi-device statistics. API-equivalent cost is an estimate, not a bill or guaranteed savings; records without a matching price remain unpriced. The installer is unsigned and has no automatic updater.
 
-[Download 3.1.0 for Windows](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.1.0) · [macOS Apple Silicon preview](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0-beta.2)
+[Download 3.1.1 for Windows](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.1.1) · [macOS Apple Silicon preview](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0-beta.2)
 
-For installation, use `Subscription-Lens-3.1.0-installer-x64.exe`. Close Subscription Lens before running it. Back up existing app data before upgrading from Electron and install into a separate directory if you want an easy rollback. The installer includes third-party license notices and does not require a separate CC Switch installation.
+For installation, use `Subscription-Lens-3.1.1-installer-x64.exe`. Close Subscription Lens before running it. Back up existing app data before upgrading from Electron and install into a separate directory if you want an easy rollback. The installer includes third-party license notices and does not require a separate CC Switch installation.
 
 1. Select **Start monitoring** to read the default Codex folder, or **Choose folder** for a custom folder containing `sessions` or `archived_sessions`.
 2. Open **Connections → Connect account** to query limits through your locally installed Codex. If signed out, use **Sign in to ChatGPT**.
@@ -96,7 +96,7 @@ Version 1.4 adds read-only Qwen Code, Kimi Code and CodeBuddy Code connectors, p
 
 ## Build and contribute
 
-For the Windows 3.1.0 build, use Windows x64, Node.js 24, Rust and pnpm. Initialize the pinned CC Switch submodule, then run the Tauri build script: it applies the checked-in Subscription Lens host patches, builds the original CC Switch React renderer and compiles its Rust runtime into one app. The NSIS package includes upstream notices. The Electron `npm run dist` command remains for the macOS preview. See [CONTRIBUTING.md](CONTRIBUTING.md) for validation details. The real-account smoke test is manual-only.
+For the Windows 3.1.1 build, use Windows x64, Node.js 24, Rust and pnpm. Initialize the pinned CC Switch submodule, then run the Tauri build script: it applies the checked-in Subscription Lens host patches, builds the original CC Switch React renderer and compiles its Rust runtime into one app. The NSIS package includes upstream notices. The Electron `npm run dist` command remains for the macOS preview. See [CONTRIBUTING.md](CONTRIBUTING.md) for validation details. The real-account smoke test is manual-only.
 
 ```powershell
 npm ci

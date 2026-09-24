@@ -1,3 +1,8 @@
+# 3.1.1 · 正式版
+
+- 修复总览切换到“多设备”后扇形统计仍显示本机模型分布的问题。饼图和图例现在按已同步设备的模型记录重新汇总，并保留设备数据的未计价状态。
+- Fixed the overview distribution chart continuing to show local models after switching to multi-device view. The chart and legend now aggregate synchronized device models and preserve their unpriced status.
+
 # 3.1.0 · 正式版
 
 - 稳定版汇总此前的 Tauri 迁移后修复：恢复额度预测、修正登录与刷新状态、避免 R2 表单刷新丢失，并完善 CodeBuddy、Qoder 与多设备统计。

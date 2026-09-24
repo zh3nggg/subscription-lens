@@ -4,7 +4,7 @@
 
 [English](../README.md) · [简体中文](README.zh-CN.md) · [Nederlands](README.nl.md)
 
-> **3.1.0：Windows 稳定版。** 汇总 Tauri 迁移后的修复，包含额度预测、CodeBuddy/Qoder 采集和 Cloudflare R2 多设备统计；修复多设备快照丢失已计算成本的问题，未匹配价格的数据会明确显示为未计价。内嵌 CC Switch 原版供应商管理与路由运行时，无需单独安装 CC Switch。首个真正稳定可用的多供应商版本为 3.0.0。Apple Silicon macOS 仍为 Electron 架构的 `3.0.0-beta.2` 预览版。
+> **3.1.1：Windows 稳定版。** 修复总览切换到多设备后扇形统计仍显示本机数据的问题。包含 Tauri 迁移后的修复、额度预测、CodeBuddy/Qoder 采集和 Cloudflare R2 多设备统计；多设备成本与未计价状态保持正确。内嵌 CC Switch 原版供应商管理与路由运行时，无需单独安装 CC Switch。首个真正稳定可用的多供应商版本为 3.0.0。Apple Silicon macOS 仍为 Electron 架构的 `3.0.0-beta.2` 预览版。
 
 ## 主要功能
 
@@ -44,7 +44,7 @@ Windows 3.0.0 复用了 [CC Switch](https://github.com/farion1231/cc-switch) 的
 
 ## 下载与快速开始
 
-**Windows 3.1.0 · x64。** 正式版包含 Codex 额度预测、CodeBuddy 与 Qoder 用量采集，以及可选的 Cloudflare R2 多设备统计。API 等价成本是估算值，不是账单；没有匹配价格的数据仍标记为未计价。下载 [Windows 3.1.0](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.1.0)，使用 `Subscription-Lens-3.1.0-installer-x64.exe` 安装。升级前请关闭旧程序；从 Electron 改为 Tauri，建议备份原有数据，需要方便回退时安装到独立目录。安装包已内嵌 CC Switch，无需单独安装。
+**Windows 3.1.1 · x64。** 修复总览多设备 tab 的扇形统计。正式版包含 Codex 额度预测、CodeBuddy 与 Qoder 用量采集，以及可选的 Cloudflare R2 多设备统计。API 等价成本是估算值，不是账单；没有匹配价格的数据仍标记为未计价。下载 [Windows 3.1.1](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.1.1)，使用 `Subscription-Lens-3.1.1-installer-x64.exe` 安装。升级前请关闭旧程序；从 Electron 改为 Tauri，建议备份原有数据，需要方便回退时安装到独立目录。安装包已内嵌 CC Switch，无需单独安装。
 
 **macOS Apple Silicon：** 以下 `3.0.0-beta.2` 仍为 Electron 预览版，与 Windows 3.0.0 的 Tauri 运行时不同。
 
@@ -59,7 +59,7 @@ Windows 3.0.0 复用了 [CC Switch](https://github.com/farion1231/cc-switch) 的
 3. 如果仍被阻止，请打开“系统设置 → 隐私与安全性”，向下找到 Subscription Lens 的安全提示，点击“仍要打开”，完成认证后再次确认。不要全局关闭 Gatekeeper。
 4. 打开前可使用同一 Release 中的 `SHA256SUMS.txt` 核对下载文件。
 
-**Windows 用户：**请使用上方的 [3.1.0 正式版](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.1.0)。
+**Windows 用户：**请使用上方的 [3.1.1 正式版](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.1.1)。
 
 1. 首次打开点击“开始监测”；自定义 Codex Home 可点“选择目录”。目录应包含 `sessions` 或 `archived_sessions`。
 2. 在“连接”中点击“连接账户”。应用使用本机 Codex 的官方登录；未登录时按按钮打开浏览器登录。
@@ -123,7 +123,7 @@ Windows 默认保存于 `%APPDATA%\Subscription Lens`，macOS 默认保存于 `~
 
 ## 源码构建与参与贡献
 
-Windows 3.1.0 的 Tauri 构建需要 Node.js 24、Rust 和 pnpm，并需初始化 CC Switch 子模块；构建脚本会编译内嵌的原版管理界面与 Rust 运行时。Apple Silicon macOS 的 Electron 预览版另需 Rust 1.95 与 Xcode Command Line Tools，用于编译内嵌 Router。界面测试、翻译维护及实验性统计引擎说明见[贡献指南](../CONTRIBUTING.md)。真实账户测试仅供手动运行。
+Windows 3.1.1 的 Tauri 构建需要 Node.js 24、Rust 和 pnpm，并需初始化 CC Switch 子模块；构建脚本会编译内嵌的原版管理界面与 Rust 运行时。Apple Silicon macOS 的 Electron 预览版另需 Rust 1.95 与 Xcode Command Line Tools，用于编译内嵌 Router。界面测试、翻译维护及实验性统计引擎说明见[贡献指南](../CONTRIBUTING.md)。真实账户测试仅供手动运行。
 
 ```powershell
 npm ci

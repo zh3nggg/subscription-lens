@@ -47,7 +47,7 @@
   const safe = (fn) => (...args) => Promise.resolve().then(() => fn(...args)).then(success, failure);
   window.addEventListener('error', (event) => recordFrontendLog('error', event.message || 'renderer error', { source: event.filename, line: event.lineno, column: event.colno }));
   window.addEventListener('unhandledrejection', (event) => recordFrontendLog('error', `unhandled rejection: ${event.reason?.message || event.reason || 'unknown'}`));
-  recordFrontendLog('info', 'renderer initialized', { version: '3.1.0', host: 'tauri' });
+  recordFrontendLog('info', 'renderer initialized', { version: '3.1.1', host: 'tauri' });
 
   const codexHome = () => {
     const home = String(navigator.userAgent || '').includes('Windows') ? '%USERPROFILE%' : '~';
@@ -484,7 +484,7 @@
       deviceCloud,
       deviceSync,
       currentDevice: null,
-      desktop: { compact: false, pinned: false, version: '3.1.0', detectedMonitors: monitor?.detected || [] },
+      desktop: { compact: false, pinned: false, version: '3.1.1', detectedMonitors: monitor?.detected || [] },
       health: { reasons: [], readErrors: 0, parseErrors: 0, partial: 0 },
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       providers: providerInfo,
