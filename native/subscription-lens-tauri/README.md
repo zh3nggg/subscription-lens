@@ -30,7 +30,8 @@ Subscription Lens does not keep a parallel provider store.
 On Windows the host embeds the Common Controls v6 manifest required by the CCS
 dialog runtime. Its WebView2 profile is isolated under the app's local data
 directory (`main/webview`) so startup does not reuse a locked CCS/Electron
-profile.
+profile. On macOS, Cloudflare R2 credentials are stored in the login Keychain
+through Security.framework rather than in the statistics snapshot or config.
 
 The host intentionally has no `devUrl`. Debug executables load the checked-in
 Subscription Lens renderer from the embedded asset protocol, so double-clicking
@@ -52,3 +53,9 @@ The verified debug executable is written to the selected target directory as
 `debug/subscription-lens-tauri.exe`. For a Windows NSIS release build, run
 `scripts/build-tauri-migration-host.ps1 -Action release -TargetDir <target>`.
 The release bundle contains the CC Switch MIT license and third-party notice.
+
+For a local Apple Silicon release on macOS 13 or later, install the renderer
+dependencies in `native/cc-switch-runtime`, then run `npm run dist:tauri:mac`
+from the repository root. The build produces an ad-hoc-signed DMG, ZIP and
+version-scoped SHA256 manifest under `dist/tauri-macos`. It intentionally does
+not produce an Intel build or claim Apple notarization.

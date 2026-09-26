@@ -7,7 +7,7 @@ const crypto = require('node:crypto');
 
 const ID_RE = /^[a-z0-9][a-z0-9_-]{0,48}$/;
 const ENV_RE = /^[A-Z_][A-Z0-9_]{1,127}$/;
-const CODEX_COMPATIBLE_ALIASES = ['gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-5.6-luna', 'gpt-6-astra', 'gpt-5.5'];
+const CODEX_COMPATIBLE_ALIASES = ['gpt-6-astra', 'gpt-6-sol', 'gpt-6-luna', 'gpt-5.6-sol', 'gpt-5.6-terra', 'gpt-5.6-luna', 'gpt-5.5'];
 
 const builtin = {
   id: 'openai-official', name: 'OpenAI Official', kind: 'official',

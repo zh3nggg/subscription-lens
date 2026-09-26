@@ -3,6 +3,7 @@ dist/
 .DS_Store
 .cache/
 native/subscription-lens-tauri/frontend/ccswitch/
+native/subscription-lens-tauri/gen/schemas/macOS-schema.json
 test-results/
 *.sqlite*
 *.log

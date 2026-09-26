@@ -6,7 +6,7 @@ A desktop app for **Codex subscription users** on Windows and Apple Silicon Macs
 
 [English](README.md) · [简体中文](docs/README.zh-CN.md) · [Nederlands](docs/README.nl.md)
 
-> **3.1.1 · stable Windows release.** Fixes the overview distribution chart so it follows the selected local or multi-device view. Includes the Tauri migration fixes, CodeBuddy/Qoder collection, quota forecasts, and Cloudflare R2 multi-device statistics. Device snapshots retain calculated API-equivalent costs and keep genuinely unpriced records distinct from zero-cost usage. The original CC Switch provider manager and routing runtime are embedded; no separate CC Switch installation is required. The first reliably usable multi-provider release was 3.0.0. Apple Silicon macOS remains the Electron preview `3.0.0-beta.2`.
+> **3.1.1 · stable Windows and Apple Silicon Tauri release.** Fixes the overview distribution chart so it follows the selected local or multi-device view. Includes the Tauri migration fixes, CodeBuddy/Qoder collection, quota forecasts, and Cloudflare R2 multi-device statistics. Device snapshots retain calculated API-equivalent costs and keep genuinely unpriced records distinct from zero-cost usage. The original CC Switch provider manager and routing runtime are embedded; no separate CC Switch installation is required.
 
 ## What you can do
 
@@ -17,7 +17,7 @@ A desktop app for **Codex subscription users** on Windows and Apple Silicon Macs
 | Plan your model mix | Turn the active quota window's model history and average pace into a recommended mix for the next reset, with confidence and suggested changes per model. |
 | Compare usage with your payment | View estimated API-equivalent costs alongside your actual payment for the billing period. |
 | Keep limits within reach | Use a compact pinnable window, the system tray and optional low-quota alerts with quiet hours. |
-| Compare devices privately | In the Windows Tauri app, optionally sync one privacy-filtered Sublens usage snapshot per device through Cloudflare R2; no source logs, chat content or project paths are uploaded. |
+| Compare devices privately | In the Windows and Apple Silicon Tauri apps, optionally sync one privacy-filtered Sublens usage snapshot per device through Cloudflare R2; no source logs, chat content or project paths are uploaded. |
 | Export and share | Export records to CSV or save an aggregate-only HTML report without project names or account identifiers. |
 
 ## Provider monitoring in 1.5
@@ -28,7 +28,7 @@ The provider and model charts also show average cost per 1M tokens for the selec
 
 In the Tauri 3.x host, native collection currently supports CodeBuddy Code and Qoder only. The other connectors listed above remain available in the Electron monitoring host, not in the Tauri build.
 
-The Windows Tauri app also supports opt-in multi-device snapshots through Cloudflare R2. Create a dedicated R2 bucket in the app or enter an existing one; Sublens stores one JSON file per device under a bucket prefix (R2's virtual folder). The access key is stored in Windows Credential Manager. Snapshots include only hashed record/session identifiers, time, model, token categories and available cost metadata. They exclude source logs, chat text, project paths, API keys and login credentials. Synchronization runs on launch and every five minutes while the app remains open. R2 uses the account endpoint and `auto` region, and implements prefix-based `ListObjectsV2` for device discovery ([Cloudflare R2 S3 compatibility](https://developers.cloudflare.com/r2/api/s3/api/)).
+The Tauri app also supports opt-in multi-device snapshots through Cloudflare R2. Create a dedicated R2 bucket in the app or enter an existing one; Sublens stores one JSON file per device under a bucket prefix (R2's virtual folder). The access key is stored in Windows Credential Manager on Windows and the login Keychain on macOS. Snapshots include only hashed record/session identifiers, time, model, token categories and available cost metadata. They exclude source logs, chat text, project paths, API keys and login credentials. Synchronization runs on launch and every five minutes while the app remains open. After upgrading to 3.1.1, run one bidirectional sync on every device so corrected cost metadata is republished. R2 uses the account endpoint and `auto` region, and implements prefix-based `ListObjectsV2` for device discovery ([Cloudflare R2 S3 compatibility](https://developers.cloudflare.com/r2/api/s3/api/)).
 
 ### Codex provider routing in the 3.0 generation
 
@@ -48,9 +48,11 @@ The 3.0 routing feature embeds the original provider-manager renderer and select
 
 **3.1.1 · Windows x64.** Fixes the overview distribution chart in multi-device view. Stable release with Codex quota forecasts, CodeBuddy and Qoder usage collection, and optional Cloudflare R2 multi-device statistics. API-equivalent cost is an estimate, not a bill or guaranteed savings; records without a matching price remain unpriced. The installer is unsigned and has no automatic updater.
 
-[Download 3.1.1 for Windows](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.1.1) · [macOS Apple Silicon preview](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0-beta.2)
+[Download 3.1.1 for Windows or Apple Silicon macOS](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.1.1)
 
 For installation, use `Subscription-Lens-3.1.1-installer-x64.exe`. Close Subscription Lens before running it. Back up existing app data before upgrading from Electron and install into a separate directory if you want an easy rollback. The installer includes third-party license notices and does not require a separate CC Switch installation.
+
+For Apple Silicon, open `Subscription-Lens-3.1.1-tauri-arm64.dmg` and drag **Subscription Lens** to **Applications**. It requires macOS 13 or later and is ad-hoc signed, not Apple-notarized. On first launch, Control-click the app in Applications, choose **Open**, then confirm **Open**; if macOS still blocks it, use **System Settings → Privacy & Security → Open Anyway**. Do not disable Gatekeeper globally. The ZIP contains the same app. Verify both downloads against `SHA256SUMS-3.1.1-tauri-macos.txt`.
 
 1. Select **Start monitoring** to read the default Codex folder, or **Choose folder** for a custom folder containing `sessions` or `archived_sessions`.
 2. Open **Connections → Connect account** to query limits through your locally installed Codex. If signed out, use **Sign in to ChatGPT**.
@@ -82,7 +84,7 @@ The app reads Codex records without changing them. It stores usage metadata, inc
 
 Monitoring data is saved in `%APPDATA%\Subscription Lens`; the embedded CC Switch runtime also maintains its own local provider database. Uninstalling retains user data by default. Do not share a live database between devices.
 
-The bundled prices are the **2026-09-16 Standard USD snapshot**. These rates are applied to collected history, not historical prices at each event's time. Fast/Batch, regional surcharges and tool fees are not included. Unknown models or incomplete pricing remain unpriced. Updating the catalog recalculates existing records.
+The bundled prices are the **2026-09-22 Standard USD snapshot**, including exact GPT-6 Astra, Sol and Luna identities. These rates are applied to collected history, not historical prices at each event's time. Fast/Batch, regional surcharges and tool fees are not included. Unknown models or incomplete pricing remain unpriced. Updating the catalog recalculates existing records.
 
 API-equivalent cost is an estimate, not a bill or guaranteed savings. Enter your actual payment to compare. Incomplete collection can understate the total value.
 
@@ -90,7 +92,7 @@ Local records and account summaries are shown separately, never added together. 
 
 ## Current scope and roadmap
 
-Supports Codex subscriptions and selected local multi-provider records on Windows, with a separate Apple Silicon macOS preview. Regular ChatGPT conversations and other-device usage are not collected automatically. Full Codex feature parity with CodexBar and codex-usage is not complete.
+Supports Codex subscriptions and selected local multi-provider records on Windows and Apple Silicon macOS. Regular ChatGPT conversations and other-device usage are not collected automatically. Full Codex feature parity with CodexBar and codex-usage is not complete.
 
 Version 1.4 adds read-only Qwen Code, Kimi Code and CodeBuddy Code connectors, plus GLM, Qwen, Kimi, MiniMax and DeepSeek attribution through Claude Code, CC Switch or compatible gateways. Legacy formats, quota/credit interfaces and more domestic tools remain on the [acceptance roadmap](docs/DOMESTIC-COMPATIBILITY.md).
 
@@ -98,7 +100,7 @@ Version 1.4 adds read-only Qwen Code, Kimi Code and CodeBuddy Code connectors, p
 
 ## Build and contribute
 
-For the Windows 3.1.1 build, use Windows x64, Node.js 24, Rust and pnpm. Initialize the pinned CC Switch submodule, then run the Tauri build script: it applies the checked-in Subscription Lens host patches, builds the original CC Switch React renderer and compiles its Rust runtime into one app. The NSIS package includes upstream notices. The Electron `npm run dist` command remains for the macOS preview. See [CONTRIBUTING.md](CONTRIBUTING.md) for validation details. The real-account smoke test is manual-only.
+For Windows 3.1.1, use Windows x64, Node.js 24, Rust and pnpm. For macOS, use an Apple Silicon Mac with macOS 13+, Xcode Command Line Tools, Node.js 24, Rust and pnpm. Initialize the pinned CC Switch submodule, then run the platform build script. Both scripts apply the checked-in Subscription Lens host, GPT-6 pricing and secure-credential patches, build the original CC Switch React renderer and compile its Rust runtime into one app. See [CONTRIBUTING.md](CONTRIBUTING.md) for validation details. The real-account smoke test is manual-only.
 
 ```powershell
 npm ci
@@ -109,6 +111,14 @@ pnpm install --frozen-lockfile
 cd ../..
 .\scripts\build-tauri-migration-host.ps1 -Action check
 .\scripts\build-tauri-migration-host.ps1 -Action release
+```
+
+```bash
+npm ci
+npm test
+git submodule update --init --recursive
+cd native/cc-switch-runtime && pnpm install --frozen-lockfile && cd ../..
+npm run dist:tauri:mac
 ```
 
 ## Development and acknowledgements

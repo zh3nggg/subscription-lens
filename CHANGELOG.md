@@ -1,4 +1,4 @@
-# 未发布 · Windows 统计修正
+# 3.1.1 · Windows 安装包修正版
 
 - 修复 Windows Tauri 构建遗漏模型 Token 汇总补丁，导致总览扇形图排除缓存读取与写入 Tokens、与顶部总量不一致。构建时临时应用补丁并在结束后还原 CC Switch 源码。
 - Fix the Windows Tauri build omitting cache-inclusive model totals. The overview distribution now uses the same processed-token basis as the headline; the build restores the embedded CC Switch source afterward.
@@ -14,16 +14,22 @@
 - Add a repeatable Ubuntu 22.04 build script, aggregation regression checks and three-language installation notes.
 
 - 修复总览切换到“多设备”后扇形统计仍显示本机模型分布的问题。饼图和图例现在按已同步设备的模型记录重新汇总，并保留设备数据的未计价状态。
+- 正式发布 Apple Silicon macOS Tauri 包：要求 macOS 13+，R2 凭据使用登录钥匙串，包含 GPT-6 Astra/Sol/Luna 精确身份与 Standard 计价；DMG、ZIP 和 SHA256 清单随 Release 提供。
 - Fixed the overview distribution chart continuing to show local models after switching to multi-device view. The chart and legend now aggregate synchronized device models and preserve their unpriced status.
+- Publishes the Apple Silicon macOS Tauri package for macOS 13+, with R2 credentials in the login Keychain, exact GPT-6 Astra/Sol/Luna identities and Standard pricing, plus DMG, ZIP and SHA256 assets.
+- Publiceert het Apple Silicon macOS Tauri-pakket voor macOS 13+, met R2-referenties in de inlogsleutelhanger, exacte GPT-6 Astra/Sol/Luna-identiteiten en Standard-tarieven, plus DMG, ZIP en SHA256-bestanden.
 
 # 3.1.0 · 正式版
 
 - 稳定版汇总此前的 Tauri 迁移后修复：恢复额度预测、修正登录与刷新状态、避免 R2 表单刷新丢失，并完善 CodeBuddy、Qoder 与多设备统计。
 - 修复多设备用量把已计算的 Codex 成本丢弃的问题：同步快照保留已计算金额；没有价格的数据明确显示未计价，不再误报 US$0.00。总览多设备和设备列表共用修复后的汇总。
-- Windows x64 正式版继续内嵌 CC Switch 原版供应商管理与路由运行时；本版本不需要单独安装 CC Switch。macOS Apple Silicon 仍为 3.0.0-beta.2 Electron 预览版。
+- Windows x64 正式版继续内嵌 CC Switch 原版供应商管理与路由运行时；本地 Apple Silicon 包已跟进相同的 3.1.0 Tauri 基线，R2 凭据使用 macOS 登录钥匙串，并保留官方 3.1 的 R2 表单与多设备成本修复。
+- 新增 GPT-6 Sol 与 GPT-6 Luna 的精确身份、路由别名和 Standard 计价；保留 GPT-6 Astra，并将价格快照更新到 2026-09-22。未知价格仍保持未计价。
 - Consolidates the post-migration Tauri fixes for quota forecasts, account refresh and sign-in status, R2 form persistence, CodeBuddy/Qoder collection, and device statistics.
 - Fixes multi-device Codex costs being dropped from snapshots. Calculated amounts are retained, genuinely unpriced usage remains visibly unpriced, and the overview/device list share the corrected totals.
-- Windows x64 stable release with the original CC Switch provider manager and routing runtime embedded. No separate CC Switch installation is required. macOS Apple Silicon remains the 3.0.0-beta.2 Electron preview.
+- Windows x64 stable release with the original CC Switch provider manager and routing runtime embedded. The local Apple Silicon package now follows the same 3.1.0 Tauri baseline, stores R2 credentials in the macOS login Keychain, and retains the official R2 form and multi-device cost fixes.
+- Adds exact GPT-6 Sol and GPT-6 Luna identities, routing aliases and Standard pricing alongside GPT-6 Astra, with the price snapshot updated to 2026-09-22. Unknown prices remain unpriced.
+- De lokale Apple Silicon-build gebruikt nu dezelfde Tauri 3.1.0-basis, bewaart R2-referenties in de macOS-inlogsleutelhanger en behoudt de officiële fixes voor het R2-formulier en apparaatkosten. GPT-6 Sol en Luna hebben exacte identiteiten en tarieven; onbekende prijzen blijven ongeprijsd.
 
 # 3.0.8 · 本地修正版
 
@@ -188,4 +194,3 @@ Windows 本地测试安装包包含本节所列的多设备 R2 同步、设备�
 - 修复额度窗口读取：同时保留默认额度和分类额度，并使用分类键识别窗口；单个额度通知不再覆盖其他额度，保留各窗口原始观测时间。
 - Fix quota window ingestion: combine default and indexed limits, preserve map identities, and merge single-limit notifications without refreshing unrelated observations.
 - Herstel quotavensters: combineer standaardlimieten en limieten per categorie, behoud hun identiteit en voeg meldingen samen zonder andere waarnemingen te vernieuwen.
-

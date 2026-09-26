@@ -11,7 +11,7 @@ providerTemplates.codex={...(providerTemplates.codex||{}),name:'OpenAI Official'
 providerTemplates.custom={...(providerTemplates.custom||{}),name:'',model:'',baseUrl:'',envKey:'OPENAI_API_KEY',protocol:'responses',category:'custom'};
 // These are intentionally recognised by Codex while a user is signed in with
 // ChatGPT. The router replaces the selected alias with the provider model.
-const codexCompatibleAliases=['gpt-5.6-sol','gpt-5.6-terra','gpt-5.6-luna','gpt-6-astra','gpt-5.5'];
+const codexCompatibleAliases=['gpt-6-astra','gpt-6-sol','gpt-6-luna','gpt-5.6-sol','gpt-5.6-terra','gpt-5.6-luna','gpt-5.5'];
 const plans={pro:'Pro',prolite:'Pro Lite',plus:'Plus',free:'Free',team:'Team',business:'Business',edu:'Edu',enterprise:'Enterprise'};
 const errors={missing_codex:'未找到 Codex',timeout:'连接超时',unsupported:'当前版本不支持',upstream:'账户查询失败',unavailable:'无法连接',closed:'连接已关闭',process:'无法启动 Codex',no_quota:'未返回额度',login_failed:'登录未完成'};
 const locale=()=>LensI18n.resolveLanguage(state.data?.settings.language,navigator.language);

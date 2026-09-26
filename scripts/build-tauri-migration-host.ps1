@@ -22,7 +22,9 @@ $runtimeDir = if ([string]::IsNullOrWhiteSpace($RuntimeDir)) {
 }
 $runtimePatches = @(
   (Join-Path $projectRoot "native\cc-switch-patches\0002-subscription-lens-tauri-host.patch"),
-  (Join-Path $projectRoot "native\cc-switch-patches\0003-subscription-lens-device-sync.patch")
+  (Join-Path $projectRoot "native\cc-switch-patches\0003-subscription-lens-device-sync.patch"),
+  (Join-Path $projectRoot "native\cc-switch-patches\0004-gpt-6-sol-luna-pricing.patch"),
+  (Join-Path $projectRoot "native\cc-switch-patches\0005-macos-r2-keychain.patch")
 )
 $providerBundleDir = Join-Path $hostDir "frontend\ccswitch"
 $rendererDist = Join-Path $runtimeDir "dist"
@@ -41,24 +43,35 @@ foreach ($runtimePatch in $runtimePatches) {
 }
 
 $patchesAppliedHere = @()
-$runtimeReady = (Test-Path -LiteralPath (Join-Path $runtimeDir "src-tauri\src\sublens_monitor.rs")) -and
-  (Test-Path -LiteralPath (Join-Path $runtimeDir "src-tauri\src\sublens_devices.rs")) -and
-  (Select-String -Quiet -Path (Join-Path $runtimeDir "src-tauri\src\lib.rs") -Pattern "pub fn run_with_context\(context:") -and
-  (Select-String -Quiet -Path (Join-Path $runtimeDir "src-tauri\src\services\s3.rs") -Pattern "pub\(crate\) async fn list_objects_v2") -and
-  (Select-String -Quiet -Path (Join-Path $runtimeDir "pnpm-workspace.yaml") -Pattern "allowBuilds:")
-
-if (-not $runtimeReady) {
-  foreach ($runtimePatch in $runtimePatches) {
-    $null = & git -C $runtimeDir apply --reverse --check $runtimePatch 2>&1
-    if ($LASTEXITCODE -ne 0) {
-      $null = & git -C $runtimeDir apply --check $runtimePatch 2>&1
-      if ($LASTEXITCODE -ne 0) {
-        throw "The pinned CC Switch runtime does not match the Subscription Lens host patch: $runtimePatch"
-      }
-      & git -C $runtimeDir apply $runtimePatch
-      if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-      $patchesAppliedHere += $runtimePatch
+foreach ($runtimePatch in $runtimePatches) {
+  $patchName = [System.IO.Path]::GetFileName($runtimePatch)
+  $alreadyApplied = switch -Wildcard ($patchName) {
+    '0002-*' {
+      (Test-Path -LiteralPath (Join-Path $runtimeDir 'src-tauri\src\sublens_monitor.rs')) -and
+      (Select-String -Quiet -Path (Join-Path $runtimeDir 'src-tauri\src\lib.rs') -Pattern 'pub fn run_with_context\(context:')
     }
+    '0003-*' {
+      (Test-Path -LiteralPath (Join-Path $runtimeDir 'src-tauri\src\sublens_devices.rs')) -and
+      (Select-String -Quiet -Path (Join-Path $runtimeDir 'src-tauri\src\services\s3.rs') -Pattern 'pub\(crate\) async fn list_objects_v2')
+    }
+    '0004-gpt-*' {
+      Select-String -Quiet -Path (Join-Path $runtimeDir 'src-tauri\src\database\tests.rs') -Pattern 'fn model_pricing_seed_includes_gpt_6_sol_and_luna'
+    }
+    '0005-macos-*' {
+      Select-String -Quiet -Path (Join-Path $runtimeDir 'src-tauri\src\sublens_devices.rs') -Pattern 'const CREDENTIAL_ACCOUNT:'
+    }
+    default { $false }
+  }
+  if ($alreadyApplied) { continue }
+  $null = & git -C $runtimeDir apply --ignore-whitespace --reverse --check $runtimePatch 2>&1
+  if ($LASTEXITCODE -ne 0) {
+    $null = & git -C $runtimeDir apply --ignore-whitespace --check $runtimePatch 2>&1
+    if ($LASTEXITCODE -ne 0) {
+      throw "The pinned CC Switch runtime does not match the Subscription Lens host patch: $runtimePatch"
+    }
+    & git -C $runtimeDir apply --ignore-whitespace $runtimePatch
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+    $patchesAppliedHere += $runtimePatch
   }
 }
 
@@ -69,11 +82,11 @@ if (-not (Test-Path -LiteralPath $modelTotalsPatch)) {
   throw "Subscription Lens model totals patch is missing: $modelTotalsPatch"
 }
 if (-not (Select-String -Quiet -Path (Join-Path $runtimeDir "src-tauri\src\services\usage_stats.rs") -Pattern "Sublens: expose cache-inclusive model totals")) {
-  $null = & git -C $runtimeDir apply --check $modelTotalsPatch 2>&1
+  $null = & git -C $runtimeDir apply --ignore-whitespace --check $modelTotalsPatch 2>&1
   if ($LASTEXITCODE -ne 0) {
     throw "The pinned CC Switch runtime does not match the Subscription Lens model totals patch: $modelTotalsPatch"
   }
-  & git -C $runtimeDir apply $modelTotalsPatch
+  & git -C $runtimeDir apply --ignore-whitespace $modelTotalsPatch
   if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
   $patchesAppliedHere += $modelTotalsPatch
 }
@@ -146,7 +159,7 @@ try {
   }
   [array]::Reverse($patchesAppliedHere)
   foreach ($runtimePatch in $patchesAppliedHere) {
-    & git -C $runtimeDir apply --reverse $runtimePatch
+    & git -C $runtimeDir apply --ignore-whitespace --reverse $runtimePatch
     if ($LASTEXITCODE -ne 0) {
       Write-Warning "Could not restore the clean CC Switch runtime after the build."
     }

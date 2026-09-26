@@ -1992,34 +1992,17 @@ window.LensLocales = {
     "Keys are stored in Windows Credential Manager and are never included in usage snapshots.",
     "Sleutels worden opgeslagen in Windows Credential Manager en nooit in gebruikssnapshots opgenomen."
   ],
-  "保存设置": [
-    "Save settings",
-    "Instellingen opslaan"
+  "密钥保存在系统凭据库中，不写入统计快照。": [
+    "Keys are stored in the system credential vault and are never included in usage snapshots.",
+    "Sleutels worden opgeslagen in de systeemreferentiekluis en nooit in gebruikssnapshots opgenomen."
   ],
-  "测试连接": [
-    "Test connection",
-    "Verbinding testen"
-  ],
-  "立即双向同步": [
-    "Sync both ways now",
-    "Nu in beide richtingen synchroniseren"
-  ],
-  "立即同步": [
-    "Sync now",
-    "Nu synchroniseren"
-  ],
-  "已配置": [
-    "Configured",
-    "Geconfigureerd"
-  ],
-  "未配置": [
-    "Not configured",
-    "Niet geconfigureerd"
-  ],
-  "已同步设备": [
-    "Synced devices",
-    "Gesynchroniseerde apparaten"
-  ],
+  "保存设置": ["Save settings", "Instellingen opslaan"],
+  "测试连接": ["Test connection", "Verbinding testen"],
+  "立即双向同步": ["Sync both ways now", "Nu in beide richtingen synchroniseren"],
+  "立即同步": ["Sync now", "Nu synchroniseren"],
+  "已配置": ["Configured", "Geconfigureerd"],
+  "未配置": ["Not configured", "Niet geconfigureerd"],
+  "已同步设备": ["Synced devices", "Gesynchroniseerde apparaten"],
   "每个文件仅包含匿名记录标识、时间、模型、Token 分类和可用计价。": [
     "Each file contains only anonymous record IDs, timestamps, models, token categories and available pricing.",
     "Elk bestand bevat alleen anonieme record-ID's, tijdstempels, modellen, tokencategorieën en beschikbare prijzen."

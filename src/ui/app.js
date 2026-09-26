@@ -11,7 +11,7 @@ providerTemplates.codex={...(providerTemplates.codex||{}),name:'OpenAI Official'
 providerTemplates.custom={...(providerTemplates.custom||{}),name:'',model:'',baseUrl:'',envKey:'OPENAI_API_KEY',protocol:'responses',category:'custom'};
 // These are intentionally recognised by Codex while a user is signed in with
 // ChatGPT. The router replaces the selected alias with the provider model.
-const codexCompatibleAliases=['gpt-5.6-sol','gpt-5.6-terra','gpt-5.6-luna','gpt-6-astra','gpt-5.5'];
+const codexCompatibleAliases=['gpt-6-astra','gpt-6-sol','gpt-6-luna','gpt-5.6-sol','gpt-5.6-terra','gpt-5.6-luna','gpt-5.5'];
 function normalizeProviderCatalog(value,defaultModel=''){
   const raw=value&& !Array.isArray(value)&&Array.isArray(value.models)?value.models:Array.isArray(value)?value:[];
   const seen=new Set(),rows=[];

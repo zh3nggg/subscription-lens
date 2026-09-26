@@ -6,7 +6,7 @@ Een desktopapp voor **Codex-abonnees** op Windows en Apple Silicon Macs die hun 
 
 [English](../README.md) · [简体中文](README.zh-CN.md) · [Nederlands](README.nl.md)
 
-> **3.1.1: stabiele Windows-release.** Verhelpt de verdelinggrafiek die na het kiezen van meerdere apparaten nog lokale modellen toonde. Bundelt ook de Tauri-migratiefixes, Codex-quota voorspellingen, CodeBuddy/Qoder-gebruiksregistratie en optionele Cloudflare R2-statistieken. Berekende kosten blijven behouden en gebruik zonder bekende prijs wordt als ongeprijsd getoond. De originele CC Switch-providerbeheerder en router-runtime zijn ingebouwd; CC Switch hoeft niet apart te worden geïnstalleerd. De eerste betrouwbaar bruikbare multi-providerrelease was 3.0.0. macOS Apple Silicon blijft de Electron-preview `3.0.0-beta.2`.
+> **3.1.1: stabiele Tauri-release voor Windows en Apple Silicon.** Verhelpt de verdelinggrafiek die na het kiezen van meerdere apparaten nog lokale modellen toonde. Bundelt ook de Tauri-migratiefixes, Codex-quota voorspellingen, CodeBuddy/Qoder-gebruiksregistratie en optionele Cloudflare R2-statistieken. Berekende kosten blijven behouden en gebruik zonder bekende prijs wordt als ongeprijsd getoond. De originele CC Switch-providerbeheerder en router-runtime zijn ingebouwd; CC Switch hoeft niet apart te worden geïnstalleerd.
 
 ## Wat kun je ermee?
 
@@ -17,7 +17,7 @@ Een desktopapp voor **Codex-abonnees** op Windows en Apple Silicon Macs die hun 
 | Je modelmix plannen | Maak van de modelhistorie en het gemiddelde tempo in het actieve quotavenster een aanbevolen mix voor de volgende reset, met betrouwbaarheid en bijsturing per model. |
 | Gebruik met je betaling vergelijken | Geschatte equivalente API-kosten naast je werkelijke betaling per factuurperiode bekijken. |
 | Limieten tijdens het werk volgen | Een compact vastzetbaar venster, systeemvak en optionele limietmeldingen met stille uren. |
-| Apparaten privé vergelijken | De Windows Tauri-app synchroniseert optioneel één privacyvriendelijke Sublens-gebruikssnapshot per apparaat via Cloudflare R2; bronlogs, chatinhoud en projectpaden worden niet geüpload. |
+| Apparaten privé vergelijken | De Windows- en Apple Silicon Tauri-app synchroniseren optioneel één privacyvriendelijke Sublens-gebruikssnapshot per apparaat via Cloudflare R2; bronlogs, chatinhoud en projectpaden worden niet geüpload. |
 | Exporteren en delen | Records naar CSV exporteren of een HTML-overzicht opslaan zonder projectnamen of accountidentificaties. |
 
 ## Aanbieders volgen in 1.5
@@ -26,7 +26,7 @@ Verbind Qwen Code, Kimi Code, CodeBuddy Code, Qoder, CC Switch, Claude Code, Gem
 
 De Tauri 3.x-versie verzamelt momenteel native gebruiksgegevens van alleen CodeBuddy Code en Qoder. De overige hierboven genoemde bronnen zijn nog beschikbaar in de Electron-monitoringversie en zijn niet aangesloten op Tauri.
 
-De Windows Tauri-app biedt optionele R2-synchronisatie tussen apparaten. Je kunt in de app een aparte bucket aanmaken of een bestaande bucket opgeven; Sublens bewaart één JSON-snapshot per apparaat onder een bucketprefix (een virtuele map in R2). De Access Key staat in Windows Credential Manager. Snapshots bevatten alleen gehashte record-/sessie-ID's, tijdstippen, modellen, tokencategorieën en beschikbare kosten; nooit bronlogs, chattekst, projectpaden, API-sleutels of aanmeldgegevens. Synchronisatie gebeurt bij het starten en elke vijf minuten zolang de app open is. De weergave kan daardoor maximaal vijf minuten achterlopen.
+De Tauri-app biedt optionele R2-synchronisatie tussen apparaten. Je kunt in de app een aparte bucket aanmaken of een bestaande bucket opgeven; Sublens bewaart één JSON-snapshot per apparaat onder een bucketprefix. De Access Key staat op Windows in Credential Manager en op macOS in de inlogsleutelhanger. Snapshots bevatten alleen gehashte record-/sessie-ID's, tijdstippen, modellen, tokencategorieën en beschikbare kosten; nooit bronlogs, chattekst, projectpaden, API-sleutels of aanmeldgegevens. Synchronisatie gebeurt bij het starten en elke vijf minuten zolang de app open is. Voer na de upgrade naar 3.1.1 op elk apparaat eenmaal een synchronisatie in beide richtingen uit.
 
 De diagrammen per aanbieder en model tonen ook de gemiddelde kosten per 1M tokens voor de geselecteerde periode. Alleen tokens met een prijs vormen de noemer; ongeprijsd gebruik blijft zichtbaar maar telt niet mee in het gemiddelde.
 
@@ -48,18 +48,14 @@ Windows 3.0.0 hergebruikt de originele providerbeheerinterface van [CC Switch](h
 
 **Windows 3.1.1 · x64.** Verhelpt de verdelinggrafiek in het multi-apparatenoverzicht. Stabiele release met Codex-quota voorspellingen, CodeBuddy- en Qoder-gebruiksregistratie en optionele Cloudflare R2-statistieken. API-equivalente kosten zijn schattingen, geen factuur; records zonder bekende prijs blijven ongeprijsd. Download [Windows 3.1.1](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.1.1) en installeer met `Subscription-Lens-3.1.1-installer-x64.exe`. Sluit de oude app voor de upgrade. Omdat de runtime van Electron naar Tauri verandert, is een back-up van de bestaande gegevens verstandig; installeer in een aparte map als je eenvoudig wilt kunnen terugkeren. CC Switch is ingebouwd en hoeft niet apart te worden geïnstalleerd.
 
-**macOS Apple Silicon:** `3.0.0-beta.2` hieronder blijft een Electron-preview en gebruikt nog niet de Tauri-runtime van Windows 3.0.0.
-
-**3.0.0-beta.2 Preview · macOS Apple Silicon.** Vereist een Mac met M-chip en macOS 13 of nieuwer. De collector verwerkt nog niet alle recordformaten volledig; totalen kunnen te hoog of te laag zijn. Kosten zijn schattingen, geen factuur of gegarandeerde besparing. Automatische updates zijn niet beschikbaar.
-
-[Download 3.0.0-beta.2](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.0.0-beta.2)
+**3.1.1-release · macOS Apple Silicon.** Gebruikt dezelfde Tauri-codebasis als Windows 3.1.1 en vereist een Mac met M-chip en macOS 13 of nieuwer. Download `Subscription-Lens-3.1.1-tauri-arm64.dmg` via de [3.1.1-release](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.1.1); de ZIP bevat dezelfde app. Automatische updates zijn niet beschikbaar.
 
 ### Installeren op macOS
 
-1. Download `Subscription-Lens-3.0.0-beta.2-arm64.dmg`, open het bestand en sleep **Subscription Lens** naar **Programma's**. De ZIP bevat dezelfde app als draagbaar archief.
-2. Deze preview is lokaal ad-hoc ondertekend maar niet door Apple genotariseerd. macOS kan daarom melden dat de ontwikkelaar niet kan worden gecontroleerd. Control-klik in **Programma's** op **Subscription Lens**, kies **Open** en bevestig opnieuw met **Open**. Dit is normaal alleen bij de eerste start nodig.
+1. Open `Subscription-Lens-3.1.1-tauri-arm64.dmg` en sleep **Subscription Lens** naar **Programma's**. De ZIP bevat dezelfde app als draagbaar archief.
+2. Dit pakket is ad-hoc ondertekend maar niet door Apple genotariseerd. macOS kan daarom melden dat de ontwikkelaar niet kan worden gecontroleerd. Control-klik in **Programma's** op **Subscription Lens**, kies **Open** en bevestig opnieuw met **Open**. Dit is normaal alleen bij de eerste start nodig.
 3. Als macOS de app nog blokkeert, open je **Systeeminstellingen → Privacy en beveiliging**, zoek je de melding voor Subscription Lens en kies je **Toch openen**. Verifieer je identiteit en bevestig **Open**. Schakel Gatekeeper niet wereldwijd uit.
-4. Je kunt de download vooraf controleren met `SHA256SUMS.txt` uit dezelfde release.
+4. Controleer de DMG of ZIP vooraf met `SHA256SUMS-3.1.1-tauri-macos.txt`.
 
 **Windows-gebruikers:** gebruik de [stabiele 3.1.1-release](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.1.1) hierboven.
 
@@ -93,7 +89,7 @@ De app leest Codex-records zonder ze te wijzigen. Gebruiksmetadata, waaronder pr
 
 Gegevens staan op Windows in `%APPDATA%\Subscription Lens` en op macOS in `~/Library/Application Support/Subscription Lens`. Ze blijven standaard behouden na het verwijderen van de app. Stel `LENS_DATA_DIR` in voor een andere locatie. Deel een actieve database niet tussen apparaten.
 
-De meegeleverde tarieven zijn een **momentopname van Standard-tarieven in USD op 2026-09-16**. Ze worden toegepast op het verzamelde historische gebruik; het zijn geen historische tarieven per gebeurtenis. Fast/Batch, regionale toeslagen en toolkosten zijn niet inbegrepen. Onbekende modellen of onvolledige tarieven blijven onberekend. Bij het bijwerken van de tarieven worden bestaande records opnieuw berekend.
+De meegeleverde tarieven zijn een **momentopname van Standard-tarieven in USD op 2026-09-22**, met de exacte modelidentiteiten GPT-6 Astra, Sol en Luna. Ze worden toegepast op het verzamelde historische gebruik; het zijn geen historische tarieven per gebeurtenis. Fast/Batch, regionale toeslagen en toolkosten zijn niet inbegrepen. Onbekende modellen of onvolledige tarieven blijven onberekend. Bij het bijwerken van de tarieven worden bestaande records opnieuw berekend.
 
 Equivalente API-kosten zijn een schatting, geen factuur of gegarandeerde besparing. Vul je werkelijke betaling in om te vergelijken. Ontbrekende gegevens kunnen de geschatte waarde verlagen.
 
@@ -109,7 +105,7 @@ Versie 1.4 voegt read-only connectors voor Qwen Code, Kimi Code en CodeBuddy Cod
 
 ## Zelf bouwen en bijdragen
 
-Voor de Tauri-build van Windows 3.1.1 zijn Node.js 24, Rust, pnpm en de geïnitialiseerde CC Switch-submodule nodig. Het buildscript compileert de originele beheerinterface en Rust-runtime. De Electron-preview voor Apple Silicon macOS vereist daarnaast Rust 1.95 en Xcode Command Line Tools voor de ingebouwde router. Zie [CONTRIBUTING.md](../CONTRIBUTING.md) voor tests en vertalingen. De test met een echt account is uitsluitend handmatig.
+Voor Windows 3.1.1 zijn Node.js 24, Rust en pnpm nodig. macOS vereist daarnaast een Apple Silicon Mac met macOS 13+ en Xcode Command Line Tools. Initialiseer voor beide platforms de CC Switch-submodule; de scripts passen de Subscription Lens-host-, GPT-6-prijs- en beveiligde-referentiepatches toe en compileren de originele beheerinterface en Rust-runtime. Zie [CONTRIBUTING.md](../CONTRIBUTING.md) voor tests en vertalingen. De test met een echt account is uitsluitend handmatig.
 
 ```powershell
 npm ci
@@ -121,7 +117,7 @@ cd ../..
 .\scripts\build-tauri-migration-host.ps1 -Action release
 ```
 
-Op een Apple Silicon Mac maakt `npm run dist` voorlopig nog de ad-hoc ondertekende Electron DMG- en ZIP-pakketten. De bovenstaande PowerShell-opdracht bouwt de Windows Tauri-versie.
+Op een Apple Silicon Mac maakt `npm run dist:tauri:mac` de ad-hoc ondertekende Tauri DMG, ZIP en versiegebonden SHA256-lijst. De bovenstaande PowerShell-opdracht bouwt de Windows Tauri-versie.
 
 ## Ontwikkeling en dankwoord
 
@@ -130,4 +126,3 @@ Ontwikkeld met ondersteuning van **GPT-6 Astra**.
 [CodexBar](https://github.com/steipete/CodexBar) dient als referentie voor limieten en desktopinteractie. MIT-gelicentieerde broncode van [codex-usage](https://github.com/zJay26/codex-usage) is opgenomen voor de volgende engine-integratie; de bron blijft met de licentievermelding behouden voor verdere integratie van de accounting-engine.
 
 MIT. Zie [licenties van derden](../THIRD-PARTY-NOTICES.md) voor bronnen en auteursrechten. Dit is een onafhankelijk project, niet verbonden aan OpenAI of onderschreven door de genoemde projecten.
-
