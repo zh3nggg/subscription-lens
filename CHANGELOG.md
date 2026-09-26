@@ -1,4 +1,17 @@
+# 未发布 · Windows 统计修正
+
+- 修复 Windows Tauri 构建遗漏模型 Token 汇总补丁，导致总览扇形图排除缓存读取与写入 Tokens、与顶部总量不一致。构建时临时应用补丁并在结束后还原 CC Switch 源码。
+- Fix the Windows Tauri build omitting cache-inclusive model totals. The overview distribution now uses the same processed-token basis as the headline; the build restores the embedded CC Switch source afterward.
+- Herstel de Windows Tauri-build zodat de modelverdeling cachetokens meetelt en overeenkomt met het totaal bovenaan; na de build wordt de CC Switch-broncode hersteld.
+
 # 3.1.1 · 正式版
+
+## Ubuntu 22.04 x64 build
+
+- Add a Linux Tauri `.deb` build based on 3.1.1, preserving the Subscription Lens host and embedded CC Switch provider manager.
+- Store R2 credentials through the Linux Secret Service keyring; declare package dependencies and provide desktop-menu launch without a terminal.
+- Expose cache-inclusive model totals so the distribution matches the headline, including historical rollups, and show empty billing dates safely on a fresh install.
+- Add a repeatable Ubuntu 22.04 build script, aggregation regression checks and three-language installation notes.
 
 - 修复总览切换到“多设备”后扇形统计仍显示本机模型分布的问题。饼图和图例现在按已同步设备的模型记录重新汇总，并保留设备数据的未计价状态。
 - Fixed the overview distribution chart continuing to show local models after switching to multi-device view. The chart and legend now aggregate synchronized device models and preserve their unpriced status.

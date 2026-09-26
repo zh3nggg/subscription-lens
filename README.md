@@ -1,5 +1,7 @@
 # Subscription Lens
 
+> Ubuntu 22.04 x64: a Tauri `.deb` build based on 3.1.1 is available locally. See [Linux installation and build instructions](docs/LINUX-22.04.md).
+
 A desktop app for **Codex subscription users** on Windows and Apple Silicon Macs who want to see their remaining quota, understand which projects use their tokens, and choose a model mix that carries their quota to the next reset. It also compares recorded usage at API rates with the subscription payment. Monitoring needs no API key; third-party routing uses the chosen provider's credentials.
 
 [English](README.md) · [简体中文](docs/README.zh-CN.md) · [Nederlands](docs/README.nl.md)

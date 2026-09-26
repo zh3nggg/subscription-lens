@@ -1,5 +1,7 @@
 # 余量 · Subscription Lens
 
+> Ubuntu 22.04 x64：已新增基于 3.1.1 的 Tauri `.deb` 本地构建。参阅 [Linux 安装与构建说明](LINUX-22.04.md)。
+
 面向 Windows 与 Apple Silicon Mac 上 **Codex 套餐用户**的桌面应用：查看还剩多少额度、哪些项目消耗了 Tokens，并推荐一套能将额度用到下次重置前的模型使用配比；同时比较已记录用量按 API 价格估算后与套餐实付的差额。本地统计无需 API Key；使用第三方路由时需提供所选供应商的凭据。
 
 [English](../README.md) · [简体中文](README.zh-CN.md) · [Nederlands](README.nl.md)

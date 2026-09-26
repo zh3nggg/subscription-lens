@@ -2698,5 +2698,41 @@
   "高级选项": [
     "Advanced options",
     "Geavanceerde opties"
+  ],
+  "密钥保存在系统凭据库中，不写入统计快照。": [
+    "Keys are stored in the system keyring, not in usage snapshots.",
+    "Sleutels worden opgeslagen in de systeemsleutelbos, niet in gebruikssnapshots."
+  ],
+  "无法打开系统凭据库。请安装 libsecret-tools 并解锁登录密钥库。": [
+    "Cannot open the system keyring. Install libsecret-tools and unlock your login keyring.",
+    "Kan de systeemsleutelbos niet openen. Installeer libsecret-tools en ontgrendel de aanmeldsleutelbos."
+  ],
+  "无法打开系统凭据库输入流": [
+    "Cannot open keyring input",
+    "Kan de invoer voor de sleutelbos niet openen"
+  ],
+  "无法写入系统凭据库。": [
+    "Cannot write to the system keyring.",
+    "Kan niet naar de systeemsleutelbos schrijven."
+  ],
+  "无法读取系统凭据库结果": [
+    "Cannot read the system keyring result",
+    "Kan het resultaat van de systeemsleutelbos niet lezen"
+  ],
+  "系统凭据库不可用或已锁定。请确认已安装 libsecret-tools 和 Secret Service 服务，解锁登录密钥库后重试。": [
+    "System keyring unavailable or locked. Unlock the login keyring and retry (libsecret-tools and a Secret Service provider are required).",
+    "De systeemsleutelbos is niet beschikbaar of vergrendeld. Installeer libsecret-tools en een Secret Service-provider, ontgrendel de aanmeldsleutelbos en probeer opnieuw."
+  ],
+  "系统凭据库中的 R2 凭据记录无效": [
+    "Invalid R2 credential record in system keyring",
+    "Ongeldige R2-inloggegevens in de systeemsleutelbos"
+  ],
+  "系统凭据记录缺少 R2 Access Key": [
+    "R2 access key missing from keyring record",
+    "R2 Access Key ontbreekt in de sleutelbos"
+  ],
+  "系统凭据记录缺少 R2 Secret Key": [
+    "R2 secret key missing from keyring record",
+    "R2 Secret Key ontbreekt in de sleutelbos"
   ]
 }

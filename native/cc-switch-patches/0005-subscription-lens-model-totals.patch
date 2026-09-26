@@ -1,0 +1,68 @@
+diff --git a/src-tauri/src/services/usage_stats.rs b/src-tauri/src/services/usage_stats.rs
+--- a/src-tauri/src/services/usage_stats.rs
++++ b/src-tauri/src/services/usage_stats.rs
+@@ -92,6 +92,12 @@ pub struct ProviderStats {
+ #[derive(Debug, Clone, Serialize, Deserialize)]
+ #[serde(rename_all = "camelCase")]
+ pub struct ModelStats {
++    // Sublens: expose cache-inclusive model totals without changing CCS total_tokens.
++    pub real_total_tokens: u64,
++    pub total_input_tokens: u64,
++    pub total_output_tokens: u64,
++    pub total_cache_read_tokens: u64,
++    pub total_cache_creation_tokens: u64,
+     pub model: String,
+     pub request_count: u64,
+     pub total_tokens: u64,
+@@ -1497,12 +1503,18 @@ impl Database {
+                 model,
+                 SUM(request_count) as request_count,
+                 SUM(total_tokens) as total_tokens,
+-                SUM(total_cost) as total_cost
++                SUM(total_cost) as total_cost,
++                SUM(input_t) as input_t, SUM(output_t) as output_t,
++                SUM(cache_read_t) as cache_read_t, SUM(cache_write_t) as cache_write_t
+             FROM (
+                 SELECT {detail_model} as model,
+                     COUNT(*) as request_count,
+                     COALESCE(SUM({fresh_input_detail} + l.output_tokens), 0) as total_tokens,
+-                    COALESCE(SUM(CAST(l.total_cost_usd AS REAL)), 0) as total_cost
++                    COALESCE(SUM(CAST(l.total_cost_usd AS REAL)), 0) as total_cost,
++                    COALESCE(SUM({fresh_input_detail}), 0) as input_t,
++                    COALESCE(SUM(l.output_tokens), 0) as output_t,
++                    COALESCE(SUM(l.cache_read_tokens), 0) as cache_read_t,
++                    COALESCE(SUM(l.cache_creation_tokens), 0) as cache_write_t
+                 FROM proxy_request_logs l
+                 {detail_join}
+                 {detail_where}
+@@ -1511,7 +1523,11 @@ impl Database {
+                 SELECT {rollup_model},
+                     COALESCE(SUM(r.request_count), 0),
+                     COALESCE(SUM({fresh_input_rollup} + r.output_tokens), 0),
+-                    COALESCE(SUM(CAST(r.total_cost_usd AS REAL)), 0)
++                    COALESCE(SUM(CAST(r.total_cost_usd AS REAL)), 0),
++                    COALESCE(SUM({fresh_input_rollup}), 0),
++                    COALESCE(SUM(r.output_tokens), 0),
++                    COALESCE(SUM(r.cache_read_tokens), 0),
++                    COALESCE(SUM(r.cache_creation_tokens), 0)
+                 FROM usage_daily_rollups r
+                 {rollup_join}
+                 {rollup_where}
+@@ -1534,7 +1550,17 @@ impl Database {
+                 0.0
+             };
+ 
++            let input = row.get::<_, i64>(4)? as u64;
++            let output = row.get::<_, i64>(5)? as u64;
++            let cached = row.get::<_, i64>(6)? as u64;
++            let written = row.get::<_, i64>(7)? as u64;
++            let (real_total_tokens, _) = derive_real_total_and_hit_rate(input, output, written, cached);
+             Ok(ModelStats {
++                real_total_tokens,
++                total_input_tokens: input,
++                total_output_tokens: output,
++                total_cache_read_tokens: cached,
++                total_cache_creation_tokens: written,
+                 model: row.get(0)?,
+                 request_count: request_count as u64,
+                 total_tokens: row.get::<_, i64>(2)? as u64,

@@ -1,5 +1,7 @@
 # Subscription Lens
 
+> Ubuntu 22.04 x64: er is een lokale Tauri `.deb`-build op basis van 3.1.1. Zie de [Linux-installatie- en bouwinstructies](LINUX-22.04.md).
+
 Een desktopapp voor **Codex-abonnees** op Windows en Apple Silicon Macs die hun resterende limieten willen bekijken, willen zien welke projecten tokens gebruiken en een modelmix willen kiezen die de limiet tot de volgende reset laat meegaan. De app vergelijkt ook vastgelegd gebruik tegen API-tarieven met de abonnementsbetaling. Voor lokale statistieken is geen API-sleutel nodig; routering via een externe provider gebruikt diens inloggegevens.
 
 [English](../README.md) · [简体中文](README.zh-CN.md) · [Nederlands](README.nl.md)

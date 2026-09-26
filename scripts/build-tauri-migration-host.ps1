@@ -62,6 +62,22 @@ if (-not $runtimeReady) {
   }
 }
 
+# The Sublens chart uses cache-inclusive tokens. CCS model totals omit cached
+# tokens by design, so expose the additional total in the embedded runtime.
+$modelTotalsPatch = Join-Path $projectRoot "native\cc-switch-patches\0005-subscription-lens-model-totals.patch"
+if (-not (Test-Path -LiteralPath $modelTotalsPatch)) {
+  throw "Subscription Lens model totals patch is missing: $modelTotalsPatch"
+}
+if (-not (Select-String -Quiet -Path (Join-Path $runtimeDir "src-tauri\src\services\usage_stats.rs") -Pattern "Sublens: expose cache-inclusive model totals")) {
+  $null = & git -C $runtimeDir apply --check $modelTotalsPatch 2>&1
+  if ($LASTEXITCODE -ne 0) {
+    throw "The pinned CC Switch runtime does not match the Subscription Lens model totals patch: $modelTotalsPatch"
+  }
+  & git -C $runtimeDir apply $modelTotalsPatch
+  if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+  $patchesAppliedHere += $modelTotalsPatch
+}
+
 $args = @($Action, "--target-dir", $TargetDir)
 $bundlePrepared = $false
 $previousSubLensHost = $env:VITE_SUBLENS_HOST

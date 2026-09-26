@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Subscription Lens
+Comment=Codex subscription and device usage monitor
+Exec=subscription-lens-tauri %U
+Icon=subscription-lens-tauri
+Terminal=false
+Categories=Utility;
+StartupWMClass=subscription-lens-tauri
+MimeType=x-scheme-handler/subscriptionlens;

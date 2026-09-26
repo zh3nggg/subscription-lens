@@ -1,0 +1,80 @@
+diff --git a/src-tauri/src/sublens_devices.rs b/src-tauri/src/sublens_devices.rs
+--- a/src-tauri/src/sublens_devices.rs
++++ b/src-tauri/src/sublens_devices.rs
+@@ -64,7 +64,7 @@ fn load_config(app: &AppHandle) -> Result<DeviceConfig, String> {
+     } else { DeviceConfig {
+         account_id: String::new(), bucket: String::new(), prefix: default_prefix(),
+         device_id: uuid::Uuid::new_v4().to_string(),
+-        device_name: std::env::var("COMPUTERNAME").unwrap_or_else(|_| "This device".into()),
++        device_name: std::env::var("COMPUTERNAME").or_else(|_| std::env::var("HOSTNAME")).unwrap_or_else(|_| "This device".into()),
+     }};
+     if config.device_id.is_empty() { config.device_id = uuid::Uuid::new_v4().to_string(); }
+     if config.device_name.is_empty() { config.device_name = "This device".into(); }
+@@ -128,11 +128,64 @@ fn delete_credentials() -> Result<(), String> {
+     Ok(())
+ }
+ 
+-#[cfg(not(windows))]
++#[cfg(target_os = "linux")]
++fn linux_secret(operation: &str, payload: Option<&[u8]>) -> Result<Option<Vec<u8>>, String> {
++    use std::io::Write;
++    use std::process::{Command, Stdio};
++    // Keep credentials off argv and bound waits for a locked/unavailable keyring.
++    let mut command = Command::new("timeout");
++    command.args(["30s", "secret-tool", operation]);
++    if operation == "store" { command.args(["--label", CREDENTIAL_TARGET]); }
++    command.args(["application", "com.subscriptionlens.desktop", "service", "cloudflare-r2"]);
++    command.stdin(Stdio::piped()).stdout(Stdio::piped()).stderr(Stdio::piped());
++    let mut child = command.spawn().map_err(|_| "无法打开系统凭据库。请安装 libsecret-tools 并解锁登录密钥库。".to_string())?;
++    if let Some(bytes) = payload {
++        let result = child.stdin.take().ok_or("无法打开系统凭据库输入流")?.write_all(bytes);
++        if result.is_err() {
++            let _ = child.kill();
++            let _ = child.wait();
++            return Err("无法写入系统凭据库。".into());
++        }
++    } else { drop(child.stdin.take()); }
++    let result = child.wait_with_output().map_err(|_| "无法读取系统凭据库结果".to_string())?;
++    if result.status.success() { return Ok(Some(result.stdout)); }
++    if result.status.code() == Some(1) && result.stderr.is_empty() && operation != "store" {
++        return Ok(None);
++    }
++    Err("系统凭据库不可用或已锁定。请确认已安装 libsecret-tools 和 Secret Service 服务，解锁登录密钥库后重试。".into())
++}
++
++#[cfg(target_os = "linux")]
++fn save_credentials(access: &str, secret: &str) -> Result<(), String> {
++    let payload = serde_json::to_vec(&json!({"accessKeyId":access,"secretAccessKey":secret})).map_err(|e| e.to_string())?;
++    linux_secret("store", Some(&payload))?;
++    Ok(())
++}
++
++#[cfg(target_os = "linux")]
++fn load_credentials() -> Result<(String, String), String> {
++    match linux_secret("lookup", None)? {
++        None => Ok((String::new(), String::new())),
++        Some(bytes) => {
++            let value: Value = serde_json::from_slice(&bytes).map_err(|_| "系统凭据库中的 R2 凭据记录无效".to_string())?;
++            let access = value["accessKeyId"].as_str().ok_or("系统凭据记录缺少 R2 Access Key")?;
++            let secret = value["secretAccessKey"].as_str().ok_or("系统凭据记录缺少 R2 Secret Key")?;
++            Ok((access.to_string(), secret.to_string()))
++        }
++    }
++}
++
++#[cfg(target_os = "linux")]
++fn delete_credentials() -> Result<(), String> {
++    linux_secret("clear", None)?;
++    Ok(())
++}
++
++#[cfg(not(any(windows, target_os = "linux")))]
+ fn save_credentials(_: &str, _: &str) -> Result<(), String> { Err("当前平台尚未提供系统凭据库适配".into()) }
+-#[cfg(not(windows))]
++#[cfg(not(any(windows, target_os = "linux")))]
+ fn load_credentials() -> Result<(String, String), String> { Ok((String::new(), String::new())) }
+-#[cfg(not(windows))]
++#[cfg(not(any(windows, target_os = "linux")))]
+ fn delete_credentials() -> Result<(), String> { Ok(()) }
+ 
+ fn credentials(config: &DeviceConfig) -> Result<S3Credentials, String> {

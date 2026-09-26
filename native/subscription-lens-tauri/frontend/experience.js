@@ -6,7 +6,7 @@ const baseChart=chart;
 chart=function(){let index=0;return baseChart().replace(/<rect class="bar"[\s\S]*?<\/rect>/g,bar=>{const d=state.data.days[index++];return `<g class="chart-hit" data-chart-day="${d.date}" role="button" tabindex="0" aria-label="${d.date}">${bar}</g>`;});};
 filters=()=>({...baseFilters(),project:state.project,session:state.session,day:state.day,unpriced:state.unpriced,sort:state.sort});
 const pricedValue=s=>s.unpriced>0&&s.unpriced===s.events?null:s.usd;
-const dateOnly=value=>new Date(value+'T12:00:00').toLocaleDateString(locale(),{year:'numeric',month:'short',day:'numeric'});
+const dateOnly=value=>{if(!value)return '—';const date=new Date(value+'T12:00:00');return Number.isNaN(date.getTime())?'—':date.toLocaleDateString(locale(),{year:'numeric',month:'short',day:'numeric'});};
 function duration(seconds){if(seconds===null||!Number.isFinite(seconds))return '—';const minutes=Math.max(1,Math.ceil(seconds/60));const f=(n,unit)=>new Intl.NumberFormat(locale(),{style:'unit',unit,unitDisplay:'short',maximumFractionDigits:0}).format(n);if(minutes<60)return f(minutes,'minute');if(minutes<1440)return f(Math.floor(minutes/60),'hour')+' '+f(minutes%60,'minute');return f(Math.floor(minutes/1440),'day')+' '+f(Math.floor(minutes%1440/60),'hour');}
 function selectedQuota(){const rows=state.data.outlooks||[];const codex=rows.filter(w=>w.limit==='codex');return rows.find(w=>w.limit+':'+w.window===state.quotaKey)||[...(codex.length?codex:rows)].sort((a,b)=>b.used-a.used)[0];}
 function quotaStatus(w){return t(({stale:'额度需要刷新',expired:'等待重置确认',exhausted:'额度已用尽',learning:'正在积累额度观测',risk:'按近期速度可能提前用尽',on_track:'按近期速度可用至重置',uncertain:'暂不能确定是否够用'})[w?.state]||'未连接');}
