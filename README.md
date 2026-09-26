@@ -6,7 +6,7 @@ A desktop app for **Codex subscription users** on Windows and Apple Silicon Macs
 
 [English](README.md) · [简体中文](docs/README.zh-CN.md) · [Nederlands](docs/README.nl.md)
 
-> **3.1.1 · stable Windows and Apple Silicon Tauri release.** Fixes the overview distribution chart so it follows the selected local or multi-device view. Includes the Tauri migration fixes, CodeBuddy/Qoder collection, quota forecasts, and Cloudflare R2 multi-device statistics. Device snapshots retain calculated API-equivalent costs and keep genuinely unpriced records distinct from zero-cost usage. The original CC Switch provider manager and routing runtime are embedded; no separate CC Switch installation is required.
+> **3.1.4 · stable Windows Tauri release.** Improves usage trends with a full-history 365-day heatmap and a clearer layout; groups editable model prices by provider and requires confirmation before applying online price changes. The pricing page keeps its provider categories without a redundant global multi-provider switch. The original CC Switch provider manager and routing runtime remain embedded; no separate CC Switch installation is required. The Apple Silicon macOS package remains 3.1.1.
 
 ## What you can do
 
@@ -46,11 +46,11 @@ The 3.0 routing feature embeds the original provider-manager renderer and select
 
 ## Download and get started
 
-**3.1.1 · Windows x64.** Fixes the overview distribution chart in multi-device view. Stable release with Codex quota forecasts, CodeBuddy and Qoder usage collection, and optional Cloudflare R2 multi-device statistics. API-equivalent cost is an estimate, not a bill or guaranteed savings; records without a matching price remain unpriced. The installer is unsigned and has no automatic updater.
+**3.1.4 · Windows x64.** Fixes usage trends and improves provider-grouped model pricing. Includes Codex quota forecasts, CodeBuddy and Qoder usage collection, and optional Cloudflare R2 multi-device statistics. API-equivalent cost is an estimate, not a bill or guaranteed savings; records without a matching price remain unpriced. The installer is unsigned and has no automatic updater.
 
-[Download 3.1.1 for Windows or Apple Silicon macOS](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.1.1)
+[Download 3.1.4 for Windows](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.1.4) · [Download 3.1.1 for Apple Silicon macOS](https://github.com/zh3nggg/subscription-lens/releases/tag/v3.1.1)
 
-For installation, use `Subscription-Lens-3.1.1-installer-x64.exe`. Close Subscription Lens before running it. Back up existing app data before upgrading from Electron and install into a separate directory if you want an easy rollback. The installer includes third-party license notices and does not require a separate CC Switch installation.
+For Windows installation, use `Subscription-Lens-3.1.4-installer-x64.exe`. Close Subscription Lens before running it. Back up existing app data before upgrading from Electron and install into a separate directory if you want an easy rollback. The installer includes third-party license notices and does not require a separate CC Switch installation.
 
 For Apple Silicon, open `Subscription-Lens-3.1.1-tauri-arm64.dmg` and drag **Subscription Lens** to **Applications**. It requires macOS 13 or later and is ad-hoc signed, not Apple-notarized. On first launch, Control-click the app in Applications, choose **Open**, then confirm **Open**; if macOS still blocks it, use **System Settings → Privacy & Security → Open Anyway**. Do not disable Gatekeeper globally. The ZIP contains the same app. Verify both downloads against `SHA256SUMS-3.1.1-tauri-macos.txt`.
 
@@ -84,7 +84,7 @@ The app reads Codex records without changing them. It stores usage metadata, inc
 
 Monitoring data is saved in `%APPDATA%\Subscription Lens`; the embedded CC Switch runtime also maintains its own local provider database. Uninstalling retains user data by default. Do not share a live database between devices.
 
-The bundled prices are the **2026-09-22 Standard USD snapshot**, including exact GPT-6 Astra, Sol and Luna identities. These rates are applied to collected history, not historical prices at each event's time. Fast/Batch, regional surcharges and tool fees are not included. Unknown models or incomplete pricing remain unpriced. Updating the catalog recalculates existing records.
+The pricing page groups models by provider and lets you edit the four USD-per-million-token rates. Opening it checks [models.dev](https://models.dev) for exact model IDs under the same provider, then shows differences for review; nothing changes until you select and confirm rates. Missing source cache rates are left unchanged. These are API-equivalent estimates, not event-time historical prices; Fast/Batch, regional surcharges and tool fees are excluded. Unknown or incomplete prices remain unpriced. New rates fill missing historical costs, but already-priced records are not automatically recalculated.
 
 API-equivalent cost is an estimate, not a bill or guaranteed savings. Enter your actual payment to compare. Incomplete collection can understate the total value.
 
@@ -100,7 +100,7 @@ Version 1.4 adds read-only Qwen Code, Kimi Code and CodeBuddy Code connectors, p
 
 ## Build and contribute
 
-For Windows 3.1.1, use Windows x64, Node.js 24, Rust and pnpm. For macOS, use an Apple Silicon Mac with macOS 13+, Xcode Command Line Tools, Node.js 24, Rust and pnpm. Initialize the pinned CC Switch submodule, then run the platform build script. Both scripts apply the checked-in Subscription Lens host, GPT-6 pricing and secure-credential patches, build the original CC Switch React renderer and compile its Rust runtime into one app. See [CONTRIBUTING.md](CONTRIBUTING.md) for validation details. The real-account smoke test is manual-only.
+For Windows 3.1.4, use Windows x64, Node.js 24, Rust and pnpm. The current macOS package remains 3.1.1 and requires an Apple Silicon Mac with macOS 13+, Xcode Command Line Tools, Node.js 24, Rust and pnpm. Initialize the pinned CC Switch submodule, then run the platform build script. Both scripts apply the checked-in Subscription Lens host, GPT-6 pricing and secure-credential patches, build the original CC Switch React renderer and compile its Rust runtime into one app. See [CONTRIBUTING.md](CONTRIBUTING.md) for validation details. The real-account smoke test is manual-only.
 
 ```powershell
 npm ci

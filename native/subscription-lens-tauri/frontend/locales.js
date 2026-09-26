@@ -161,7 +161,7 @@ window.LensLocales = {
     "Factuurperiode"
   ],
   "全部": [
-    "All time",
+    "All",
     "Alles"
   ],
   "导出": [
@@ -239,22 +239,6 @@ window.LensLocales = {
   "已连接": [
     "Connected",
     "Verbonden"
-  ],
-  "额度已读取": [
-    "Quota loaded",
-    "Quota opgehaald"
-  ],
-  "额度读取失败": [
-    "Quota query failed",
-    "Quota ophalen mislukt"
-  ],
-  "授权正常，额度读取失败": [
-    "Authorized, but quota could not be loaded",
-    "Geautoriseerd, maar quota kon niet worden opgehaald"
-  ],
-  "授权状态未知": [
-    "Authorization status unknown",
-    "Autorisatiestatus onbekend"
   ],
   "历史快照": [
     "Last snapshot",
@@ -556,22 +540,6 @@ window.LensLocales = {
     "Plan",
     "Abonnement"
   ],
-  "授权账号": [
-    "Authorized account",
-    "Geautoriseerd account"
-  ],
-  "可用额度窗口": [
-    "Available quota windows",
-    "Beschikbare quota-vensters"
-  ],
-  "接口仅提供额度窗口，不提供账户累计 Tokens。": [
-    "The API returns quota windows, not lifetime account tokens.",
-    "De API retourneert quota-vensters, geen totaal aantal accounttokens."
-  ],
-  "尚未查询": [
-    "Not queried yet",
-    "Nog niet opgevraagd"
-  ],
   "最近查询": [
     "Last checked",
     "Laatst gecontroleerd"
@@ -859,6 +827,10 @@ window.LensLocales = {
   "请选择 codex.exe": [
     "Select codex.exe",
     "Selecteer codex.exe"
+  ],
+  "请选择 Codex 程序": [
+    "Select the Codex executable",
+    "Selecteer het Codex-programma"
   ],
   "登录地址未通过校验": [
     "Sign-in URL could not be verified",
@@ -1956,121 +1928,6 @@ window.LensLocales = {
     "Devices",
     "Apparaten"
   ],
-  "Cloudflare R2 同步": [
-    "Cloudflare R2 sync",
-    "Cloudflare R2-synchronisatie"
-  ],
-  "每台设备在指定 bucket 前缀下保存一个 Sublens 统计快照。": [
-    "Each device keeps one Sublens usage snapshot under the selected bucket prefix.",
-    "Elk apparaat bewaart één Sublens-gebruikssnapshot onder het gekozen bucketprefix."
-  ],
-  "可在此创建专用于 Sublens 的 R2 bucket；也可以填写已有的专用 bucket。对象前缀相当于逻辑文件夹，不会上传源日志、聊天正文、项目路径或凭据。": [
-    "Create a dedicated R2 bucket for Sublens here, or enter an existing dedicated bucket. The object prefix acts as a virtual folder; source logs, chat text, project paths and credentials are never uploaded.",
-    "Maak hier een aparte R2-bucket voor Sublens aan of voer een bestaande aparte bucket in. Het objectprefix werkt als virtuele map; bronlogs, chattekst, projectpaden en inloggegevens worden nooit geüpload."
-  ],
-  "Cloudflare Account ID": [
-    "Cloudflare Account ID",
-    "Cloudflare-account-ID"
-  ],
-  "R2 bucket": [
-    "R2 bucket",
-    "R2-bucket"
-  ],
-  "创建 R2 bucket": [
-    "Create R2 bucket",
-    "R2-bucket aanmaken"
-  ],
-  "R2 bucket 已创建": [
-    "R2 bucket created",
-    "R2-bucket aangemaakt"
-  ],
-  "对象前缀（逻辑文件夹）": [
-    "Object prefix (virtual folder)",
-    "Objectprefix (virtuele map)"
-  ],
-  "密钥保存在 Windows 凭据管理器中，不写入统计快照。": [
-    "Keys are stored in Windows Credential Manager and are never included in usage snapshots.",
-    "Sleutels worden opgeslagen in Windows Credential Manager en nooit in gebruikssnapshots opgenomen."
-  ],
-  "密钥保存在系统凭据库中，不写入统计快照。": [
-    "Keys are stored in the system credential vault and are never included in usage snapshots.",
-    "Sleutels worden opgeslagen in de systeemreferentiekluis en nooit in gebruikssnapshots opgenomen."
-  ],
-  "保存设置": ["Save settings", "Instellingen opslaan"],
-  "测试连接": ["Test connection", "Verbinding testen"],
-  "立即双向同步": ["Sync both ways now", "Nu in beide richtingen synchroniseren"],
-  "立即同步": ["Sync now", "Nu synchroniseren"],
-  "已配置": ["Configured", "Geconfigureerd"],
-  "未配置": ["Not configured", "Niet geconfigureerd"],
-  "已同步设备": ["Synced devices", "Gesynchroniseerde apparaten"],
-  "每个文件仅包含匿名记录标识、时间、模型、Token 分类和可用计价。": [
-    "Each file contains only anonymous record IDs, timestamps, models, token categories and available pricing.",
-    "Elk bestand bevat alleen anonieme record-ID's, tijdstempels, modellen, tokencategorieën en beschikbare prijzen."
-  ],
-  "尚未同步设备；点击“立即双向同步”。": [
-    "No devices synced yet. Select “Sync both ways now”.",
-    "Nog geen apparaten gesynchroniseerd. Kies ‘Nu in beide richtingen synchroniseren’."
-  ],
-  "配置 R2 后，设备会在首次同步时显示在此处。": [
-    "Configure R2 to show devices here after the first sync.",
-    "Configureer R2 om apparaten hier na de eerste synchronisatie te zien."
-  ],
-  "多设备": [
-    "All devices",
-    "Alle apparaten"
-  ],
-  "{n} 台设备 · 最近同步快照": [
-    "{n} devices · latest synced snapshots",
-    "{n} apparaten · nieuwste gesynchroniseerde snapshots"
-  ],
-  "当前设备的本机记录": [
-    "Local records from this device",
-    "Lokale records van dit apparaat"
-  ],
-  "暂时没有设备快照，请到“设备”页面执行同步。": [
-    "No device snapshots yet. Run sync on the Devices page.",
-    "Nog geen apparaatsnapshots. Synchroniseer op de pagina Apparaten."
-  ],
-  "配置 Cloudflare R2 后即可汇总多台设备的统计快照。": [
-    "Configure Cloudflare R2 to combine usage snapshots from multiple devices.",
-    "Configureer Cloudflare R2 om gebruikssnapshots van meerdere apparaten te combineren."
-  ],
-  "配置设备同步": [
-    "Set up device sync",
-    "Apparaatsynchronisatie instellen"
-  ],
-  "R2 连接成功": [
-    "R2 connection succeeded",
-    "R2-verbinding geslaagd"
-  ],
-  "R2 设置已保存": [
-    "R2 settings saved",
-    "R2-instellingen opgeslagen"
-  ],
-  "断开 R2 同步": [
-    "Disconnect R2 sync",
-    "R2-synchronisatie verbreken"
-  ],
-  "R2 同步已断开；本机缓存的设备数据仍保留": [
-    "R2 sync disconnected; locally cached device data is kept",
-    "R2-synchronisatie verbroken; lokaal gecachte apparaatgegevens blijven behouden"
-  ],
-  "已同步 {n} 台设备": [
-    "Synced {n} devices",
-    "{n} apparaten gesynchroniseerd"
-  ],
-  "已保存；留空以保留": [
-    "Saved; leave blank to keep",
-    "Opgeslagen; laat leeg om te behouden"
-  ],
-  "粘贴 Access Key ID": [
-    "Paste Access Key ID",
-    "Plak Access Key ID"
-  ],
-  "粘贴 Secret Access Key": [
-    "Paste Secret Access Key",
-    "Plak Secret Access Key"
-  ],
   "导出设备数据": [
     "Export device data",
     "Apparaatgegevens exporteren"
@@ -2286,6 +2143,10 @@ window.LensLocales = {
   "启用": [
     "Enable",
     "Inschakelen"
+  ],
+  "测试连接": [
+    "Test connection",
+    "Verbinding testen"
   ],
   "连接成功 · {n} 个模型": [
     "Connected · {n} models",
@@ -2759,6 +2620,86 @@ window.LensLocales = {
     "Choose a preset, then adjust the fields below if needed.",
     "Kies een preset en pas daarna zo nodig de velden hieronder aan."
   ],
+  "先输入或保存 API Key，再获取模型目录。": [
+    "Enter or save an API key before fetching the model catalog.",
+    "Voer een API-sleutel in of sla hem op voordat je de modelcatalogus ophaalt."
+  ],
+  "按 CC Switch 的 Codex 供应商结构添加端点、凭据和模型目录。": [
+    "Add an endpoint, credentials and model catalog using the CC Switch Codex provider structure.",
+    "Voeg een endpoint, referenties en modelcatalogus toe volgens de Codex-providerstructuur van CC Switch."
+  ],
+  "保存到 Codex config.toml 的默认 model；留空时使用模型目录第一行。": [
+    "The default model saved to Codex config.toml; the first model in the catalog is used when this is empty.",
+    "Het standaardmodel dat in Codex config.toml wordt opgeslagen; het eerste catalogusmodel wordt gebruikt als dit leeg is."
+  ],
+  "模型目录会按 CC Switch 格式保存，编辑时保留显示名、上下文窗口和推理档位。": [
+    "The model catalog is saved in the CC Switch format, preserving display names, context windows and reasoning levels when edited.",
+    "De modelcatalogus wordt opgeslagen in het CC Switch-formaat; weergavenamen, contextvensters en redeneerniveaus blijven behouden bij bewerken."
+  ],
+  "上游格式": [
+    "Upstream format",
+    "Upstreamindeling"
+  ],
+  "Responses（原生）": [
+    "Responses (native)",
+    "Responses (native)"
+  ],
+  "这些字段对应 CC Switch 的 Codex 配置。": [
+    "These fields correspond to the CC Switch Codex configuration.",
+    "Deze velden komen overeen met de Codex-configuratie van CC Switch."
+  ],
+  "模型目录": [
+    "Model catalog",
+    "Modelcatalogus"
+  ],
+  "这是 Codex 看到的模型列表。每行保存显示名、真实模型 ID、上下文窗口和供应商接受的推理档位。": [
+    "This is the model list shown to Codex. Each row saves a display name, real model ID, context window and reasoning levels accepted by the provider.",
+    "Dit is de modellijst die Codex ziet. Elke rij bewaart een weergavenaam, echte model-ID, contextvenster en redeneerniveaus die de provider accepteert."
+  ],
+  "添加模型": [
+    "Add model",
+    "Model toevoegen"
+  ],
+  "显示名称 / 真实模型 ID": [
+    "Display name / real model ID",
+    "Weergavenaam / echte model-ID"
+  ],
+  "上下文 / 推理档位": [
+    "Context / reasoning levels",
+    "Context / redeneerniveaus"
+  ],
+  "显示名称": [
+    "Display name",
+    "Weergavenaam"
+  ],
+  "真实模型 ID": [
+    "Real model ID",
+    "Echte model-ID"
+  ],
+  "上下文窗口": [
+    "Context window",
+    "Contextvenster"
+  ],
+  "推理档位：low, high, max": [
+    "Reasoning levels: low, high, max",
+    "Redeneerniveaus: low, high, max"
+  ],
+  "移除模型": [
+    "Remove model",
+    "Model verwijderen"
+  ],
+  "还没有模型目录，点击添加模型或获取模型列表。": [
+    "No model catalog yet. Add a model or fetch the model list.",
+    "Nog geen modelcatalogus. Voeg een model toe of haal de modellijst op."
+  ],
+  "保存后会写入 CC Switch 兼容的 modelCatalog.models；不会把 API Key 写入配置文件。": [
+    "Saving writes CC Switch-compatible modelCatalog.models; the API key is never written to the config file.",
+    "Opslaan schrijft modelCatalog.models in CC Switch-formaat; de API-sleutel wordt nooit in het configuratiebestand gezet."
+  ],
+  "高级选项": [
+    "Advanced options",
+    "Geavanceerde opties"
+  ],
   "密钥保存在系统凭据库中，不写入统计快照。": [
     "Keys are stored in the system keyring, not in usage snapshots.",
     "Sleutels worden opgeslagen in de systeemsleutelbos, niet in gebruikssnapshots."
@@ -2790,6 +2731,86 @@ window.LensLocales = {
   "系统凭据记录缺少 R2 Access Key": [
     "R2 access key missing from keyring record",
     "R2 Access Key ontbreekt in de sleutelbos"
+  ],
+  "检查新价格": [
+    "Check for new prices",
+    "Controleer nieuwe prijzen"
+  ],
+  "正在检查价格…": [
+    "Checking prices…",
+    "Prijzen controleren…"
+  ],
+  "模型供应商": [
+    "Model providers",
+    "Modelaanbieders"
+  ],
+  "搜索模型": [
+    "Search models",
+    "Zoek modellen"
+  ],
+  "本地价格按 USD / 百万 Tokens 计算；在线价格来自 models.dev，仅在确认后更新。": [
+    "Local prices use USD per million tokens. Online prices come from models.dev and change only after your confirmation.",
+    "Lokale prijzen zijn in USD per miljoen tokens. Online prijzen komen van models.dev en wijzigen alleen na uw bevestiging."
+  ],
+  "最近检查": [
+    "Last checked",
+    "Laatst gecontroleerd"
+  ],
+  "发现 {n} 项差异": [
+    "Found {n} price differences",
+    "{n} prijsverschillen gevonden"
+  ],
+  "查看差异并确认": [
+    "Review differences",
+    "Verschillen bekijken"
+  ],
+  "修改价格": [
+    "Edit price",
+    "Prijs wijzigen"
+  ],
+  "没有匹配的模型": [
+    "No matching models",
+    "Geen overeenkomende modellen"
+  ],
+  "修改价格只会为缺价的历史记录补价；已有费用不会自动重新计价。": [
+    "Changing prices fills missing historical costs only; existing costs are not automatically recalculated.",
+    "Prijswijzigingen vullen alleen ontbrekende historische kosten aan; bestaande kosten worden niet automatisch herberekend."
+  ],
+  "修改模型价格": [
+    "Edit model prices",
+    "Modelprijzen wijzigen"
+  ],
+  "保存后仅为缺价的历史记录补价；已有费用不会自动重新计价。": [
+    "Saving fills missing historical costs only; existing costs are not automatically recalculated.",
+    "Opslaan vult alleen ontbrekende historische kosten aan; bestaande kosten worden niet automatisch herberekend."
+  ],
+  "确认价格差异": [
+    "Review price differences",
+    "Prijsverschillen beoordelen"
+  ],
+  "在线价格来自 models.dev。勾选要采用的模型；现有价格在确认前不会变化。": [
+    "Online prices come from models.dev. Select the models to update; current prices stay unchanged until you confirm.",
+    "Online prijzen komen van models.dev. Selecteer de modellen; huidige prijzen blijven ongewijzigd tot u bevestigt."
+  ],
+  "全选 / 全不选": [
+    "Select all / none",
+    "Alles / niets selecteren"
+  ],
+  "应用所选价格": [
+    "Apply selected prices",
+    "Geselecteerde prijzen toepassen"
+  ],
+  "请选择价格": [
+    "Select a price",
+    "Selecteer een prijs"
+  ],
+  "已更新 {n} 个模型": [
+    "Updated {n} models",
+    "{n} modellen bijgewerkt"
+  ],
+  "价格已保存": [
+    "Price saved",
+    "Prijs opgeslagen"
   ],
   "系统凭据记录缺少 R2 Secret Key": [
     "R2 secret key missing from keyring record",

@@ -161,7 +161,7 @@ window.LensLocales = {
     "Factuurperiode"
   ],
   "全部": [
-    "All time",
+    "All",
     "Alles"
   ],
   "导出": [
@@ -2699,5 +2699,121 @@ window.LensLocales = {
   "高级选项": [
     "Advanced options",
     "Geavanceerde opties"
+  ],
+  "密钥保存在系统凭据库中，不写入统计快照。": [
+    "Keys are stored in the system keyring, not in usage snapshots.",
+    "Sleutels worden opgeslagen in de systeemsleutelbos, niet in gebruikssnapshots."
+  ],
+  "无法打开系统凭据库。请安装 libsecret-tools 并解锁登录密钥库。": [
+    "Cannot open the system keyring. Install libsecret-tools and unlock your login keyring.",
+    "Kan de systeemsleutelbos niet openen. Installeer libsecret-tools en ontgrendel de aanmeldsleutelbos."
+  ],
+  "无法打开系统凭据库输入流": [
+    "Cannot open keyring input",
+    "Kan de invoer voor de sleutelbos niet openen"
+  ],
+  "无法写入系统凭据库。": [
+    "Cannot write to the system keyring.",
+    "Kan niet naar de systeemsleutelbos schrijven."
+  ],
+  "无法读取系统凭据库结果": [
+    "Cannot read the system keyring result",
+    "Kan het resultaat van de systeemsleutelbos niet lezen"
+  ],
+  "系统凭据库不可用或已锁定。请确认已安装 libsecret-tools 和 Secret Service 服务，解锁登录密钥库后重试。": [
+    "System keyring unavailable or locked. Unlock the login keyring and retry (libsecret-tools and a Secret Service provider are required).",
+    "De systeemsleutelbos is niet beschikbaar of vergrendeld. Installeer libsecret-tools en een Secret Service-provider, ontgrendel de aanmeldsleutelbos en probeer opnieuw."
+  ],
+  "系统凭据库中的 R2 凭据记录无效": [
+    "Invalid R2 credential record in system keyring",
+    "Ongeldige R2-inloggegevens in de systeemsleutelbos"
+  ],
+  "系统凭据记录缺少 R2 Access Key": [
+    "R2 access key missing from keyring record",
+    "R2 Access Key ontbreekt in de sleutelbos"
+  ],
+  "检查新价格": [
+    "Check for new prices",
+    "Controleer nieuwe prijzen"
+  ],
+  "正在检查价格…": [
+    "Checking prices…",
+    "Prijzen controleren…"
+  ],
+  "模型供应商": [
+    "Model providers",
+    "Modelaanbieders"
+  ],
+  "搜索模型": [
+    "Search models",
+    "Zoek modellen"
+  ],
+  "本地价格按 USD / 百万 Tokens 计算；在线价格来自 models.dev，仅在确认后更新。": [
+    "Local prices use USD per million tokens. Online prices come from models.dev and change only after your confirmation.",
+    "Lokale prijzen zijn in USD per miljoen tokens. Online prijzen komen van models.dev en wijzigen alleen na uw bevestiging."
+  ],
+  "最近检查": [
+    "Last checked",
+    "Laatst gecontroleerd"
+  ],
+  "发现 {n} 项差异": [
+    "Found {n} price differences",
+    "{n} prijsverschillen gevonden"
+  ],
+  "查看差异并确认": [
+    "Review differences",
+    "Verschillen bekijken"
+  ],
+  "修改价格": [
+    "Edit price",
+    "Prijs wijzigen"
+  ],
+  "没有匹配的模型": [
+    "No matching models",
+    "Geen overeenkomende modellen"
+  ],
+  "修改价格只会为缺价的历史记录补价；已有费用不会自动重新计价。": [
+    "Changing prices fills missing historical costs only; existing costs are not automatically recalculated.",
+    "Prijswijzigingen vullen alleen ontbrekende historische kosten aan; bestaande kosten worden niet automatisch herberekend."
+  ],
+  "修改模型价格": [
+    "Edit model prices",
+    "Modelprijzen wijzigen"
+  ],
+  "保存后仅为缺价的历史记录补价；已有费用不会自动重新计价。": [
+    "Saving fills missing historical costs only; existing costs are not automatically recalculated.",
+    "Opslaan vult alleen ontbrekende historische kosten aan; bestaande kosten worden niet automatisch herberekend."
+  ],
+  "确认价格差异": [
+    "Review price differences",
+    "Prijsverschillen beoordelen"
+  ],
+  "在线价格来自 models.dev。勾选要采用的模型；现有价格在确认前不会变化。": [
+    "Online prices come from models.dev. Select the models to update; current prices stay unchanged until you confirm.",
+    "Online prijzen komen van models.dev. Selecteer de modellen; huidige prijzen blijven ongewijzigd tot u bevestigt."
+  ],
+  "全选 / 全不选": [
+    "Select all / none",
+    "Alles / niets selecteren"
+  ],
+  "应用所选价格": [
+    "Apply selected prices",
+    "Geselecteerde prijzen toepassen"
+  ],
+  "请选择价格": [
+    "Select a price",
+    "Selecteer een prijs"
+  ],
+  "已更新 {n} 个模型": [
+    "Updated {n} models",
+    "{n} modellen bijgewerkt"
+  ],
+  "价格已保存": [
+    "Price saved",
+    "Prijs opgeslagen"
+  ],
+  "系统凭据记录缺少 R2 Secret Key": [
+    "R2 secret key missing from keyring record",
+    "R2 Secret Key ontbreekt in de sleutelbos"
   ]
 };

@@ -270,3 +270,24 @@ body:not(.compact-mode) .trend-model-track{height:7px;border-radius:99px;backgro
 body:not(.compact-mode) .trend-model-track span{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,#0a84ff,#64d2ff)}
 body:not(.compact-mode) .trend-card .trend-footer{padding-top:2px}
 @media(max-width:720px){body:not(.compact-mode) .trend-controls{justify-content:flex-start;margin-top:5px}.trend-card .panel-head{align-items:flex-start;flex-direction:column}body:not(.compact-mode) .trend-view-tabs{margin-left:10px}.trend-card .trend-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+/* Pricing stays compact and keeps each provider visible as a separate tab. */
+.price-toolbar{display:flex;align-items:center;gap:12px;margin:0 0 12px;min-width:0}
+.price-provider-tabs{display:flex;gap:4px;overflow-x:auto;min-width:0;flex:1;padding:3px;background:var(--subtle);border-radius:9px;scrollbar-width:thin}
+.price-provider-tabs button{white-space:nowrap;padding:7px 11px;border-radius:7px;color:var(--muted);font-size:11px}
+.price-provider-tabs button.active{color:var(--text);background:var(--card);box-shadow:0 1px 3px #0001}
+.price-provider-tabs small{margin-left:6px;opacity:.65}
+#price-search{width:170px;flex:none}
+.price-notice{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.price-notice .price-error{color:#b42318}
+.price-table th,.price-table td{padding:10px 15px}
+.price-table td strong{font-weight:500}
+.price-field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.price-field-grid .field{margin:0}
+.price-field-grid .field span{display:block;color:var(--muted);font-size:11px;margin-bottom:5px}
+.price-field-grid .input{width:100%}
+.price-review-list{max-height:min(48vh,420px);overflow:auto;border:1px solid var(--line);border-radius:9px}
+.price-review-item{display:flex;gap:12px;padding:12px;border-bottom:1px solid var(--line);font-size:11px;cursor:pointer}
+.price-review-item:last-child{border-bottom:0}
+.price-review-item>span{display:grid;gap:3px}
+.price-review-item small{color:var(--muted)}
+.price-review-item input{align-self:start;margin-top:3px}

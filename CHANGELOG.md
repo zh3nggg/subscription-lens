@@ -1,3 +1,32 @@
+# 3.1.4 · 正式版
+
+- 完善用量趋势：热力图使用完整每日历史和本地日期，展示最近 365 天；图表布局更清晰，并补全无逐日记录时的模型分布回退。
+- 价格页按模型供应商分类，支持编辑四类单价；models.dev 价格差异需由用户确认后应用，统计图切换 Tokens／费用时颜色保持一致。
+- 价格页面不再显示顶部的“Codex 套餐 / 多供应商”全局切换；页面内的供应商分类标签继续保留。
+- Improve usage trends with a full-history, local-date 365-day heatmap, a clearer chart layout and a model-summary fallback.
+- Group prices by provider, allow editing four token rates and apply models.dev updates only after confirmation; keep chart colors stable between token and cost views.
+- Remove the redundant global Codex / multi-provider switch from the pricing page while retaining its provider category tabs.
+- Verbeter de gebruikstrends met een warmtekaart van 365 dagen op basis van volledige historie en lokale datums, plus een helderdere grafieklayout.
+- Prijzen zijn per aanbieder gegroepeerd; prijsupdates van models.dev vereisen bevestiging en grafiekkleuren blijven gelijk bij tokens of kosten.
+- Verwijder de overbodige algemene Codex-/multi-aanbieder-schakelaar van de prijspagina; de categorietabs per aanbieder blijven beschikbaar.
+
+# 3.1.3 · 开发中
+
+- 修复用量趋势热力图只读取当前筛选周期、日期被 UTC 转换错位的问题；现在按最近 365 天展示本地日期，并查询完整每日历史数据。
+- 重整趋势卡片的信息层级与控件布局，减少重复指标，让图表优先显示；热力图网格会随卡片宽度收缩，不再横向溢出。
+- Fix the usage trend heatmap's range-limited data and UTC date shift. It now displays the latest 365 local-calendar days using full daily history.
+- Rework the trend card hierarchy and responsive layout so charts remain readable and the calendar fits its container.
+- Herstel de trendwarmtekaart met volledige daghistorie over de laatste 365 lokale kalenderdagen en voorkom horizontale overflow.
+
+# 3.1.2 · 开发中
+
+- Codex 与多供应商价格页均按模型供应商切换，并支持搜索和直接修改四类每百万 Token 价格。
+- 打开价格页时检查 models.dev 的同名模型价格；仅展示差异，用户选择并确认后才写入本地价格。未提供的缓存价格保持原值；已有费用不会自动重新计价。
+- 统计饼图的颜色按供应商或模型身份分配，切换 Tokens／费用时保持一致。
+- 修复本机模型缺少逐模型未计价字段时，图例有金额而饼图中心却显示“—”的问题；多设备视图保持正常。
+- Group prices by provider, allow editing four token rates, and preview models.dev differences before applying selected updates. Keep chart colors stable across token and cost views.
+- Groepeer prijzen per aanbieder, bewerk vier tokentarieven en bekijk verschillen met models.dev voordat geselecteerde wijzigingen worden toegepast. Grafiekkleuren blijven gelijk bij wisselen tussen tokens en kosten.
+
 # 3.1.1 · Windows 安装包修正版
 
 - 修复 Windows Tauri 构建遗漏模型 Token 汇总补丁，导致总览扇形图排除缓存读取与写入 Tokens、与顶部总量不一致。构建时临时应用补丁并在结束后还原 CC Switch 源码。

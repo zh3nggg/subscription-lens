@@ -89,7 +89,7 @@ De app leest Codex-records zonder ze te wijzigen. Gebruiksmetadata, waaronder pr
 
 Gegevens staan op Windows in `%APPDATA%\Subscription Lens` en op macOS in `~/Library/Application Support/Subscription Lens`. Ze blijven standaard behouden na het verwijderen van de app. Stel `LENS_DATA_DIR` in voor een andere locatie. Deel een actieve database niet tussen apparaten.
 
-De meegeleverde tarieven zijn een **momentopname van Standard-tarieven in USD op 2026-09-22**, met de exacte modelidentiteiten GPT-6 Astra, Sol en Luna. Ze worden toegepast op het verzamelde historische gebruik; het zijn geen historische tarieven per gebeurtenis. Fast/Batch, regionale toeslagen en toolkosten zijn niet inbegrepen. Onbekende modellen of onvolledige tarieven blijven onberekend. Bij het bijwerken van de tarieven worden bestaande records opnieuw berekend.
+De prijspagina groepeert modellen per aanbieder en laat u de vier tarieven per miljoen tokens aanpassen. De Windows 3.1.4-broncode controleert bij het openen models.dev op dezelfde model-ID bij dezelfde aanbieder en toont verschillen ter beoordeling; tarieven veranderen pas na uw bevestiging. Ontbrekende cachetarieven blijven ongewijzigd. Nieuwe tarieven vullen ontbrekende historische kosten aan, maar reeds berekende kosten worden niet automatisch herberekend. Fast/Batch, regionale toeslagen en toolkosten zijn niet inbegrepen; onbekende of onvolledige tarieven blijven ongeprijsd.
 
 Equivalente API-kosten zijn een schatting, geen factuur of gegarandeerde besparing. Vul je werkelijke betaling in om te vergelijken. Ontbrekende gegevens kunnen de geschatte waarde verlagen.
 
@@ -105,7 +105,7 @@ Versie 1.4 voegt read-only connectors voor Qwen Code, Kimi Code en CodeBuddy Cod
 
 ## Zelf bouwen en bijdragen
 
-Voor Windows 3.1.1 zijn Node.js 24, Rust en pnpm nodig. macOS vereist daarnaast een Apple Silicon Mac met macOS 13+ en Xcode Command Line Tools. Initialiseer voor beide platforms de CC Switch-submodule; de scripts passen de Subscription Lens-host-, GPT-6-prijs- en beveiligde-referentiepatches toe en compileren de originele beheerinterface en Rust-runtime. Zie [CONTRIBUTING.md](../CONTRIBUTING.md) voor tests en vertalingen. De test met een echt account is uitsluitend handmatig.
+Voor de Windows 3.1.4-broncode zijn Node.js 24, Rust en pnpm nodig. Het bestaande macOS 3.1.1-pakket vereist daarnaast een Apple Silicon Mac met macOS 13+ en Xcode Command Line Tools. Initialiseer voor beide platforms de CC Switch-submodule; de scripts passen de Subscription Lens-host-, GPT-6-prijs- en beveiligde-referentiepatches toe en compileren de originele beheerinterface en Rust-runtime. Zie [CONTRIBUTING.md](../CONTRIBUTING.md) voor tests en vertalingen. De test met een echt account is uitsluitend handmatig.
 
 ```powershell
 npm ci

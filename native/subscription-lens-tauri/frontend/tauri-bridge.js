@@ -47,7 +47,7 @@
   const safe = (fn) => (...args) => Promise.resolve().then(() => fn(...args)).then(success, failure);
   window.addEventListener('error', (event) => recordFrontendLog('error', event.message || 'renderer error', { source: event.filename, line: event.lineno, column: event.colno }));
   window.addEventListener('unhandledrejection', (event) => recordFrontendLog('error', `unhandled rejection: ${event.reason?.message || event.reason || 'unknown'}`));
-  recordFrontendLog('info', 'renderer initialized', { version: '3.1.1', host: 'tauri' });
+  recordFrontendLog('info', 'renderer initialized', { version: '3.1.4', host: 'tauri' });
 
   const codexHome = () => {
     const home = String(navigator.userAgent || '').includes('Windows') ? '%USERPROFILE%' : '~';
@@ -318,7 +318,9 @@
       unpriced: Boolean(filters.unpriced), sort: filters.sort || 'cost', offset: number(filters.offset), limit: number(filters.limit, 50),
     }).catch((error) => { recordFrontendLog('error', 'multi-provider monitor query failed', { message: error?.message }); return null; });
     let authStatusError = null;
-    const [summary, trends, models, providers, logs, settings, providerInfo, authStatus, scannedSessions, monitor, deviceCloud, deviceSync] = await Promise.all([
+    const allTrendsPromise = startDate === null ? Promise.resolve(null) : invoke('get_usage_trends', { appType: 'codex', providerName, model: modelFilter, startDate: null, endDate: null })
+      .catch((error) => { recordFrontendLog('warn', 'full-history trend query failed; using selected range', { message: error?.message }); return null; });
+    const [summary, trends, models, providers, logs, settings, providerInfo, authStatus, scannedSessions, monitor, deviceCloud, deviceSync, allTrends] = await Promise.all([
       invoke('get_usage_summary', common),
       invoke('get_usage_trends', common),
       invoke('get_model_stats', common),
@@ -337,6 +339,7 @@
       monitorPromise,
       invoke('sublens_device_query', { from: startDate ?? 0, to: endDate, deviceId: filters.device || null }).catch(() => ({ devices: [], summary: { tokens: 0, cached: 0, output: 0, events: 0, sessions: 0, usd: 0, pricedTokens: 0, unpriced: 0 }, models: [], days: [], rows: [] })),
       invoke('sublens_device_get_config').catch(() => ({ configured: false, credentialsSaved: false, accountId: '', bucket: '', prefix: 'subscription-lens/devices', deviceId: '', deviceName: '' })),
+      allTrendsPromise,
     ]);
     const codexSessions = (scannedSessions || []).filter((entry) => entry?.providerId === 'codex');
     const sessionCatalog = new Map(codexSessions.map((entry) => [String(entry.sessionId), {
@@ -376,12 +379,14 @@
     const totalTokens = number(summary?.realTotalTokens, number(summary?.totalInputTokens) + number(summary?.totalOutputTokens));
     const usd = moneyNumber(summary?.totalCost);
     const events = number(summary?.totalRequests);
-    const trendDays = (trends || []).map((item) => ({
+    const mapTrendDay = (item) => ({
       date: item.date,
       tokens: number(item.totalTokens),
       usd: moneyNumber(item.totalCost),
       events: number(item.requestCount),
-    }));
+    });
+    const trendDays = (trends || []).map(mapTrendDay).sort((a, b) => a.date.localeCompare(b.date));
+    const allTrendDays = (allTrends || trends || []).map(mapTrendDay).sort((a, b) => a.date.localeCompare(b.date));
     const needle = String(filters.query || '').trim().toLowerCase();
     const allLogRows = (logs?.data || []).map((item) => mapLog(item, sessionCatalog)).filter((row) => {
       const haystack = [row.project, row.title, row.model, row.session, row.provider].map((value) => String(value || '').toLowerCase()).join(' ');
@@ -454,7 +459,7 @@
       sessions: hierarchy.sessions.slice(offset, offset + limit),
       sessionTotal: hierarchy.sessions.length,
       days: deviceSelected ? deviceCloud.days : trendDays,
-      trend: { days: trendDays, models: modelsRows, modelsByDay: [] },
+      trend: { days: allTrendDays, periodDays: trendDays, models: modelsRows, modelsByDay: [] },
       rows: deviceSelected ? deviceCloud.rows : logRows,
       offset,
       limit,
@@ -484,7 +489,7 @@
       deviceCloud,
       deviceSync,
       currentDevice: null,
-      desktop: { compact: false, pinned: false, version: '3.1.1', detectedMonitors: monitor?.detected || [] },
+      desktop: { compact: false, pinned: false, version: '3.1.4', detectedMonitors: monitor?.detected || [] },
       health: { reasons: [], readErrors: 0, parseErrors: 0, partial: 0 },
       timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       providers: providerInfo,
@@ -532,6 +537,52 @@
     } catch {
       return { version: 'CCS', asOf: new Date().toISOString().slice(0, 10), models: {} };
     }
+  }
+
+  const pricingFields = ['inputCostPerMillion', 'cacheReadCostPerMillion', 'cacheCreationCostPerMillion', 'outputCostPerMillion'];
+  const pricingProvider = id => {
+    const value = String(id || '').toLowerCase();
+    if (/^claude[-./:]/.test(value)) return 'anthropic';
+    if (/^(?:gpt|o[13456])[-./:]/.test(value)) return 'openai';
+    if (/^gemini[-./:]/.test(value)) return 'google';
+    if (/^deepseek[-./:]/.test(value)) return 'deepseek';
+    if (/^(?:qwen|qwq)[-./:]/.test(value)) return 'alibaba';
+    return null;
+  };
+  const validPrice = value => (typeof value === 'number' || (typeof value === 'string' && value.trim() !== ''))
+    && Number.isFinite(Number(value)) && Number(value) >= 0 && Number(value) < 1e12;
+  async function fetchPriceChanges() {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+    let response;
+    try { response = await fetch('https://models.dev/api.json', { signal: controller.signal }); }
+    finally { clearTimeout(timeout); }
+    if (!response.ok) throw new Error(`models.dev HTTP ${response.status}`);
+    const source = await response.json();
+    const rows = await invoke('get_model_pricing');
+    const candidates = new Map();
+    for (const [providerId, provider] of Object.entries(source || {})) {
+      for (const [id, model] of Object.entries(provider?.models || {})) {
+        if (model?.status === 'deprecated' || typeof model?.cost?.input !== 'number' || typeof model?.cost?.output !== 'number' || !validPrice(model.cost.input) || !validPrice(model.cost.output)) continue;
+        const key = `${providerId}:${id.toLowerCase()}`;
+        candidates.set(key, model);
+      }
+    }
+    const changes = [];
+    for (const row of rows || []) {
+      const provider = pricingProvider(row.modelId);
+      if (!provider) continue;
+      const sourceModel = candidates.get(`${provider}:${row.modelId.toLowerCase()}`);
+      if (!sourceModel) continue;
+      const cost = sourceModel.cost;
+      // Missing cache rates in the source are not interpreted as free cache usage.
+      const next = { ...row,
+        inputCostPerMillion: String(cost.input), outputCostPerMillion: String(cost.output),
+        cacheReadCostPerMillion: typeof cost.cache_read === 'number' && validPrice(cost.cache_read) ? String(cost.cache_read) : row.cacheReadCostPerMillion,
+        cacheCreationCostPerMillion: typeof cost.cache_write === 'number' && validPrice(cost.cache_write) ? String(cost.cache_write) : row.cacheCreationCostPerMillion };
+      if (pricingFields.some(field => Number(next[field]) !== Number(row[field]))) changes.push({ current: row, next, provider });
+    }
+    return { checkedAt: new Date().toISOString(), source: 'models.dev', checked: rows.length, changes };
   }
 
   let loginDeviceCode = null;
@@ -671,6 +722,20 @@
     exportPrices: safe(async () => {
       const catalog = await modelCatalog();
       const anchor = document.createElement('a'); anchor.href = URL.createObjectURL(new Blob([JSON.stringify(catalog, null, 2)], { type: 'application/json' })); anchor.download = 'subscription-lens-model-prices.json'; anchor.click(); URL.revokeObjectURL(anchor.href); return Object.keys(catalog.models || {}).length;
+    }),
+    fetchPriceChanges: safe(fetchPriceChanges),
+    updatePrice: safe(async (entry) => {
+      if (!entry?.modelId || pricingFields.some(field => !validPrice(entry[field]))) throw new Error('Invalid model price');
+      await invoke('update_model_pricing', { modelId: entry.modelId, displayName: entry.displayName || entry.modelId,
+        inputCost: String(entry.inputCostPerMillion), outputCost: String(entry.outputCostPerMillion),
+        cacheReadCost: String(entry.cacheReadCostPerMillion), cacheCreationCost: String(entry.cacheCreationCostPerMillion) });
+      invalidateQueryCache(); return true;
+    }),
+    applyPriceChanges: safe(async (entries) => {
+      if (!Array.isArray(entries) || entries.some(entry => !entry?.modelId || pricingFields.some(field => !validPrice(entry[field])))) throw new Error('Invalid model price');
+      if (!entries.length) return 0;
+      const count = await invoke('update_model_pricing_batch', { entries });
+      invalidateQueryCache(); return count;
     }),
     importPrices: safe(() => 0),
     resetPrices: safe(() => true),

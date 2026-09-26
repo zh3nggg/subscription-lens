@@ -89,7 +89,7 @@ Windows 3.0.0 复用了 [CC Switch](https://github.com/farion1231/cc-switch) 的
 - 使用记录只读；保存时间、模型、项目名、Token 与来源元数据，不保存聊天正文，不直接读取认证文件。
 - 每 15 秒检查新增记录。已连接账户默认每 60 秒查询额度；账户 Token 汇总约每 10 分钟更新。
 - 同一记录重复扫描或归档不会重复入账。原记录被删除后，已经采集到的历史仍保留。
-- API 等价成本按价格页 **2026-09-22 的 Standard 价格快照**重估已采集用量，包含 GPT-6 Astra、Sol、Luna 的精确模型身份，以及输入、缓存、写入和输出分类；推理 Token 已含在输出时不重复收费。
+- 价格页按模型供应商分类，可修改输入、缓存读取、缓存写入和输出四种单价。Windows 3.1.4 源码在打开价格页时检查 models.dev 的同供应商、同模型 ID 价格，只展示差异，选中并确认后才更新；来源未给出的缓存价格保持原值。新价格只为缺价的历史记录补价，已有费用不会自动重算；推理 Token 已含在输出时不重复收费。
 - 此数值不是实际账单。不匹配 Fast/Batch、地区附加费或工具调用费用；不是按事件发生时的历史价格结算。
 - “价格”页可导出 JSON 模板、编辑后导入；导入会重估已有记录。未识别模型或缺少价格的记录显示未计价。内置价格不会悄悄在线变化。
 - 本机明细和账户汇总分别展示；不把两者相加。多设备汇总只含用户主动同步的 Sublens 快照。不保证覆盖云端任务、普通 ChatGPT 网页或手机聊天。
@@ -121,7 +121,7 @@ Windows 默认保存于 `%APPDATA%\Subscription Lens`，macOS 默认保存于 `~
 
 ## 源码构建与参与贡献
 
-Windows 3.1.1 的 Tauri 构建需要 Node.js 24、Rust 和 pnpm；macOS 还需要 Apple Silicon Mac、macOS 13+ 与 Xcode Command Line Tools。两种平台均需初始化 CC Switch 子模块；构建脚本会应用 Subscription Lens 主机、GPT-6 计价与安全凭据补丁，并编译原版管理界面和 Rust 运行时。界面测试、翻译维护及实验性统计引擎说明见[贡献指南](../CONTRIBUTING.md)。真实账户测试仅供手动运行。
+Windows 3.1.4 源码的 Tauri 构建需要 Node.js 24、Rust 和 pnpm；现有 macOS 3.1.1 包还需要 Apple Silicon Mac、macOS 13+ 与 Xcode Command Line Tools。两种平台均需初始化 CC Switch 子模块；构建脚本会应用 Subscription Lens 主机、GPT-6 计价与安全凭据补丁，并编译原版管理界面和 Rust 运行时。界面测试、翻译维护及实验性统计引擎说明见[贡献指南](../CONTRIBUTING.md)。真实账户测试仅供手动运行。
 
 ```powershell
 npm ci
